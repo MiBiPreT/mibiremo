@@ -1,0 +1,63 @@
+TITLE Simple BTEX dissolution model
+
+SOLUTION 1
+units   mol/kgw
+temp    20.0
+density		1.0
+pH 			7.0000 charge 
+pe			4.0			
+Ethylnapl   	1.0				# Ethylbenzene/MAH NAPL
+Ethyl			0.0				# Ethylbenzene dissolved
+Benznapl		1.0				# Benzene NAPL
+Benz			0.0				# Benzene dissolved
+-water 		1				# kg	
+
+
+########## Define kinetic reactions #########
+KINETICS 1
+Benznapl
+	-formula Benznapl -1.0  Benz	1.0  
+	-parms  1.0e-05
+
+Ethylnapl
+	-formula  Ethylnapl -1.0  Ethyl   1.0   
+	-parms  1.0e-05
+
+-steps 7 day in 50    # 50 steps
+INCREMENTAL_REACTIONS true
+
+
+#PRINT
+# -reset true
+# -selected_output true
+
+
+SELECTED_OUTPUT
+-file phout_sel.dat
+-high_precision
+#-reset false
+
+USER_PUNCH
+-headings EthylNAPL BenzNAPL EthylD BenzD
+-start
+10 PUNCH MOL("Ethylnapl"), MOL("Benznapl"), MOL("Ethyl"), MOL("Benz") 
+-end
+
+USER_GRAPH 1
+ -head time EthylbenzeneNAPL BenzeneNAPL EthylbenzeneD BenzeneD; 
+ -axis_titles "Time / days" "NAPL (mol)" "Dissolved (mg/L)"
+ -chart_title "BTEX dissolution"
+ -initial_solutions true
+ -start
+   10 graph_x total_time/3600/24 
+   20 graph_y MOL("Ethylnapl")
+   30 graph_y MOL("Benznapl")
+   40 graph_sy MOL("Ethyl")*106.17*1000
+   50 graph_sy MOL("Benz")*78.114*1000
+ -end
+
+
+END
+
+
+
