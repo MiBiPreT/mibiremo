@@ -80,4 +80,4 @@ ENV/
 phout_sel.dat
 examples/pqi/*.sel 
 phreeqc.log
-~ex3_BTEX_dissolution_and_transport.sel
+!ex3_BTEX_dissolution_and_transport.sel
