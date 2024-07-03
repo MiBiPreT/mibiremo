@@ -2,7 +2,7 @@
 # CaCO3(s) + 2HCl(aq) → CaCl2(aq) + CO2(g) + H2O(l)
 # Chemical reactions assumed at equilibrium
 #
-# Last revision: 21/05/2024
+# Last revision: 02/07/2024
 
 # %%
 import mibiremo
@@ -15,7 +15,7 @@ import time
 db = '../mibiremo/database/phreeqc.dat'             # .dat database path
 ncells = 1000                                       # number of model cells
 nthreads = 4                                        # multithread calculation. -1 for all CPUs
-pqifile = 'pqi/Calcite_titration.pqi'               # Name of the phreeqc input file
+pqifile = 'pqi/ex1_Calcite_titration.pqi'           # Name of the phreeqc input file
 HCl_range = [0.0, 4.0]                              # mol/L
 
 unit_sol = 2                                        # 1: mg/L; 2: mol/L; 3: kg/kgs

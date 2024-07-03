@@ -1,7 +1,7 @@
 ## MiBiReMo - Example - BTEX dissolution
 #
 #
-# Last revision: 21/05/2024
+# Last revision: 02/07/2024
 
 
 import mibiremo
@@ -14,7 +14,7 @@ import time
 db = '../mibiremo/database/mibirem.dat'             # .dat database path
 ncells = 1                                          # number of model cells
 nthreads = 4                                        # multithread calculation. -1 for all CPUs
-pqifile = 'pqi/BTEX_dissolution.pqi'                # Name of the phreeqc input file
+pqifile = 'pqi/ex2_BTEX_dissolution.pqi'            # Name of the phreeqc input file
 
 unit_sol = 2                                        # 1: mg/L; 2: mol/L; 3: kg/kgs
 units = 1                                           # 0: mol/L cell; 1: mol/L water; 2: mol/L rock
