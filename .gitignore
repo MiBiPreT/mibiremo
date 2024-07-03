@@ -71,3 +71,13 @@ ENV/
 
 # Spyder project settings
 .spyderproject
+
+# PhreeqcRM files
+*.pqo
+*.inp
+*.chem.txt
+*.log.txt
+phout_sel.dat
+examples/pqi/*.sel 
+phreeqc.log
+~ex3_BTEX_dissolution_and_transport.sel
