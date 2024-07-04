@@ -22,15 +22,5 @@ pip install .
 ```
 
 ## Examples
+Examples are available in the [`examples`](examples/) directory along with the documentation. 
 
-Currently, two examples are available in the `examples` directory. 
-The first example `ex1-titration.py` demonstrates the use of the package to simulate a simple titration in a batch, where a solution is equilibrated with a mineral phase (calcite) and the pH is adjusted by adding HCl.
-The second example `ex2-BTEX_dissolution.py` demonstrates the use of the package to simulate the kinetic dissolution of benzene and ethylbenzene in a batch reactor.
-
-To run the examples, navigate to the `examples` directory and run the desired example script:
-```sh
-cd path/to/project_folder
-source mibiremo/bin/activate
-cd path/to/mibiremo_source/examples
-python ex1-titration.py
-```
