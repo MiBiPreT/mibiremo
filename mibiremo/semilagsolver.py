@@ -101,14 +101,8 @@ class SemiLagSolver:
             # R-L Solution
             CRL[i] = (solA + solB + solC) / (1 + theta)
         
-        # Average L-R and R-L solutions
-        C = (CLR + CRL) / 2
-        
-        # Update initial condition for next step k
-        C_init = C.copy()
-        
-        # Update to the final state
-        self.C = C
+        # Average L-R and R-L solutions and update to final state
+        self.C = (CLR + CRL) / 2
 
 
     def transport(self, C_bound):
