@@ -1,8 +1,11 @@
 """
 Python-PhreeqcRM interface
-Modified from project MoeinJahanbani / PyPhreeqc (github) 
+==========================
 
-Last revision: 21/05/2024
+PhreeqcRM documentation:
+https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html
+
+Last revision: 03/07/2024
 """
 
 
