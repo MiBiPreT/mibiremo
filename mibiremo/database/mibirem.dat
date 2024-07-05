@@ -1,5 +1,22 @@
 # MIBIREM.DAT
-# Database file based on standard phreeeqc.dat
+#
+# MIBIREM Project
+# 
+# Database based on standard phreeeqc.dat
+#
+# Microbiome-based bioremediation-related contaminants 
+# are included in the database, i.e.:
+# - BTEX and related compounds:
+#     - Benzene
+#     - Toluene
+#     - Ethylbenzene
+#     - Xilene
+#     - 1-Methyl-Naphthalene
+#     - Naphthalene
+#
+#
+# Last revision: 05/07/2024
+#
 
 SOLUTION_MASTER_SPECIES
 #
@@ -64,13 +81,16 @@ Naphnapl        Naphnapl        0.0     Naphnapl        128.1732
 Meth_naphnapl   Meth_naphnapl   0.0     Meth_naphnapl   142.2
 Benznapl        Benznapl        0.0     Benznapl        78.1134
 Ethylnapl       Ethylnapl       0.0     Ethylnapl       106.167
+Toluenenapl		Toluenenapl		0.0		Toluenenapl		92.14
+Xilenenapl		Xilenenapl		0.0		Xilenenapl		106.16
 
 # BTEX - Dissolved phase
 Naph            Naph            0.0     Naph            128.1732
 Meth_naph       Meth_naph       0.0     Meth_naph       142.2
 Benz            Benz            0.0     Benz            78.1134
 Ethyl           Ethyl           0.0     Ethyl           106.167
-
+Toluene			Toluene			0.0		Toluene			92.14
+Xilene			Xilene			0.0		Xilene			106.16
 
 ###########
 
@@ -198,7 +218,9 @@ H2Sg = H2Sg # H2S
 	-dw	 2.1e-9
         -Vm  1.39  28.3  0  -7.22  -0.59 # ref. 1 + Hnedkovsky et al., 1996, JCT 28, 125
 
-# MIBIREM
+##### MIBIREM
+
+## BTEX
 Naph = Naph
     -log_k  0.0
 Meth_naph = Meth_naph
@@ -215,6 +237,15 @@ Benznapl = Benznapl
     -log_k  0.0
 Ethylnapl = Ethylnapl
     -log_k  0.0
+Toluenenapl	= Toluenenapl
+    -log_k  0.0
+Xilenenapl = Xilenenapl
+    -log_k  0.0
+Toluene	= Toluene
+    -log_k  0.0
+Xilene = Xilene
+    -log_k  0.0
+
 
 ###########
 # aqueous species
@@ -1851,7 +1882,9 @@ Naphnapl
 20  mMeth_naphnapl = tot("Meth_naphnapl")
 23  mBenznapl = tot("Benznapl")
 25  mEthylnapl = tot("Ethynapl")
-30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl
+26  mToluenenapl = tot("Toluenenapl")
+27  mXilenenapl = tot("Xilenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
 32  if (m_napl_tot <= 1.0e-10) then goto 200
 40  solub_Naph = 0.00082440530989838
 50  msolub Naph = mNaphnapl / m_napl_tot * solub_Naph
@@ -1874,7 +1907,9 @@ Meth_naphnapl
 20  mNaphnapl = tot("Naphnapl")
 23  mBenznapl = tot("Benznapl")
 25  mEthylnapl = tot("Ethynapl")
-30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl
+26  mToluenenapl = tot("Toluenenapl")
+27  mXilenenapl = tot("Xilenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
 32  if (m_napl_tot <= 1.0e-10) then goto 200
 50  msolub_Meth_naph = mMeth_naphnapl / m_napl_tot * solub_Meth_naph
 60  rate = parm(1) * (msolub_Meth_naph - mMeth_naph)
@@ -1890,12 +1925,14 @@ Benznapl
   -start
 10  mBenznapl = TOT("Benznapl")
 11  if (mBenznapl <= 1e-10) then goto 200
-12  solub_Benz = 0.0227873834706977
+12  solub_Benz = 0.0227873834706977 # 1.78 g/L 
 13  mBenz = tot("Benz")
 20  mNaphnapl = tot("Naphnapl")
 23  mMeth_naphnapl = tot("Meth_naphnapl")
 25  mEthylnapl = tot("Ethylnapl")
-30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl
+26  mToluenenapl = tot("Toluenenapl")
+27  mXilenenapl = tot("Xilenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
 32  if (m_napl_tot <= 1.0e-10) then goto 200
 50  msolub_Benz = mBenznapl / m_napl_tot * solub_Benz
 60  rate = parm(1) * (msolub_Benz - mBenz)
@@ -1917,7 +1954,9 @@ Ethylnapl
 20  mNaphnapl = tot("Naphnapl")
 21  mMeth_naphnapl = tot("Meth_naphnapl")
 24  mBenznapl = tot("Benznapl")
-30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl
+26  mToluenenapl = tot("Toluenenapl")
+27  mXilenenapl = tot("Xilenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
 32  if (m_napl_tot <= 1.0e-10) then goto 200
 50  msolub_Ethyl = mEthylnapl / m_napl_tot * solub_Ethyl
 60  rate = parm(1) * (msolub_Ethyl - mEthyl)
@@ -1925,6 +1964,58 @@ Ethylnapl
 80  if (moles > m) then moles = m
 200 Save moles
   -end
+
+
+##########################################
+# Toluenenapl Toluene
+##########################################
+Toluenenapl
+  -start
+10  mToluenenapl = tot("Toluenenapl")
+11  if (mToluenenapl <= 1.0e-10) then goto 200
+12  solub_Toluene = 5.6435e-3 # 0.52 g/L
+13  mToluene = tot("Toluene")
+20  mNaphnapl = tot("Naphnapl")
+21  mMeth_naphnapl = tot("Meth_naphnapl")
+24  mBenznapl = tot("Benznapl")
+25  mEthylnapl = tot("Ethylnapl")
+27  mXilenenapl = tot("Xilenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
+32  if (m_napl_tot <= 1.0e-10) then goto 200
+50  msolub_Toluene = mToluenenapl / m_napl_tot * solub_Toluene
+60  rate = parm(1) * (msolub_Toluene - mToluene)
+70  moles = rate * time
+80  if (moles > m) then moles = m
+200 Save moles
+  -end
+
+
+
+##########################################
+# Xilenenapl Xilene
+##########################################
+Xilenenapl
+  -start
+10  mXilenenapl = tot("Xilenenapl")
+11  if (mXilenenapl <= 1.0e-10) then goto 200
+12  solub_Xilene = 1.6954e-3 # 0.18 g/L
+13  mXilene = tot("Xilene")
+20  mNaphnapl = tot("Naphnapl")
+21  mMeth_naphnapl = tot("Meth_naphnapl")
+24  mBenznapl = tot("Benznapl")
+25  mEthylnapl = tot("Ethylnapl")
+26  mToluenenapl = tot("Toluenenapl")
+30  m_napl_tot = mNaphnapl + mMeth_naphnapl + mBenznapl + mEthylnapl + mToluenenapl + mXilenenapl
+32  if (m_napl_tot <= 1.0e-10) then goto 200
+50  msolub_Xilene = mXilenenapl / m_napl_tot * solub_Xilene
+60  rate = parm(1) * (msolub_Xilene - mXilene)
+70  moles = rate * time
+80  if (moles > m) then moles = m
+200 Save moles
+  -end
+
+
+
 
 
 
