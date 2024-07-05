@@ -1,0 +1,63 @@
+TITLE BTEX kinetic dissolution model - Benzene Toluene Ethylbenzene Xilene
+
+SOLUTION 1
+units   	mol/kgw
+temp    	20.0
+density		1.0
+pH 			7.0 charge 
+pe			4.0			
+Benznapl	1.0				# Benzene NAPL
+Benz		0.0				# Benzene dissolved
+Toluenenapl 1.0 			# Toluene NAPL
+Toluene 	0.0 			# Toluene dissolved
+Ethylnapl   1.0				# Ethylbenzene NAPL
+Ethyl		0.0				# Ethylbenzene dissolved
+Xilenenapl  1.0 			# Xilene NAPL
+Xilene 		0.0 			# Xilene dissolved
+
+-water 		1				# kg	
+
+
+########## Define kinetic reactions #########
+KINETICS 1
+Benznapl
+	-formula Benznapl -1.0  Benz	1.0  
+	-parms  1.0e-05
+
+Ethylnapl
+	-formula  Ethylnapl -1.0  Ethyl   1.0   
+	-parms  1.0e-05
+
+Toluenenapl
+	-formula  Toluenenapl -1.0  Toluene   1.0   
+	-parms  1.0e-05
+	
+Xilenenapl
+	-formula  Xilenenapl -1.0  Xilene   1.0   
+	-parms  1.0e-05
+
+-steps 7 day in 50    # 50 steps
+INCREMENTAL_REACTIONS true
+#############################################
+
+
+USER_GRAPH 1
+ -head time BenzeneNAPL TolueneNAPL EthylbenzeneNAPL XileneNAPL BenzeneD TolueneD EthylbenzeneD XileneD; 
+ -axis_titles "Time / days" "NAPL (mol)" "Dissolved (mg/L)"
+ -chart_title "BTEX dissolution"
+ -initial_solutions true
+ -start
+   10 graph_x total_time/3600/24 
+   20 graph_y MOL("Benznapl")
+   21 graph_y MOL("Toluenenapl")
+   22 graph_y MOL("Ethylnapl")
+   23 graph_y MOL("Xilenenapl")
+   30 graph_sy MOL("Benz")*GFW("Benz")*1000 		# Convert to mg/L and plot
+   31 graph_sy MOL("Toluene")*GFW("Toluene")*1000 	# Convert to mg/L and plot
+   32 graph_sy MOL("Ethyl")*GFW("Ethyl")*1000 		# Convert to mg/L and plot
+   33 graph_sy MOL("Xilene")*GFW("Xilene")*1000 	# Convert to mg/L and plot
+ -end
+
+
+END
+
