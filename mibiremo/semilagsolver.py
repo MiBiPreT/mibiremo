@@ -1,15 +1,14 @@
 """
-    Semi-lagrangian solver for 1D advection on a uniform grid
+    Semi-Lagrangian solver for 1D advection-diffusion equation on a uniform grid
 
-    1) Advection solved with semi-lagrangian method with cubic spline interpolation
-    2) Diffusion solved with Saul'yev finite difference scheme (alternating directions)
+    Advection and diffusion are solved separately (operator splitting) in two steps:
+    1) Advection solved with method of characteristics (MOC) with cubic spline interpolation
+    2) Diffusion solved with Saul'yev method
     
     Author: Matteo Masi
-    Last revision: 03/07/2024
+    Last revision: 08/07/2024
 
 """
-
-
 
 import numpy as np
 from scipy.interpolate import PchipInterpolator
@@ -19,12 +18,12 @@ warnings.filterwarnings("ignore")
 
 class SemiLagSolver:
     """
-    Implements semi-lagrangian integration schemes with Dirichlet-type boundary 
+    Implements a semi-Lagrangian integration scheme with Dirichlet-type boundary 
     condition at the inlet of the domain (left boundary x = 0) 
     and Neumann-type boundary condition at the outlet (right boundary).
 
     Usage:
-        obj = SemiLagSolver(x, C, v, dt)
+        obj = SemiLagSolver(x, C, v, D, dt)
         
     Parameters:
         x (np.ndarray): Spatial coordinates (must be equally spaced)
@@ -37,8 +36,8 @@ class SemiLagSolver:
 
     def __init__(self, x, C_init, v, D, dt):
         """
-        Initializes the LagSolver object with spatial coordinates, 
-        initial concentration, velocity, time-step, and solver type.
+        Initializes the SemiLagSolver object with spatial coordinates, 
+        initial concentration, velocity, diffusion coefficient, and time-step.
         """
         self.x = x
         self.C = C_init
@@ -50,6 +49,7 @@ class SemiLagSolver:
 
     def cubic_spline_advection(self, C_bound):
         """
+        Advection
         Propagates the current variable using a cubic spline interpolation.
         """
         cs = PchipInterpolator(self.x, self.C)
@@ -63,7 +63,8 @@ class SemiLagSolver:
 
     def saulyev_solver_alt(self, C_bound):
         """
-        Saul'yev solver (integration in alternating directions)
+        Diffusion
+        Saul'yev explicit solver (integration in alternating directions)
         """
         dt = self.dt
         theta = self.D * dt / (self.dx ** 2)
