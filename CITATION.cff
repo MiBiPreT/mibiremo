@@ -6,12 +6,15 @@ authors:
   - family-names: Masi
     given-names: Matteo
     orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: Jaro
+    given-names: Camphuijsen
+    orcid: "https://orcid.org/0000-0002-8928-7831"
 date-released: 2025-04-08
 version: "0.1.0"
 repository-code: "https://github.com/MiBiPret/mibiremo"
 keywords:
   - "Microbiome"
-  - " Bioremediation"
-  - " Chemical Reaction"
-  - " Geochemical Engineering"
+  - "Bioremediation"
+  - "Chemical Reaction"
+  - "Geochemical Engineering"
 message: "If you use this software, please cite it using these metadata."
