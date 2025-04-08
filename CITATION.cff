@@ -1,0 +1,17 @@
+# YAML 1.2
+---
+cff-version: "1.2.0"
+title: "mibiremo"
+authors:
+  - family-names: Camphuijsen
+    given-names: Jaro
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+date-released: 2025-04-08
+version: "0.1.0"
+repository-code: "https://github.com/MiBiPret/mibiremo"
+keywords:
+  - "Microbiome"
+  - " Bioremediation"
+  - " Chemical Reaction"
+  - " Geochemical Engineering"
+message: "If you use this software, please cite it using these metadata."
