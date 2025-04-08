@@ -18,8 +18,6 @@
 
 Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library
 
-The project setup is documented in [project_setup.md](project_setup.md). Feel free to remove this document (and/or the link to this document) if you don't need it.
-
 ## Installation
 
 To install mibiremo from GitHub repository, do:
