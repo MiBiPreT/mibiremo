@@ -15,20 +15,26 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "",
+    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "pyqt5",
+    "scipy",
+]
 description = "Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
 license = {file = "LICENSE"}
 name = "mibiremo"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 version = "0.1.0"
 
 [project.optional-dependencies]
@@ -39,17 +45,14 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
-    "sphinx",
-    "sphinx_rtd_theme",
-    "sphinx-autoapi",
     "tox",
-    "myst_parser",
 ]
-docs = [
-    "sphinx",
-    "sphinx_rtd_theme",
-    "sphinx-autoapi",
-    "myst_parser",
+doc = [
+    "mkdocs >=1.4.2",
+    "mkdocs-material >=8.2.7",
+    "mkdocstrings[python] ==0.27.0",
+    "mdx-include >=1.4.1",
+    "mkdocs-markdownextradata-plugin >=0.2.5",
 ]
 publishing = [
     "build",
@@ -65,10 +68,9 @@ ReadTheDocs = "https://mibiremo.readthedocs.io"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-
 [tool.coverage.run]
 branch = true
-source = ["src/mibiremo"]
+source = ["mibiremo"]
 command_line = "-m pytest"
 
 [tool.tox]

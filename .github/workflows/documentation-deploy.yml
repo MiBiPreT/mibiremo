@@ -1,0 +1,27 @@
+name: documentation-deploy
+
+permissions: write-all
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-docs-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          pip install ".[doc]" 
+      - name: Deploy mkdocs on GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdocs gh-deploy --force

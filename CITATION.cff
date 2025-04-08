@@ -3,8 +3,8 @@
 cff-version: "1.2.0"
 title: "mibiremo"
 authors:
-  - family-names: Camphuijsen
-    given-names: Jaro
+  - family-names: Masi
+    given-names: Matteo
     orcid: "https://orcid.org/0000-0000-0000-0000"
 date-released: 2025-04-08
 version: "0.1.0"
