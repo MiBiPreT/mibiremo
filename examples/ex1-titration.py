@@ -5,17 +5,17 @@
 # Last revision: 02/07/2024
 
 # %%
-import mibiremo
-import numpy as np
-import matplotlib.pyplot as plt
 import time
+import matplotlib.pyplot as plt
+import numpy as np
+import mibiremo
 
 # %%
 ########### SETTINGS ##############
-db = '../mibiremo/database/phreeqc.dat'             # .dat database path
+db = "../mibiremo/database/phreeqc.dat"             # .dat database path
 ncells = 1000                                       # number of model cells
 nthreads = 4                                        # multithread calculation. -1 for all CPUs
-pqifile = 'pqi/ex1_Calcite_titration.pqi'           # Name of the phreeqc input file
+pqifile = "pqi/ex1_Calcite_titration.pqi"           # Name of the phreeqc input file
 HCl_range = [0.0, 4.0]                              # mol/L
 
 unit_sol = 2                                        # 1: mg/L; 2: mol/L; 3: kg/kgs
@@ -27,7 +27,7 @@ S = 1.0                                             # Saturation
 
 # %%
 # Initialize Phreeqc
-phr = mibiremo.PhreeqcRM() 
+phr = mibiremo.PhreeqcRM()
 phr.create(nxyz=ncells, n_threads=nthreads)
 
 # Load database
@@ -39,7 +39,7 @@ phr.RM_SetComponentH2O(0)           # Don't include H2O in the component list
 phr.RM_SetRebalanceFraction(0.5)    # Rebalance the load of each thread
 
 ### Set units
-phr.RM_SetUnitsSolution(unit_sol)   
+phr.RM_SetUnitsSolution(unit_sol)
 phr.RM_SetUnitsPPassemblage(units)
 phr.RM_SetUnitsExchange(units)
 phr.RM_SetUnitsSurface(units)
@@ -52,25 +52,23 @@ phr.RM_SetPorosity(n*np.ones(ncells))
 phr.RM_SetSaturation(S*np.ones(ncells))
 
 ### Create error log files
-phr.RM_SetFilePrefix('titr')
+phr.RM_SetFilePrefix("titr")
 phr.RM_OpenFiles()
 
 ### Multicomponent diffusion transport calculation settings
 phr.RM_SetSpeciesSaveOn(1)
 
 # %%
-# RUN 
+# RUN
 status = phr.RM_RunFile(1,1,1,pqifile)
-print('Run: ' + mibiremo.IRM_RESULT(status)[1])
 # Print some of the reaction module information and log to file
 th = phr.RM_GetThreadCount()
-str1 = 'Number of threads:  {}\n'.format(th)
+str1 = f"Number of threads:  {th}\n"
 phr.RM_OutputMessage(str1)
-print(str1)
 
 # %%
 # Transfer solutions and reactants from the InitialPhreeqc instance to the reaction-module workers
-# Column index for the initial conditions ic1.shape ->  (ncells, 7) 
+# Column index for the initial conditions ic1.shape ->  (ncells, 7)
 #(1) SOLUTIONS, (2) EQUILIBRIUM_PHASES, (3) EXCHANGE, (4) SURFACE, (5) GAS_PHASE, (6) SOLID_SOLUTIONS, and (7) KINETICS
 
 ncl = phr.RM_GetGridCellCount()
@@ -96,19 +94,19 @@ ncomps = phr.RM_FindComponents()
 nspecies = phr.RM_GetSpeciesCount()
 
 # Get the components
-components = np.zeros(ncomps,dtype='U20')
+components = np.zeros(ncomps,dtype="U20")
 for i in range(ncomps):
     status = phr.RM_GetComponent(i, components,20)
 
 # Get the species
-species = np.zeros(nspecies,dtype='U20')
+species = np.zeros(nspecies,dtype="U20")
 for i in range(nspecies):
     status = phr.RM_GetSpeciesName(i, species,20)
 
 
 # %%
 # Retrieve initial solution
-# Make an initial step (zero lenght) to be sure that 
+# Make an initial step (zero lenght) to be sure that
 # everything is at equilibrium
 phr.RM_SetTime(0.0)
 phr.RM_SetTimeStep(0.0)
@@ -131,22 +129,22 @@ status = phr.RM_GetSpeciesConcentrations(Cs)
 # GET SELECTED OUTPUT
 nselout = phr.RM_GetSelectedOutputCount()
 ncolsel = phr.RM_GetSelectedOutputColumnCount()
-selout = np.zeros(ncells*ncolsel, dtype=np.float64) 
+selout = np.zeros(ncells*ncolsel, dtype=np.float64)
 status = phr.RM_GetSelectedOutput(selout)
 
 # Get headers of the selected output
-selout_h = np.zeros(ncolsel,dtype='U100')
+selout_h = np.zeros(ncolsel,dtype="U100")
 for i in range(ncolsel):
     status = phr.RM_GetSelectedOutputHeading(i,selout_h,100)
-    
+
 
 # %%
 # SET SPECIES CONCENTRATION
 HCl = np.linspace(HCl_range[0],HCl_range[1],ncells) #mol/L
 
 # Find column of Cl- and H+ species
-indx_Cl = np.where(species == 'Cl-')[0][0]
-indx_H = np.where(species == 'H+')[0][0]
+indx_Cl = np.where(species == "Cl-")[0][0]
+indx_H = np.where(species == "H+")[0][0]
 
 # Species matrix
 Cs_r = Cs.reshape(nspecies,ncells).T
@@ -164,7 +162,6 @@ phr.RM_SetTimeStep(1.0)
 t = time.time()
 phr.RM_RunCells()
 elapsed = time.time() - t
-print('Elapsed time {:.2f} (s)'.format(elapsed))
 
 # %%
 # GET RESULTS - SELECTED OUTPUT
@@ -174,7 +171,7 @@ s_pd = phr.pdSelectedOutput()  # Returns a pandas Data Frame
 # PLOTS
 plt.figure(figsize = (10,6))
 plt.plot(HCl, s_pd.pH)
-plt.xlabel('molH$^+$ added')
-plt.ylabel('pH')
+plt.xlabel("molH$^+$ added")
+plt.ylabel("pH")
 plt.show()
 

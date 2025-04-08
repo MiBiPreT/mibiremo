@@ -1,5 +1,4 @@
-"""
-Python-PhreeqcRM interface
+"""Python-PhreeqcRM interface.
 ==========================
 
 PhreeqcRM documentation:
@@ -10,42 +9,40 @@ Last revision: 03/07/2024
 
 
 import ctypes
+import os
 import numpy as np
 import pandas as pd
-import os
 from .irmresult import IRM_RESULT
 
 
 class PhreeqcRM:
-    
+
     def __init__(self):
-        '''
-        Initialize PhreeqcRM instance
-        '''
+        """Initialize PhreeqcRM instance."""
         self.dllpath = None
         self.nxyz = 1
         self.n_threads = 1
         self.libc = None
         self.id = None
-    
-    def create(self, dllpath = '', nxyz = 1, n_threads = 1):
-        '''
-            Create a PhreeqcRM instance
-            Args:
-                dllpath: Path to the PhreeqcRM library. If left empty, the provided libraries are used.
-                nxyz: Number of grid cells. Default: 1.
-                n_threads: Number of threads. Default: 1.
-        '''
-        if dllpath == '':
+
+    def create(self, dllpath = "", nxyz = 1, n_threads = 1) -> None:
+        """Create a PhreeqcRM instance
+        Args:
+            dllpath: Path to the PhreeqcRM library. If left empty, the provided libraries are used.
+            nxyz: Number of grid cells. Default: 1.
+            n_threads: Number of threads. Default: 1.
+        """
+        if dllpath == "":
             # If no path is provided, use the default path, based on operating system
-            if os.name == 'nt':
-                dllpath = os.path.join(os.path.dirname(__file__), 'lib', 'PhreeqcRM.dll')
-            elif os.name == 'posix':
-                dllpath = os.path.join(os.path.dirname(__file__), 'lib', 'PhreeqcRM.so')
+            if os.name == "nt":
+                dllpath = os.path.join(os.path.dirname(__file__), "lib", "PhreeqcRM.dll")
+            elif os.name == "posix":
+                dllpath = os.path.join(os.path.dirname(__file__), "lib", "PhreeqcRM.so")
             else:
-                raise Exception('Operating system not supported')
+                msg = "Operating system not supported"
+                raise Exception(msg)
         self.dllpath = dllpath
-                
+
         if n_threads == -1:
             n_threads = os.cpu_count()
 
@@ -55,12 +52,10 @@ class PhreeqcRM:
         self.id = self.libc.RM_Create(nxyz,n_threads)
 
     def pdSelectedOutput(self):
-        '''
-            Returns a Pandas data frame for Selected Output
-        '''
+        """Returns a Pandas data frame for Selected Output."""
         # Get selected ouput headings
         ncolsel = self.RM_GetSelectedOutputColumnCount()
-        selout_h = np.zeros(ncolsel,dtype='U100')
+        selout_h = np.zeros(ncolsel,dtype="U100")
         for i in range(ncolsel):
             self.RM_GetSelectedOutputHeading(i,selout_h,100)
         so = np.zeros(ncolsel*self.nxyz).reshape(self.nxyz, ncolsel)
@@ -183,7 +178,7 @@ class PhreeqcRM:
         status = self.libc.RM_GetSelectedOutputHeading(self.id,col,String,l)
         headings[col] = String.value.decode()
         return status
-        
+
     def RM_GetSelectedOutputColumnCount(self):
         return self.libc.RM_GetSelectedOutputColumnCount(self.id)
 
@@ -219,7 +214,7 @@ class PhreeqcRM:
 
     def RM_GetSpeciesLog10Gammas(self,species_log10gammas):
         return self.libc.RM_GetSpeciesLog10Gammas(self.id,species_log10gammas)
-    
+
     def RM_GetSpeciesName(self,num,chem_name,l):
         String = ctypes.create_string_buffer(l)
         status = self.libc.RM_GetSpeciesName(self.id,num,String,l)
@@ -255,7 +250,7 @@ class PhreeqcRM:
 
     def RM_InitialPhreeqc2SpeciesConcentrations(self,species_c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
         return self.libc.RM_InitialPhreeqc2SpeciesConcentrations(self.id,species_c.ctypes,n_boundary.ctypes,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
-    
+
     def RM_InitialPhreeqcCell2Module(self,n,module_numbers,dim_module_numbers):
         return self.libc.RM_InitialPhreeqcCell2Module(self.id,n,module_numbers,dim_module_numbers)
 
@@ -331,10 +326,10 @@ class PhreeqcRM:
     def RM_SetUnitsExchange(self,option):
         return self.libc.RM_SetUnitsExchange(self.id,option)
 
-    def RM_SetUnitsGasPhase(self,option):
+    def RM_SetUnitsGasPhase(self,option) -> None:
         self.libc.RM_SetUnitsGasPhase(self.id,option)
 
-    def RM_SetUnitsKinetics(self,option):
+    def RM_SetUnitsKinetics(self,option) -> None:
         self.libc.RM_SetUnitsKinetics(self.id,option)
 
     def RM_SetUnitsPPassemblage(self,option):
