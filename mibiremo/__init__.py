@@ -1,2 +1,2 @@
-from .phreeqc import *
-from .semilagsolver import *
+from .phreeqc import PhreeqcRM as PhreeqcRM
+from .semilagsolver import SemiLagSolver as SemiLagSolver
