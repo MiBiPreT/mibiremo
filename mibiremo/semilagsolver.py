@@ -14,6 +14,7 @@ from scipy.interpolate import PchipInterpolator
 
 warnings.filterwarnings("ignore")
 
+
 class SemiLagSolver:
     """Implements a semi-Lagrangian integration scheme with Dirichlet-type boundary
     condition at the inlet of the domain (left boundary x = 0)
@@ -42,7 +43,6 @@ class SemiLagSolver:
         self.dt = dt
         self.dx = x[1] - x[0]
 
-
     def cubic_spline_advection(self, C_bound) -> None:
         """Advection
         Propagates the current variable using a cubic spline interpolation.
@@ -61,7 +61,7 @@ class SemiLagSolver:
         Saul'yev explicit solver (integration in alternating directions).
         """
         dt = self.dt
-        theta = self.D * dt / (self.dx ** 2)
+        theta = self.D * dt / (self.dx**2)
 
         # Assign current C state as initial condition
         C_init = self.C.copy()
@@ -73,7 +73,7 @@ class SemiLagSolver:
             if i == 0:  # left boundary
                 solA = theta * C_bound
             else:
-                solA = theta * CLR[i-1]
+                solA = theta * CLR[i - 1]
             solB = (1 - theta) * C_init[i]
             solC = theta * C_init[i + 1] if i < len(CLR) - 1 else theta * C_init[i]
             # L-R Solution
@@ -84,7 +84,7 @@ class SemiLagSolver:
             if i == len(CRL) - 1:  # right boundary (take from LR solution)
                 solA = theta * CLR[-1]
             else:
-                solA = theta * CRL[i+1]
+                solA = theta * CRL[i + 1]
             solB = (1 - theta) * C_init[i]
             solC = theta * C_init[i - 1] if i > 0 else theta * C_init[i]
             # R-L Solution
@@ -92,7 +92,6 @@ class SemiLagSolver:
 
         # Average L-R and R-L solutions and update to final state
         self.C = (CLR + CRL) / 2
-
 
     def transport(self, C_bound):
         """Couple advection and diffusion."""
