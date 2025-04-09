@@ -11,6 +11,7 @@ nav:
   - Home: index.md
   - Introduction: introduction.md
   - Development: development.md
+  - Examples: examples.md
   - API Reference: reference.md
 
 theme:
