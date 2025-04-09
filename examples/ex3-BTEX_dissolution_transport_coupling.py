@@ -27,20 +27,20 @@ pqikin =  "pqi/ex3_BTEX_dissolution_and_transport_coupling_kin.pqi" # Name of th
 selfile = "pqi/ex3_BTEX_dissolution_and_transport.sel"              # Name of the selected output file (PHREEQC results)
 
 ###########  MODEL PARAMETERS  #########
-ncells = 1000                                                       # number of model cells
-dt = 0.1                                                            # Coupling time step (days)
-L = 100.0                                                           # Length of the domain (m)
-nthreads = 6                                                        # Multithread calculation. -1 for all CPUs
-alpha = 0.05                                                        # Dispersivity m2
-v = 1.0                                                             # Groundwater velocity m/d
-De = 0.0                                                            # Molecular diffusion m2/s
-simDuration = 100.0                                                 # Simulation duration (days)
-unit_sol = 2                                                        # 1: mg/L; 2: mol/L; 3: kg/kgs
-units = 1                                                           # 0: mol/L cell; 1: mol/L water; 2: mol/L rock
-n = 1.0                                                             # Porosity
-S = 1.0                                                             # Saturation
+ncells = 1000           # number of model cells
+dt = 0.1                # Coupling time step (days)
+L = 100.0               # Length of the domain (m)
+nthreads = 6            # Multithread calculation. -1 for all CPUs
+alpha = 0.05            # Dispersivity m2
+v = 1.0                 # Groundwater velocity m/d
+De = 0.0                # Molecular diffusion m2/s
+simDuration = 100.0     # Simulation duration (days)
+unit_sol = 2            # 1: mg/L; 2: mol/L; 3: kg/kgs
+units = 1               # 0: mol/L cell; 1: mol/L water; 2: mol/L rock
+n = 1.0                 # Porosity
+S = 1.0                 # Saturation
 
-probe = 49.75                                                       # Probe location (m) for results extraction (for comparison with PHREEQC results)
+probe = 49.75           # Probe location (m) for results extraction (for comparison with PHREEQC results)
 
 D = alpha*v     # Dispersion coefficient m2/d
 
@@ -257,8 +257,10 @@ df.columns = df.columns.str.replace(" ", "")
 transp = df[df["state"].str.contains("transp")]
 fig = plt.figure(figsize=(10, 4))
 # PHREEQC results
-plt.plot(transp["time"]/3600/24, transp["Benz"]*1e3*78.114, label="Benzene - PHREEQC - equilibrium", linestyle="None", marker="o", markersize=8, markerfacecolor="none")
-plt.plot(transp["time"]/3600/24, transp["Ethyl"]*1e3*106.17, label="Ethylbenzene - PHREEQC - equil.",  linestyle="None", marker="^", markersize=8, markerfacecolor="none")
+plt.plot(transp["time"]/3600/24, transp["Benz"]*1e3*78.114, label="Benzene - PHREEQC - equilibrium", 
+         linestyle="None", marker="o", markersize=8, markerfacecolor="none")
+plt.plot(transp["time"]/3600/24, transp["Ethyl"]*1e3*106.17, label="Ethylbenzene - PHREEQC - equil.",  
+         linestyle="None", marker="^", markersize=8, markerfacecolor="none")
 
 # Equilibrium dissolution
 plt.plot(tvect[:], Csim[:,0]*78.114*1000, label="Benzene - MIBIREMO - equilibrium")

@@ -98,9 +98,9 @@ class PhreeqcRM:
     def RM_GetChemistryCellCount(self):
         return self.libc.RM_GetChemistryCellCount(self.id)
 
-    def RM_GetComponent(self,num,chem_name,l):
-        String = ctypes.create_string_buffer(l)
-        status = self.libc.RM_GetComponent(self.id,num,String,l)
+    def RM_GetComponent(self,num,chem_name,length):
+        String = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetComponent(self.id,num,String,length)
         chem_name[num] = String.value.decode()
         return status
 
@@ -117,8 +117,8 @@ class PhreeqcRM:
         return self.libc.RM_GetEquilibriumPhaseCount(self.id)
     def RM_GetEquilibriumPhaseName(self,num,name,l1):
         return self.libc.RM_GetEquilibriumPhaseName(self.id,num,name,l1)
-    def RM_GetErrorString(self,errstr,l):
-        return self.libc.RM_GetErrorString(self.id,errstr,l)
+    def RM_GetErrorString(self,errstr,length):
+        return self.libc.RM_GetErrorString(self.id,errstr,length)
     def RM_GetErrorStringLength(self):
         return self.libc.RM_GetErrorStringLength(self.id)
     def RM_GetExchangeName(self,num,name,l1):
@@ -130,8 +130,8 @@ class PhreeqcRM:
     def RM_GetExchangeSpeciesName(self,num,name,l1):
         return self.libc.RM_GetExchangeSpeciesName(self.id,num,name,l1)
 
-    def RM_GetFilePrefix(self,prefix,l):
-        return self.libc.RM_GetFilePrefix(self.id,prefix.encode(),l)
+    def RM_GetFilePrefix(self,prefix,length):
+        return self.libc.RM_GetFilePrefix(self.id,prefix.encode(),length)
     def RM_GetGasComponentsCount(self):
         return self.libc.RM_GetGasComponentsCount(self.id)
 
@@ -173,9 +173,9 @@ class PhreeqcRM:
     def RM_GetSelectedOutputCount(self):
         return self.libc.RM_GetSelectedOutputCount(self.id)
 
-    def RM_GetSelectedOutputHeading(self,col,headings,l):
-        String = ctypes.create_string_buffer(l)
-        status = self.libc.RM_GetSelectedOutputHeading(self.id,col,String,l)
+    def RM_GetSelectedOutputHeading(self,col,headings,length):
+        String = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetSelectedOutputHeading(self.id,col,String,length)
         headings[col] = String.value.decode()
         return status
 
@@ -215,9 +215,9 @@ class PhreeqcRM:
     def RM_GetSpeciesLog10Gammas(self,species_log10gammas):
         return self.libc.RM_GetSpeciesLog10Gammas(self.id,species_log10gammas)
 
-    def RM_GetSpeciesName(self,num,chem_name,l):
-        String = ctypes.create_string_buffer(l)
-        status = self.libc.RM_GetSpeciesName(self.id,num,String,l)
+    def RM_GetSpeciesName(self,num,chem_name,length):
+        String = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetSpeciesName(self.id,num,String,length)
         chem_name[num] = String.value.decode()
         return status
 
@@ -246,10 +246,14 @@ class PhreeqcRM:
         return self.libc.RM_InitialPhreeqc2Module(self.id,ic1.ctypes,ic2.ctypes,f1.ctypes)
 
     def RM_InitialPhreeqc2Concentrations(self,c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
-        return self.libc.RM_InitialPhreeqc2Concentrations(self.id,c.ctypes,n_boundary,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
+        return self.libc.RM_InitialPhreeqc2Concentrations(self.id,c.ctypes,n_boundary,boundary_solution1.ctypes,
+                                                          boundary_solution2.ctypes,fraction1.ctypes)
 
-    def RM_InitialPhreeqc2SpeciesConcentrations(self,species_c,n_boundary,boundary_solution1,boundary_solution2,fraction1):
-        return self.libc.RM_InitialPhreeqc2SpeciesConcentrations(self.id,species_c.ctypes,n_boundary.ctypes,boundary_solution1.ctypes,boundary_solution2.ctypes,fraction1.ctypes)
+    def RM_InitialPhreeqc2SpeciesConcentrations(self,species_c,n_boundary,boundary_solution1,boundary_solution2,
+                                                fraction1):
+        return self.libc.RM_InitialPhreeqc2SpeciesConcentrations(self.id,species_c.ctypes,n_boundary.ctypes,
+                                                                 boundary_solution1.ctypes,boundary_solution2.ctypes,
+                                                                 fraction1.ctypes)
 
     def RM_InitialPhreeqcCell2Module(self,n,module_numbers,dim_module_numbers):
         return self.libc.RM_InitialPhreeqcCell2Module(self.id,n,module_numbers,dim_module_numbers)
