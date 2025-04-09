@@ -8,7 +8,7 @@
 [![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu) 
 [![workflow scq badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_mibiremo&metric=alert_status)](https://sonarcloud.io/dashboard?id=MiBiPreT_mibiremo) 
 [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_mibiremo&metric=coverage)](https://sonarcloud.io/dashboard?id=MiBiPreT_mibiremo)
-[![Documentation Status](https://readthedocs.org/projects/mibiremobadge/?version=latest)](https://mibiremo.readthedocs.io/en/latest/?badge=latest)
+<!-- [![Documentation Status](https://readthedocs.org/projects/mibiremobadge/?version=latest)](https://mibiremo.readthedocs.io/en/latest/?badge=latest) -->
 [![build](https://github.com/MiBiPreT/mibiremo/actions/workflows/build.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/build.yml)
 [![cffconvert](https://github.com/MiBiPreT/mibiremo/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/cffconvert.yml)
 [![sonarcloud](https://github.com/MiBiPreT/mibiremo/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/sonarcloud.yml)
