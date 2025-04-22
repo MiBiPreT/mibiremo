@@ -31,7 +31,7 @@ pip install mibiremo
 
 ### Installation of most recent development version
 
-To install mibiscreen from the GitHub repository directly, do:
+To install mibiremo from the GitHub repository directly, do:
 
 ```console
 git clone git@github.com:MiBiPreT/mibiremo.git

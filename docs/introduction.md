@@ -2,7 +2,7 @@
 
 ## General
 
-TODO: Provide a general introduction to this software
+MiBiReMo (Microbiome Bioremediation Reaction Module) is a Python interface to the PhreeqcRM library. The package is designed to be coupled with transport models to simulate reactive transport in porous media, with applications in environmental and geochemical engineering.
 
 ## MIBIREM
 
