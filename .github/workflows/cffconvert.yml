@@ -9,7 +9,6 @@ on:
     - main
 
 jobs:
-
   verify:
     name: "cffconvert"
     runs-on: ubuntu-latest
