@@ -4,7 +4,7 @@
 PhreeqcRM documentation:
 https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html
 
-Last revision: 03/07/2024
+Last revision: 10/06/2025
 """
 
 import ctypes
@@ -17,18 +17,23 @@ from .irmresult import IRM_RESULT
 class PhreeqcRM:
     def __init__(self):
         """Initialize PhreeqcRM instance."""
+        self._initialized = False
         self.dllpath = None
         self.nxyz = 1
         self.n_threads = 1
         self.libc = None
         self.id = None
+        self.components = None
+        self.species = None
 
     def create(self, dllpath="", nxyz=1, n_threads=1) -> None:
-        """Create a PhreeqcRM instance
-        Args:
-            dllpath: Path to the PhreeqcRM library. If left empty, the provided libraries are used.
-            nxyz: Number of grid cells. Default: 1.
-            n_threads: Number of threads. Default: 1.
+        """
+        Creates a PhreeqcRM instance
+
+        Paremeters:
+            dllpath (str, optional): Path to the PhreeqcRM library. If left empty, the provided libraries are used.
+            nxyz (int, optional): Number of grid cells. Default: 1.
+            n_threads (int, optional): Number of threads. Default: 1.
         """
         if dllpath == "":
             # If no path is provided, use the default path, based on operating system
@@ -47,7 +52,129 @@ class PhreeqcRM:
         self.n_threads = n_threads
         self.nxyz = nxyz
         self.libc = ctypes.CDLL(dllpath)
-        self.id = self.libc.RM_Create(nxyz, n_threads)
+        try:
+            self.id = self.libc.RM_Create(nxyz, n_threads)
+            self._initialized = True
+        except Exception as e:
+            msg = f"Failed to create PhreeqcRM instance: {e}"
+            raise RuntimeError(msg)
+
+
+    def initialize_phreeqc(self, database_path, units_solution=2, units=1, porosity=1.0, saturation=1.0, multicomponent=True) -> None:
+        """
+        Helper function that initializes a PhreeqcRM object with specified parameters and loads the given database.
+
+        Parameters:
+            database_path (str): Path to the Phreeqc database file to be loaded.
+            nxyz (int, optional): Number of cells to initialize in the model. Default is 1.
+            n_threads (int, optional): Number of threads to use for parallel processing. Default is 1.
+            units_solution (int, optional): Units for solutions (e.g., 1 = mol/L, 2 = mmol/L). Default is 2.
+            units (int, optional): Units for other phases (e.g., Exchange, Surface, etc.). Default is 1.
+            porosity (float, optional): Porosity value to assign to all cells. Default is 1.0.
+            saturation (float, optional): Saturation value to assign to all cells. Default is 1.0.
+            multicomponent (bool, optional): Whether to enable multicomponent diffusion settings. Default is True.
+
+        Raises:
+            RuntimeError: If the Phreeqc database fails to load.
+        """
+
+        if not self._initialized:
+            raise RuntimeError("PhreeqcRM instance not initialized. Call create() first.")
+
+        # Load database
+        status = self.RM_LoadDatabase(database_path)
+        if status != 0:
+            raise RuntimeError("Failed to load Phreeqc database")
+
+        # Set properties/parameters
+        self.RM_SetComponentH2O(0)  # Don't include H2O in component list
+        self.RM_SetRebalanceFraction(0.5)  # Rebalance thread load
+
+        # Set units
+        self.RM_SetUnitsSolution(units_solution)
+        self.RM_SetUnitsPPassemblage(units)
+        self.RM_SetUnitsExchange(units)
+        self.RM_SetUnitsSurface(units)
+        self.RM_SetUnitsGasPhase(units)
+        self.RM_SetUnitsSSassemblage(units)
+        self.RM_SetUnitsKinetics(units)
+
+        # Set porosity and saturation
+        self.RM_SetPorosity(porosity * np.ones(self.nxyz))
+        self.RM_SetSaturation(saturation * np.ones(self.nxyz))
+
+        # Create error log files
+        self.RM_SetFilePrefix("phr")
+        self.RM_OpenFiles()
+
+        # Multicomponent diffusion settings
+        if multicomponent:
+            self.RM_SetSpeciesSaveOn(1)
+
+
+    def run_initial_from_file(self, pqi_file, ic):
+        """
+        Helper function that runs the initial setup for a PHREEQC module simulation.
+
+        Parameters:
+            pqi_file (str): Path to the PHREEQC input file (.pqi) used for the initial setup.
+            ic (numpy.ndarray): Initial conditions array with shape (nxyz, 7) where each row corresponds to a cell and columns represent:
+                - Column 0: Solution ID
+                - Column 1: Equilibrium phase ID
+                - Column 2: Exchange ID
+                - Column 3: Surface ID
+                - Column 4: Gas phase ID
+                - Column 5: Solid solution ID
+                - Column 6: Kinetic reaction ID
+
+        Raises:
+            RuntimeError: If the PHREEQC input file fails to run.
+        """
+
+        # Run the initial setup file
+        status = self.RM_RunFile(1, 1, 1, pqi_file)
+        if status != 0:
+            raise RuntimeError("Failed to run Phreeqc input file")
+
+        # Check size of initial conditions array
+        if ic.shape != (self.nxyz, 7):
+            raise ValueError(f"Initial conditions array must have shape ({self.nxyz}, 7), got {ic.shape}")
+
+        # Be sure that ic is a numpy array
+        if not isinstance(ic, np.ndarray):
+            try:
+                ic = np.array(ic).astype(np.int32)
+            except Exception as e:
+                raise ValueError("Initial conditions must be convertible to a numpy array of integers") from e
+
+        # Reshape initial conditions to 1D array
+        ic1 = np.reshape(ic.T, self.nxyz * 7).astype(np.int32)
+
+        # ic2 contains numbers for a second entity that mixes with the first entity (here, it is not used)
+        ic2 = -1 * np.ones(self.nxyz * 7, dtype=np.int32)
+
+        # f1 contains the fractions of the first entity in each cell (here, it is set to 1.0)
+        f1 = np.ones(self.nxyz * 7, dtype=np.float64)
+
+        status = self.RM_InitialPhreeqc2Module(ic1, ic2, f1)
+
+        # Get component and species information
+        n_comps = self.RM_FindComponents()
+        n_species = self.RM_GetSpeciesCount()
+
+        self.components = np.zeros(n_comps, dtype="U20")
+        for i in range(n_comps):
+            self.RM_GetComponent(i, self.components, 20)
+
+        self.species = np.zeros(n_species, dtype="U20")
+        for i in range(n_species):
+            self.RM_GetSpeciesName(i, self.species, 20)
+
+        # Run initial equilibrium step
+        self.RM_SetTime(0.0)
+        self.RM_SetTimeStep(0.0)
+        status = self.RM_RunCells()
+
 
     def pdSelectedOutput(self):
         """Returns a Pandas data frame for Selected Output."""
@@ -61,7 +188,6 @@ class PhreeqcRM:
         return pd.DataFrame(so.reshape(ncolsel, self.nxyz).T, columns=selout_h)
 
     ### PhreeqcRM functions
-
     def RM_Abort(self, result, err_str):
         return IRM_RESULT(self.libc.RM_Abort(self.id, result, err_str))
 
