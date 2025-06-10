@@ -51,37 +51,6 @@ n_steps = int(sim_duration / dt)  # Number of time steps
 contaminant_spot = int(0.5 * n_cells / domain_length)  # Contaminant spot size
 
 
-def initialize_phreeqc():
-    """Initialize and configure PhreeqcRM instance."""
-    phr = mibiremo.PhreeqcRM()
-    phr.create(nxyz=n_cells, n_threads=n_threads)
-    phr.RM_LoadDatabase(database_path)
-
-    # Set properties/parameters
-    phr.RM_SetComponentH2O(0)  # Exclude H2O from component list
-    phr.RM_SetRebalanceFraction(0.5)  # Thread load balancing
-
-    # Configure units
-    phr.RM_SetUnitsSolution(unit_solution)
-    phr.RM_SetUnitsPPassemblage(units)
-    phr.RM_SetUnitsExchange(units)
-    phr.RM_SetUnitsSurface(units)
-    phr.RM_SetUnitsGasPhase(units)
-    phr.RM_SetUnitsSSassemblage(units)
-    phr.RM_SetUnitsKinetics(units)
-
-    # Set physical properties
-    phr.RM_SetPorosity(porosity * np.ones(n_cells))
-    phr.RM_SetSaturation(saturation * np.ones(n_cells))
-    phr.RM_SetRepresentativeVolume(1.0 * np.ones(n_cells))
-
-    # Configure output
-    phr.RM_SetFilePrefix("btex")
-    phr.RM_OpenFiles()
-
-    return phr
-
-
 def run_simulation(pqi_file, kinetic=False):
     """Run coupled transport-reaction simulation.
 
@@ -92,44 +61,34 @@ def run_simulation(pqi_file, kinetic=False):
     Returns:
         Tuple of (time vector, concentration results at probe location)
     """
-    phr = initialize_phreeqc()
-    status = phr.RM_RunFile(1, 1, 1, pqi_file)
+    # Initialize PhreeqcRM
+    phr = mibiremo.PhreeqcRM()
+    phr.create(nxyz=n_cells, n_threads=n_threads)
+    phr.initialize_phreeqc(database_path, unit_solution, units, porosity, saturation)
 
-    # Set initial conditions
-    ic1 = -1 * np.ones(n_cells * 7, dtype=np.int32)
-    ic2 = -1 * np.ones(n_cells * 7, dtype=np.int32)
-    f1 = np.ones(n_cells * 7, dtype=np.float64)
+    # Prepare the initial conditions
+    # Use SOLUTION 2, and disable all other model features (-1)
+    ic = [2,-1,-1,-1,-1,-1,-1]
 
-    # Assign definitions to cells
-    for i in np.arange(n_cells):
-        ic1[i] = 2  # Solution
-        ic1[i + n_cells] = -1  # Equilibrium phases
-        ic1[i + 2 * n_cells] = -1  # Exchange
-        ic1[i + 3 * n_cells] = -1  # Surface
-        ic1[i + 4 * n_cells] = -1  # Gas phase
-        ic1[i + 5 * n_cells] = -1  # Solid solutions
-        ic1[i + 6 * n_cells] = -1  # Kinetics
+    # Repeat for all cells (row-wise)
+    ic = np.tile(ic, (n_cells, 1))
 
     # Contaminated spot 0.5 m
     spot = int(0.5 * n_cells / domain_length)
-    ic1[0:spot] = 1  # Contaminant spot
+    ic[0:spot, 0] = 1  # Contaminant spot
     if kinetic:
-        ic1[6 * n_cells : 6 * n_cells + spot] = 1  # Kinetics
+        ic[0:spot, 6] = 1 # Kinetics
     else:
-        ic1[n_cells : n_cells + spot] = 1  # Equilibrium phases
+        ic[0:spot, 1] = 1 # Equilibrium phases
 
-    status = phr.RM_InitialPhreeqc2Module(ic1, ic2, f1)
+    # Run initial conditions in PhreeqcRM
+    phr.run_initial_from_file(pqi_file, ic)
 
-    # Get component information
-    n_comps = phr.RM_FindComponents()
-    components = np.zeros(n_comps, dtype="U20")
-    for i in range(n_comps):
-        status = phr.RM_GetComponent(i, components, 20)
-
-    # Initialize simulation
-    phr.RM_SetTime(0.0)
-    phr.RM_SetTimeStep(0.1)  # Small initial step
-    status = phr.RM_RunCells()
+    # Get components and species
+    components = phr.components
+    species = phr.species
+    n_comps = len(components)
+    n_species = len(species)
 
     # Get initial concentrations
     cc = np.zeros(n_cells * n_comps, dtype=np.float64)
