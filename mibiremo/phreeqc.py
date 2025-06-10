@@ -60,7 +60,15 @@ class PhreeqcRM:
             raise RuntimeError(msg)
 
 
-    def initialize_phreeqc(self, database_path, units_solution=2, units=1, porosity=1.0, saturation=1.0, multicomponent=True) -> None:
+    def initialize_phreeqc(
+        self,
+        database_path,
+        units_solution=2,
+        units=1,
+        porosity=1.0,
+        saturation=1.0,
+        multicomponent=True,
+    ) -> None:
         """
         Helper function that initializes a PhreeqcRM object with specified parameters and loads the given database.
 
@@ -118,7 +126,8 @@ class PhreeqcRM:
 
         Parameters:
             pqi_file (str): Path to the PHREEQC input file (.pqi) used for the initial setup.
-            ic (numpy.ndarray): Initial conditions array with shape (nxyz, 7) where each row corresponds to a cell and columns represent:
+            ic (numpy.ndarray): Initial conditions array with shape (nxyz, 7) where each
+            row corresponds to a cell and columns represent:
                 - Column 0: Solution ID
                 - Column 1: Equilibrium phase ID
                 - Column 2: Exchange ID
