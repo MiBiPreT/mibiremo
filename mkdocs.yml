@@ -1,6 +1,6 @@
 site_name: mibiremo
 site_description: Microbiome Bioremediation Reaction Module, a Python interface to PhreeqcRM library
-site_author: Matteo Masi, Jaro Camphuijsen 
+site_author: Matteo Masi, Jaro Camphuijsen
 site_url: https://MiBiPreT.github.io/mibiremo
 repo_name: MiBiPreT/mibiremo
 repo_url: https://github.com/MiBiPreT/mibiremo
@@ -91,4 +91,4 @@ extra_javascript:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/MiBiPreT/mibiscreen
+      link: https://github.com/MiBiPreT/mibiremo
