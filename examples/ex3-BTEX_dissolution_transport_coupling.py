@@ -86,7 +86,6 @@ def run_simulation(pqi_file, kinetic=False):
 
     # Get components and species
     components = phr.components
-    species = phr.species
     n_comps = len(components)
 
     # Get initial concentrations
