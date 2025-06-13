@@ -10,7 +10,7 @@ on:
 
 jobs:
   check-links:
-    name: CHeck markdown links with Linkspector
+    name: Check markdown links with Linkspector
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
