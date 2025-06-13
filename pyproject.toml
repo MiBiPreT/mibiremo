@@ -86,7 +86,10 @@ extras = dev
 [tool.ruff]
 line-length = 120
 output-format = "concise"
-extend-exclude = ["docs"]
+extend-exclude = ["docs", "*.ipynb"]
+
+[tool.ruff.format]
+skip-magic-trailing-comma = false
 
 [tool.ruff.lint]
 # Allow unused variables when underscore-prefixed.

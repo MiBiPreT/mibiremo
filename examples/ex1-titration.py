@@ -37,7 +37,7 @@ phr.initialize_phreeqc(database_path, unit_solution, units, porosity, saturation
 
 # Prepare the initial conditions
 # Use SOLUTION 1 and EQUILIBRIUM_PHASES 1, disable all other phases (-1)
-ic = np.array([1,1,-1,-1,-1,-1,-1]).astype(np.int32)
+ic = np.array([1, 1, -1, -1, -1, -1, -1]).astype(np.int32)
 
 # Repeat for all other cells (row-wise)
 ic = np.tile(ic, (n_cells, 1))
@@ -46,8 +46,8 @@ ic = np.tile(ic, (n_cells, 1))
 phr.run_initial_from_file(pqi_file, ic)
 components = phr.components
 species = phr.species
-n_comps = len(components) # Number of components
-n_species = len(species) # Number of species
+n_comps = len(components)  # Number of components
+n_species = len(species)  # Number of species
 
 # Initialize concentration vectors
 cc = np.zeros(n_cells * n_comps, dtype=np.float64)
@@ -83,10 +83,9 @@ results_df = phr.pdSelectedOutput()
 
 # Plot results
 plt.figure(figsize=(10, 6))
-plt.plot(hcl, results_df['pH'])
+plt.plot(hcl, results_df["pH"])
 plt.xlabel("mol H$^+$ added")
 plt.ylabel("pH")
 plt.title("Calcite Titration Curve")
 plt.grid(True)
 plt.show()
-
