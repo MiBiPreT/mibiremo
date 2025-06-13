@@ -68,7 +68,7 @@ def run_simulation(pqi_file, kinetic=False):
 
     # Prepare the initial conditions
     # Use SOLUTION 2, and disable all other model features (-1)
-    ic = [2,-1,-1,-1,-1,-1,-1]
+    ic = [2, -1, -1, -1, -1, -1, -1]
 
     # Repeat for all cells (row-wise)
     ic = np.tile(ic, (n_cells, 1))
@@ -77,9 +77,9 @@ def run_simulation(pqi_file, kinetic=False):
     spot = int(0.5 * n_cells / domain_length)
     ic[0:spot, 0] = 1  # Contaminant spot
     if kinetic:
-        ic[0:spot, 6] = 1 # Kinetics
+        ic[0:spot, 6] = 1  # Kinetics
     else:
-        ic[0:spot, 1] = 1 # Equilibrium phases
+        ic[0:spot, 1] = 1  # Equilibrium phases
 
     # Run initial conditions in PhreeqcRM
     phr.run_initial_from_file(pqi_file, ic)
@@ -133,7 +133,7 @@ def run_simulation(pqi_file, kinetic=False):
                 conc_matrix[:, species_map[j]],
                 velocity,
                 dispersion_coeff,
-                dt
+                dt,
             )
             transported_conc = solver.transport(left_boundary_conc)
 
@@ -184,12 +184,12 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
     plt.plot(
         time_eq,
         conc_eq[:, 0] * 78.114 * 1000,
-        label="Benzene - MIBIREMO - equilibrium"
+        label="Benzene - MIBIREMO - equilibrium",
     )
     plt.plot(
         time_eq,
         conc_eq[:, 1] * 106.17 * 1000,
-        label="Ethylbenzene - MIBIREMO - equil."
+        label="Ethylbenzene - MIBIREMO - equil.",
     )
 
     # Plot kinetic dissolution results
@@ -197,13 +197,13 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
         time_kin,
         conc_kin[:, 0] * 78.114 * 1000,
         label="Benzene - MIBIREMO - kinetics",
-        linestyle="--"
+        linestyle="--",
     )
     plt.plot(
         time_kin,
         conc_kin[:, 1] * 106.17 * 1000,
         label="Ethylbenzene - MIBIREMO - kinetics",
-        linestyle="--"
+        linestyle="--",
     )
 
     # Configure plot
@@ -211,9 +211,8 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
     plt.ylabel("Aqueous concentration (mg/L)")
     plt.legend()
     plt.title(
-        "BTEX dissolution and transport at 50 m distance from the source\n"
-        "Equilibrium vs kinetics comparison",
-        fontsize=10
+        "BTEX dissolution and transport at 50 m distance from the source\nEquilibrium vs kinetics comparison",
+        fontsize=10,
     )
     plt.tight_layout()
     plt.show()
@@ -233,9 +232,14 @@ def main():
     phreeqc_results = pd.read_csv(sel_file, sep="\t")
 
     # Plot results
-    plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results)
+    plot_results(
+        time_eq,
+        conc_eq,
+        time_kin,
+        conc_kin,
+        phreeqc_results,
+    )
 
 
 if __name__ == "__main__":
     main()
-

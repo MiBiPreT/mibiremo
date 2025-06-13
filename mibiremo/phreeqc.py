@@ -59,7 +59,6 @@ class PhreeqcRM:
             msg = f"Failed to create PhreeqcRM instance: {e}"
             raise RuntimeError(msg)
 
-
     def initialize_phreeqc(
         self,
         database_path,
@@ -118,7 +117,6 @@ class PhreeqcRM:
         # Multicomponent diffusion settings
         if multicomponent:
             self.RM_SetSpeciesSaveOn(1)
-
 
     def run_initial_from_file(self, pqi_file, ic):
         """
@@ -183,7 +181,6 @@ class PhreeqcRM:
         self.RM_SetTime(0.0)
         self.RM_SetTimeStep(0.0)
         status = self.RM_RunCells()
-
 
     def pdSelectedOutput(self):
         """Returns a Pandas data frame for Selected Output."""

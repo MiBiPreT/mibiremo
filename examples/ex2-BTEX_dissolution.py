@@ -39,7 +39,7 @@ phr.initialize_phreeqc(database_path, unit_solution, units, porosity, saturation
 
 # Prepare the initial conditions
 # Use SOLUTION 1 and KINETICS 1, disable all model features (-1)
-ic = [1,-1,-1,-1,-1,-1,1]
+ic = [1, -1, -1, -1, -1, -1, 1]
 
 # Repeat for all other cells (row-wise)
 ic = np.tile(ic, (n_cells, 1))
