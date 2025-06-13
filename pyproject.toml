@@ -72,6 +72,7 @@ testpaths = ["tests"]
 branch = true
 source = ["mibiremo"]
 command_line = "-m pytest"
+omit = ["examples/*"]
 
 [tool.tox]
 legacy_tox_ini = """
