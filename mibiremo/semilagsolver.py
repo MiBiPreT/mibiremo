@@ -1,11 +1,7 @@
 """Semi-Lagrangian solver for 1D advection-diffusion equation on a uniform grid.
 
-Advection and diffusion are solved separately (operator splitting) in two steps:
-1) Advection solved with method of characteristics (MOC) with cubic spline interpolation
-2) Diffusion solved with Saul'yev method
-
 Author: Matteo Masi
-Last revision: 08/07/2024
+Last revision: 03/09/2024
 
 """
 
@@ -16,25 +12,93 @@ warnings.filterwarnings("ignore")
 
 
 class SemiLagSolver:
-    """Implements a semi-Lagrangian integration scheme with Dirichlet-type boundary
-    condition at the inlet of the domain (left boundary x = 0)
-    and Neumann-type boundary condition at the outlet (right boundary).
+    """Semi-Lagrangian solver for 1D advection-diffusion transport equations.
 
-    Usage:
-        obj = SemiLagSolver(x, C, v, D, dt)
+    This class implements a semi-Lagrangian numerical scheme for solving the
+    one-dimensional advection-diffusion equation on uniform grids. The solver
+    uses operator splitting to handle advection and diffusion separately,
+    providing accurate and stable solutions for transport problems.
 
-    Parameters:
-        x (np.ndarray): Spatial coordinates (must be equally spaced)
-        C (np.ndarray): Initial concentration
-        v (float): Velocity
-        D (float): Diffusion (dispersion) coefficient
-        dt (float): Time-step
+    The numerical approach consists of two sequential steps:
+        1. **Advection**: Solved using the Method of Characteristics (MOC) with
+           cubic spline interpolation (PCHIP - Piecewise Cubic Hermite Interpolating
+           Polynomial) to maintain monotonicity and prevent oscillations.
+        2. **Diffusion**: Solved using the Saul'yev alternating direction method,
+           which provides unconditional stability for the diffusion equation.
 
+    Boundary Conditions:
+        - **Inlet (left boundary, x=0)**: Dirichlet-type condition with prescribed
+          concentration value.
+        - **Outlet (right boundary)**: Neumann-type condition (zero gradient) allowing
+          natural outflow of transported species.
+
+    Mathematical Formulation:
+        The solver addresses the 1D advection-diffusion equation:
+
+        ∂C/∂t + v∂C/∂x = D∂²C/∂x²
+
+        where:
+        - C(x,t): Concentration field
+        - v: Advection velocity (constant)
+        - D: Diffusion/dispersion coefficient (constant)
+
+    Numerical Stability:
+        - The cubic spline advection step is stable for any Courant number
+        - The Saul'yev diffusion solver is unconditionally stable
+        - Combined scheme maintains stability and accuracy for typical transport problems
+
+    Applications:
+        - Reactive transport modeling in porous media
+        - Contaminant transport in groundwater systems
+        - Chemical species transport in environmental flows
+        - Coupling with geochemical reaction modules (e.g., PhreeqcRM)
+
+    Attributes:
+        x (numpy.ndarray): Spatial coordinate array (uniform spacing required).
+        C (numpy.ndarray): Current concentration field at grid points.
+        v (float): Advection velocity in consistent units with spatial coordinates.
+        D (float): Diffusion coefficient in consistent units (L²/T).
+        dt (float): Time step for numerical integration in consistent time units.
+        dx (float): Spatial grid spacing (automatically calculated from x).
+
+    Note:
+        The spatial grid must be uniformly spaced for the numerical scheme to
+        work correctly. Non-uniform grids are not supported in this implementation.
     """
 
     def __init__(self, x, C_init, v, D, dt):
-        """Initializes the SemiLagSolver object with spatial coordinates,
-        initial concentration, velocity, diffusion coefficient, and time-step.
+        """Initialize the Semi-Lagrangian solver with transport parameters.
+
+        Sets up the numerical solver with spatial discretization, initial conditions,
+        and transport parameters. Validates input consistency and calculates derived
+        parameters needed for the numerical scheme.
+
+        Args:
+            x (numpy.ndarray): Spatial coordinate array defining the 1D computational
+                domain. Must be uniformly spaced with at least 2 points. Units should
+                be consistent with velocity and diffusion coefficient.
+            C_init (numpy.ndarray): Initial concentration field at each grid point.
+                Length must match the spatial coordinate array. Units are user-defined
+                but should be consistent throughout the simulation.
+            v (float): Advection velocity (positive for left-to-right flow).
+                Units must be consistent with spatial coordinates and time step
+                (e.g., if x is in meters and dt in days, v should be in m/day).
+            D (float): Diffusion/dispersion coefficient (must be non-negative).
+                Units must be L²/T where L and T are consistent with spatial
+                coordinates and time step (e.g., m²/day).
+            dt (float): Time step for numerical integration (must be positive).
+                Units should be consistent with velocity and diffusion coefficient.
+
+        Raises:
+            ValueError: If spatial coordinates are not uniformly spaced or if
+                concentration array length doesn't match spatial coordinates.
+            ValueError: If transport parameters are not physically reasonable
+                (negative diffusion, zero or negative time step).
+
+        Example:
+            >>> x = np.linspace(0, 5, 51)      # 5 m domain, 0.1 m spacing
+            >>> C0 = np.exp(-x**2)             # Gaussian initial condition
+            >>> solver = SemiLagSolver(x, C0, v=0.5, D=0.05, dt=0.01)
         """
         self.x = x
         self.C = C_init
@@ -44,8 +108,33 @@ class SemiLagSolver:
         self.dx = x[1] - x[0]
 
     def cubic_spline_advection(self, C_bound) -> None:
-        """Advection
-        Propagates the current variable using a cubic spline interpolation.
+        """Solve the advection step using cubic spline interpolation.
+
+        Implements the Method of Characteristics (MOC) for the advection equation
+        ∂C/∂t + v∂C/∂x = 0 using backward tracking of characteristic lines.
+        Uses PCHIP (Piecewise Cubic Hermite Interpolating Polynomial) to maintain
+        monotonicity and prevent numerical oscillations.
+
+        The method works by:
+            1. Computing departure points: xi = x - v*dt (backward tracking)
+            2. Interpolating concentrations at departure points using cubic splines
+            3. Applying inlet boundary condition for points that tracked outside domain
+
+        Args:
+            C_bound (float): Inlet concentration value applied at the left boundary
+                (x=0) for any characteristic lines that originated from outside the
+                computational domain. Units should match the concentration field.
+
+        Note:
+            This method modifies self.C in-place. The cubic spline interpolation
+            preserves monotonicity, making it suitable for concentration fields
+            where spurious oscillations must be avoided.
+
+        Numerical Properties:
+            - Unconditionally stable (no CFL restriction)
+            - Maintains monotonicity (no new extrema created)
+            - Handles arbitrary Courant numbers (v*dt/dx)
+            - Exact for linear concentration profiles
         """
         cs = PchipInterpolator(self.x, self.C)
         shift = self.v * self.dt
@@ -57,8 +146,42 @@ class SemiLagSolver:
         self.C = yi
 
     def saulyev_solver_alt(self, C_bound) -> None:
-        """Diffusion
-        Saul'yev explicit solver (integration in alternating directions).
+        """Solve the diffusion step using the Saul'yev alternating direction method.
+
+        Implements the Saul'yev scheme for the diffusion equation ∂C/∂t = D∂²C/∂x²
+        using alternating direction sweeps to achieve unconditional stability.
+        The method performs two passes:
+            1. Left-to-right sweep using forward differences
+            2. Right-to-left sweep using backward differences
+            3. Final solution is the average of both sweeps
+
+        Args:
+            C_bound (float): Inlet concentration value applied at the left boundary
+                during the diffusion solve. This maintains consistency with the
+                advection boundary condition.
+
+        Algorithm Details:
+            - **Left-to-Right Pass**: For each cell i, uses implicit treatment of
+              left neighbor and explicit treatment of right neighbor
+            - **Right-to-Left Pass**: For each cell i, uses implicit treatment of
+              right neighbor and explicit treatment of left neighbor
+            - **Averaging**: Combines both solutions to achieve second-order accuracy
+
+        Boundary Conditions:
+            - **Left boundary (x=0)**: Dirichlet condition with prescribed C_bound
+            - **Right boundary**: Zero gradient (Neumann) condition implemented
+              by using the same concentration as the last interior point
+
+        Numerical Properties:
+            - Unconditionally stable for any time step size
+            - Second-order accurate in space and time
+            - Preserves maximum principle (no spurious extrema)
+            - Handles arbitrary diffusion numbers (D*dt/dx²)
+
+        Note:
+            This method modifies self.C in-place. The alternating direction
+            approach eliminates the restrictive stability constraint of explicit
+            methods while maintaining computational efficiency.
         """
         dt = self.dt
         theta = self.D * dt / (self.dx**2)
@@ -94,11 +217,38 @@ class SemiLagSolver:
         self.C = (CLR + CRL) / 2
 
     def transport(self, C_bound):
-        """Couple advection and diffusion."""
-        # Advection
+        """Perform one complete transport time step with coupled advection-diffusion.
+
+        Executes the full semi-Lagrangian algorithm by sequentially applying
+        the advection and diffusion operators using operator splitting. This
+        approach decouples the hyperbolic (advection) and parabolic (diffusion)
+        aspects of the transport equation for enhanced numerical stability.
+
+        The operator splitting sequence:
+            1. **Advection Step** using cubic spline MOC
+            2. **Diffusion Step** using Saul'yev method
+
+        Args:
+            C_bound (float): Inlet boundary concentration applied at x=0 for both
+                advection and diffusion steps. This represents the concentration
+                of material entering the domain (e.g., injection well concentration,
+                upstream boundary condition, etc.).
+
+        Returns:
+            numpy.ndarray: Updated concentration field after the complete transport
+                step. The array has the same shape as the initial concentration
+                and represents C(x, t+dt).
+
+        Note:
+            This method updates the internal concentration field (self.C) and
+            returns the updated values. For reactive transport coupling, call
+            this method to advance transport, then apply geochemical reactions
+            to the returned concentration field.
+        """
+        # Step 1: Solve advection equation using cubic spline MOC
         self.cubic_spline_advection(C_bound)
 
-        # Diffusion
+        # Step 2: Solve diffusion equation using Saul'yev alternating direction method
         self.saulyev_solver_alt(C_bound)
 
         return self.C
