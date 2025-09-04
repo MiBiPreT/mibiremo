@@ -96,7 +96,7 @@ class SemiLagSolver:
             ValueError: If transport parameters are not physically reasonable
                 (negative diffusion, zero or negative time step).
 
-        Example:
+        Examples:
             >>> x = np.linspace(0, 5, 51)      # 5 m domain, 0.1 m spacing
             >>> C0 = np.exp(-x**2)             # Gaussian initial condition
             >>> solver = SemiLagSolver(x, C0, v=0.5, D=0.05, dt=0.01)

@@ -6,6 +6,7 @@ high-performance interface to PHREEQC geochemical modeling capabilities for
 reactive transport simulations in environmental and hydrological applications.
 
 PhreeqcRM enables:
+
 - Multi-threaded geochemical calculations for large-scale transport models
 - Equilibrium and kinetic geochemical reactions in porous media
 - Parallel processing for computationally intensive reactive transport
@@ -13,9 +14,11 @@ PhreeqcRM enables:
 This interface provides a Python wrapper around the PhreeqcRM C++ library,
 simplifying the process of integrating geochemical calculations with transport models.
 
-PhreeqcRM documentation and source code:
-https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html
-https://github.com/usgs-coupled/phreeqcrm
+All RM_* methods in this class correspond directly to PhreeqcRM C++ functions.
+PhreeqcRM documentation and source code can be found at:
+
+- [PhreeqcRM Documentation](https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html)
+- [PhreeqcRM GitHub Repository](https://github.com/usgs-coupled/phreeqcrm)
 
 Last revision: 03/09/2025
 """
@@ -284,7 +287,7 @@ class PhreeqcRM:
         self.RM_SetTimeStep(0.0)
         status = self.RM_RunCells()
 
-    def get_selected_output_df(self):
+    def get_selected_output_df(self) -> pd.DataFrame:
         """Retrieve selected output data as a pandas DataFrame.
 
         Extracts the current selected output data from PhreeqcRM and formats it

@@ -64,6 +64,8 @@ plugins:
         options:
           docstring_style: google
           show_submodules: true
+          filters:
+            - "!^RM_"
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:
