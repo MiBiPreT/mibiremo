@@ -79,7 +79,7 @@ elapsed = time.time() - start_time
 print(f"Simulation completed in {elapsed:.2f} seconds")
 
 # Get results
-results_df = phr.pdSelectedOutput()
+results_df = phr.get_selected_output_df()
 
 # Plot results
 plt.figure(figsize=(10, 6))
