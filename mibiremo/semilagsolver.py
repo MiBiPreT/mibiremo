@@ -6,6 +6,7 @@ Last revision: 03/09/2024
 """
 
 import warnings
+import numpy as np
 from scipy.interpolate import PchipInterpolator
 
 warnings.filterwarnings("ignore")
@@ -216,7 +217,7 @@ class SemiLagSolver:
         # Average L-R and R-L solutions and update to final state
         self.C = (CLR + CRL) / 2
 
-    def transport(self, C_bound):
+    def transport(self, C_bound) -> np.ndarray:
         """Perform one complete transport time step with coupled advection-diffusion.
 
         Executes the full semi-Lagrangian algorithm by sequentially applying
