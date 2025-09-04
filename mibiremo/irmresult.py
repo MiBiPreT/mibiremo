@@ -19,7 +19,7 @@ References:
 """
 
 
-def IRM_RESULT(code):
+def IRM_RESULT(code) -> tuple[str, str]:
     """Map PhreeqcRM integer error codes to descriptive error messages.
 
     Args:
