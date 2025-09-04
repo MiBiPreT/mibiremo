@@ -107,7 +107,7 @@ class PhreeqcRM:
             Exception: If the operating system is not supported (Windows/Linux only).
             RuntimeError: If PhreeqcRM instance creation fails.
 
-        Example:
+        Examples:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100, n_threads=4)
         """
@@ -168,7 +168,7 @@ class PhreeqcRM:
             RuntimeError: If the PhreeqcRM instance is not initialized or if
                 the database fails to load.
 
-        Example:
+        Examples:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100)
             >>> rm.initialize_phreeqc("phreeqc.dat", units_solution=1)
@@ -234,7 +234,7 @@ class PhreeqcRM:
             ValueError: If initial conditions array has incorrect shape or cannot
                 be converted to integer array.
 
-        Example:
+        Examples:
             >>> import numpy as np
             >>> ic = np.array([[1, -1, -1, -1, -1, -1, -1]])  # Only solution 1
             >>> rm.run_initial_from_file("initial.pqi", ic)
@@ -284,7 +284,7 @@ class PhreeqcRM:
         self.RM_SetTimeStep(0.0)
         status = self.RM_RunCells()
 
-    def pdSelectedOutput(self):
+    def get_selected_output_df(self):
         """Retrieve selected output data as a pandas DataFrame.
 
         Extracts the current selected output data from PhreeqcRM and formats it
@@ -297,8 +297,8 @@ class PhreeqcRM:
                 rows representing grid cells and columns representing the
                 selected output variables defined in the PHREEQC input.
 
-        Example:
-            >>> df = rm.pdSelectedOutput()
+        Examples:
+            >>> df = rm.get_selected_output_df()
             >>> print(df.columns)  # Show available output variables
             >>> print(df['pH'])     # Access pH values for all cells
         """
@@ -334,7 +334,7 @@ class PhreeqcRM:
         Returns:
             int: IRM_RESULT status code (0 for success, non-zero for error).
 
-        Example:
+        Examples:
             >>> rm.RM_OpenFiles()  # Open files for logging
             >>> # ... perform calculations ...
             >>> rm.RM_CloseFiles()  # Close files when done
@@ -394,7 +394,7 @@ class PhreeqcRM:
         Returns:
             str: Human-readable error message corresponding to the error code.
 
-        Example:
+        Examples:
             >>> status = rm.RM_RunCells()
             >>> if status != 0:
             >>>     error_msg = rm.RM_DecodeError(status)
@@ -417,7 +417,7 @@ class PhreeqcRM:
             After calling this method, the PhreeqcRM instance should not be
             used for any further operations. All method calls will fail.
 
-        Example:
+        Examples:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100)
             >>> # ... use PhreeqcRM instance ...
@@ -486,7 +486,7 @@ class PhreeqcRM:
             and before beginning transport time stepping. The returned
             count determines array sizes for concentration transfers.
 
-        Example:
+        Examples:
             >>> rm.run_initial_from_file("initial.pqi", ic_array)
             >>> ncomp = rm.RM_FindComponents()
             >>> print(f"Transport requires {ncomp} components")
@@ -576,7 +576,7 @@ class PhreeqcRM:
             by all components for cell 1, etc. Use this method after
             RM_RunCells() to get updated concentrations for transport.
 
-        Example:
+        Examples:
             >>> ncomp = rm.RM_GetComponentCount()
             >>> conc = np.zeros(nxyz * ncomp)
             >>> rm.RM_GetConcentrations(conc)
@@ -796,7 +796,7 @@ class PhreeqcRM:
         Note:
             Use RM_GetSelectedOutputColumnCount() to determine the number
             of columns and RM_GetSelectedOutputHeading() to get column names.
-            The pdSelectedOutput() method provides a more convenient pandas
+            The get_selected_output_df() method provides a more convenient pandas
             DataFrame interface to this data.
         """
         return self.libc.RM_GetSelectedOutput(self.id, so.ctypes)
@@ -867,7 +867,7 @@ class PhreeqcRM:
             this method can be used. Use RM_GetSpeciesCount() to determine the
             number of species and RM_GetSpeciesName() to get species names.
 
-        Example:
+        Examples:
             >>> rm.RM_SetSpeciesSaveOn(1)  # Enable species saving
             >>> rm.RM_RunCells()  # Run reactions
             >>> nspecies = rm.RM_GetSpeciesCount()
@@ -893,7 +893,7 @@ class PhreeqcRM:
             running initial equilibrium calculations. Species names can be
             retrieved using RM_GetSpeciesName() with indices from 0 to count-1.
 
-        Example:
+        Examples:
             >>> nspecies = rm.RM_GetSpeciesCount()
             >>> print(f"System contains {nspecies} aqueous species")
             >>> # Get all species names
@@ -962,7 +962,7 @@ class PhreeqcRM:
         Returns:
             int: IRM_RESULT status code (0 for success, non-zero for error).
 
-        Example:
+        Examples:
             >>> nspecies = rm.RM_GetSpeciesCount()
             >>> species_names = np.zeros(nspecies, dtype='U20')
             >>> for i in range(nspecies):
@@ -1041,7 +1041,7 @@ class PhreeqcRM:
             by PhreeqcRM for kinetic calculations. The time units should be
             consistent with kinetic rate constants in the database.
 
-        Example:
+        Examples:
             >>> current_time = rm.RM_GetTime()
             >>> print(f"Current simulation time: {current_time} days")
         """
@@ -1067,7 +1067,7 @@ class PhreeqcRM:
             of kinetic rate equations. Smaller time steps provide more accurate
             solutions but require more computational time.
 
-        Example:
+        Examples:
             >>> dt = rm.RM_GetTimeStep()
             >>> print(f"Current time step: {dt} days")
         """
@@ -1132,7 +1132,7 @@ class PhreeqcRM:
             or running calculations. The database determines which species,
             minerals, and reactions are available for calculations.
 
-        Example:
+        Examples:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100)
             >>> status = rm.RM_LoadDatabase("phreeqc.dat")
@@ -1169,7 +1169,7 @@ class PhreeqcRM:
             Call RM_SetFilePrefix() before this method to set the file name
             prefix. Use RM_CloseFiles() to properly close files when finished.
 
-        Example:
+        Examples:
             >>> rm.RM_SetFilePrefix("simulation")
             >>> rm.RM_OpenFiles()  # Creates simulation.log, simulation.err, etc.
             >>> # ... run calculations ...
@@ -1206,7 +1206,7 @@ class PhreeqcRM:
             - Time step is set with RM_SetTimeStep()
             - Temperature and pressure are set if needed
 
-        Example:
+        Examples:
             >>> rm.RM_SetConcentrations(concentrations)
             >>> rm.RM_SetTime(current_time)
             >>> rm.RM_SetTimeStep(dt)
@@ -1242,7 +1242,7 @@ class PhreeqcRM:
             syntax. Common blocks include SOLUTION, EQUILIBRIUM_PHASES, EXCHANGE,
             SURFACE, GAS_PHASE, SOLID_SOLUTIONS, KINETICS, and SELECTED_OUTPUT.
 
-        Example:
+        Examples:
             >>> # Run initial conditions file in initial PhreeqcRM instance
             >>> status = rm.RM_RunFile(0, 1, 0, "initial_conditions.pqi")
             >>> if status != 0:
@@ -1267,7 +1267,7 @@ class PhreeqcRM:
         Returns:
             int: IRM_RESULT status code (0 for success, non-zero for error).
 
-        Example:
+        Examples:
             >>> phreeqc_input = '''
             >>> SOLUTION 1
             >>>     pH 7.0
@@ -1303,7 +1303,7 @@ class PhreeqcRM:
             Including H2O increases the number of transport equations but may
             be necessary for some specialized applications.
 
-        Example:
+        Examples:
             >>> rm.RM_SetComponentH2O(0)  # Standard: don't transport H2O
             >>> ncomp = rm.RM_FindComponents()  # Get component count
         """
@@ -1331,7 +1331,7 @@ class PhreeqcRM:
             RM_RunCells(). The concentrations are used as initial conditions
             for equilibrium and kinetic calculations.
 
-        Example:
+        Examples:
             >>> # Transport model updates concentrations
             >>> new_conc = transport_step(old_conc, velocity, dt)
             >>> # Transfer to reaction module
@@ -1393,7 +1393,7 @@ class PhreeqcRM:
             in each cell: water_volume = porosity × saturation × bulk_volume.
             This affects concentration calculations and reaction stoichiometry.
 
-        Example:
+        Examples:
             >>> porosity = np.full(nxyz, 0.25)  # 25% porosity for all cells
             >>> rm.RM_SetPorosity(porosity)
         """
@@ -1449,7 +1449,7 @@ class PhreeqcRM:
             water volume: water_volume = porosity × saturation × bulk_volume.
             This directly affects solution concentrations and reaction rates.
 
-        Example:
+        Examples:
             >>> # Fully saturated conditions
             >>> saturation = np.ones(nxyz)
             >>> rm.RM_SetSaturation(saturation)
@@ -1489,7 +1489,7 @@ class PhreeqcRM:
             - Detailed speciation analysis
             - Species-specific output and post-processing
 
-        Example:
+        Examples:
             >>> rm.RM_SetSpeciesSaveOn(1)  # Enable species saving
             >>> rm.RM_RunCells()  # Calculate with species saving
             >>> species_conc = np.zeros(nxyz * nspecies)
@@ -1520,7 +1520,7 @@ class PhreeqcRM:
             to ensure kinetic calculations use the correct time. The time
             is used to integrate kinetic rate equations over the time step.
 
-        Example:
+        Examples:
             >>> for step in range(num_steps):
             >>>     current_time = step * dt
             >>>     rm.RM_SetTime(current_time)
@@ -1553,7 +1553,7 @@ class PhreeqcRM:
             For stiff kinetic systems, smaller time steps may be required
             for numerical stability and accuracy.
 
-        Example:
+        Examples:
             >>> dt = 0.1  # 0.1 day time step
             >>> rm.RM_SetTimeStep(dt)
             >>> rm.RM_RunCells()  # Integrate kinetics over dt
@@ -1603,7 +1603,7 @@ class PhreeqcRM:
             - RM_GetSpeciesConcentrations() output units
             - Initial condition concentration scaling
 
-        Example:
+        Examples:
             >>> rm.RM_SetUnitsSolution(2)  # Use mmol/L
             >>> # Now all concentrations are in millimolar units
             >>> conc_mmol = np.array([1.0, 0.5, 2.0])  # 1, 0.5, 2 mmol/L
@@ -1654,7 +1654,7 @@ class PhreeqcRM:
             correct component count. The returned value determines array sizes
             for RM_SetConcentrations() and RM_GetConcentrations().
 
-        Example:
+        Examples:
             >>> rm.run_initial_from_file("initial.pqi", ic_array)
             >>> ncomp = rm.RM_GetComponentCount()
             >>> conc_array = np.zeros(nxyz * ncomp)
