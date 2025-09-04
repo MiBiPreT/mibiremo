@@ -16,8 +16,8 @@ Functions:
     IRM_RESULT: Maps integer error codes to IRMStatus objects with enhanced functionality.
 
 References:
-    PhreeqcRM IrmResult.h File Reference:
-    https://usgs-coupled.github.io/phreeqcrm/IrmResult_8h.html
+
+- [PhreeqcRM IrmResult.h File Reference](https://usgs-coupled.github.io/phreeqcrm/IrmResult_8h.html)
 
 """
 
@@ -26,23 +26,23 @@ from typing import NamedTuple
 
 class IRMStatus(NamedTuple):
     """PhreeqcRM status result with enhanced functionality.
-    
+
     This named tuple extends the basic error code mapping with convenience methods
     for better error handling and user experience.
-    
+
     Attributes:
         code (int): The raw integer error code from PhreeqcRM.
         name (str): Symbolic name of the error code (e.g., "IRM_OK", "IRM_FAIL").
         message (str): Human-readable description of the error.
     """
     code: int
-    name: str 
+    name: str
     message: str
-    
+
     def __bool__(self) -> bool:
         """Return True if the operation was successful (code == 0).
-        
-        This allows for intuitive success checking:
+
+        Examples:
             >>> result = rm.RM_RunCells()
             >>> if result:
             >>>     print("Success!")
@@ -50,43 +50,43 @@ class IRMStatus(NamedTuple):
             >>>     print(f"Error: {result}")
         """
         return self.code == 0
-        
+
     def __int__(self) -> int:
         """Return the raw integer code for backwards compatibility.
-        
-        This ensures existing code using integer comparisons continues to work:
+
+        Examples:
             >>> result = rm.RM_RunCells()
             >>> if int(result) == 0:  # Still works
             >>>     print("Success!")
         """
         return self.code
-        
+
     def __str__(self) -> str:
         """Return a formatted string representation of the status.
-        
+
         Returns:
             str: Formatted string in the form "ERROR_NAME: Error description"
         """
         return f"{self.name}: {self.message}"
-    
+
     @property
     def is_success(self) -> bool:
         """Check if the operation was successful.
-        
+
         Returns:
             bool: True if code is 0 (success), False otherwise.
         """
         return self.code == 0
-        
+
     def raise_for_status(self, context: str = "") -> None:
         """Raise an exception if the operation failed.
-        
+
         Args:
             context (str, optional): Additional context for the error message.
-                
+
         Raises:
             RuntimeError: If the status code indicates failure (non-zero).
-            
+
         Examples:
             >>> result = rm.RM_LoadDatabase("invalid.dat")
             >>> result.raise_for_status("Loading database")
@@ -117,13 +117,13 @@ def IRM_RESULT(code: int) -> IRMStatus:
             - code (int): The raw integer error code
             - name (str): Symbolic error code name (e.g., "IRM_OK", "IRM_FAIL")
             - message (str): Human-readable error description
-            
+
     Examples:
         >>> result = IRM_RESULT(0)
         >>> print(result)  # "IRM_OK: Success"
         >>> if result:  # True for success
         >>>     print("Operation successful")
-        >>> 
+        >>>
         >>> error = IRM_RESULT(-1)
         >>> print(int(error))  # -1 (backwards compatibility)
         >>> error.raise_for_status("Memory allocation")  # Raises RuntimeError
