@@ -60,7 +60,9 @@ plugins:
       python:
         rendering:
           show_source: true
+          render_doctest_blocks: true
         options:
+          docstring_style: google
           show_submodules: true
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
