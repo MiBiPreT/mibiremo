@@ -25,6 +25,16 @@ python -m pip install --no-cache-dir --editable .[docs]
 
 Afterwards check that the install directory is present in the `PATH` environment variable.
 
+## Quick Start
+
+For a quick overview of available development commands, run:
+
+```shell
+make help
+```
+
+This will show shortcuts to common development tasks like testing, linting, and building documentation.
+
 ## Running the tests
 
 There are two ways to run tests.
