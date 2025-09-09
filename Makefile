@@ -57,7 +57,7 @@ format: ## Format code with ruff
 
 # Documentation
 .PHONY: docs-serve
-docs-serve: install-doc  ## Serve documentation locally
+docs-serve:  ## Serve documentation locally
 	$(PYTHON) -m mkdocs serve
 
 # Build and Release
