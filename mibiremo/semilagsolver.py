@@ -1,7 +1,7 @@
 """Semi-Lagrangian solver for 1D advection-diffusion equation on a uniform grid.
 
 Author: Matteo Masi
-Last revision: 03/09/2024
+Last revision: 09/09/2024
 
 """
 
@@ -101,6 +101,12 @@ class SemiLagSolver:
             >>> C0 = np.exp(-x**2)             # Gaussian initial condition
             >>> solver = SemiLagSolver(x, C0, v=0.5, D=0.05, dt=0.01)
         """
+        if len(x) != len(C_init):
+            raise ValueError(f"Length of x ({len(x)}) must match length of C_init ({len(C_init)})")
+
+        if len(x) < 2:
+            raise ValueError(f"Grid must have at least 2 points, got {len(x)}")
+
         self.x = x
         self.C = C_init
         self.v = v
