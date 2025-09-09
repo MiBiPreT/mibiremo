@@ -58,14 +58,14 @@ plugins:
     default_handler: python
     handlers:
       python:
-        rendering:
-          show_source: true
-          render_doctest_blocks: true
         options:
           docstring_style: google
           show_submodules: true
+          show_source: true
           filters:
             - "!^RM_"
+          extra:
+            render_doctest_blocks: true
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:
