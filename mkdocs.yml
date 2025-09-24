@@ -63,6 +63,8 @@ plugins:
           show_docstring_description: true
           docstring_style: google
           docstring_section_style: table
+          filters:
+            - "!^RM_"
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:
