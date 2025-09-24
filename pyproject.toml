@@ -48,10 +48,10 @@ dev = [
     "tox",
 ]
 doc = [
-    "mkdocs >=1.4.2",
-    "mkdocs-material >=8.2.7",
-    "mkdocstrings[python] >=0.28.0",
-    "mkdocs-autorefs >=1.0.0",
+    "mkdocs >=1.6.0",
+    "mkdocs-material >=9.6.0",
+    "mkdocstrings[python] >=0.30.0",
+    "mkdocs-autorefs >=1.4.0",
     "mdx-include >=1.4.1",
     "mkdocs-markdownextradata-plugin >=0.2.5",
 ]
