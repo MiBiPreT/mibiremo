@@ -15,7 +15,6 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -31,7 +30,7 @@ dependencies = [
 ]
 description = "Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
-license = {file = "LICENSE"}
+license = "Apache-2.0"
 name = "mibiremo"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
