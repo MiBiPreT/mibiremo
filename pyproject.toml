@@ -65,6 +65,9 @@ Repository = "https://github.com/MiBiPret/mibiremo"
 Issues = "https://github.com/MiBiPret/mibiremo/issues"
 ReadTheDocs = "https://mibiremo.readthedocs.io"
 
+[tool.setuptools]
+py-modules = ['mibiremo']
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
