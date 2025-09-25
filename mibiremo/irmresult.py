@@ -35,6 +35,7 @@ class IRMStatus(NamedTuple):
         name (str): Symbolic name of the error code (e.g., "IRM_OK", "IRM_FAIL").
         message (str): Human-readable description of the error.
     """
+
     code: int
     name: str
     message: str
