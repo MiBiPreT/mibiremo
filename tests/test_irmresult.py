@@ -53,17 +53,6 @@ class TestIRMStatus:
         status = IRMStatus(99, "UNKNOWN", "Unknown error")
         assert str(status) == "UNKNOWN: Unknown error"
 
-    def test_is_success_property(self):
-        """Test is_success property."""
-        status = IRMStatus(0, "IRM_OK", "Success")
-        assert status.is_success is True
-
-        status = IRMStatus(-1, "IRM_FAIL", "Failure")
-        assert status.is_success is False
-
-        status = IRMStatus(1, "ERROR", "Some error")
-        assert status.is_success is False
-
     def test_raise_for_status_success(self):
         """Test raise_for_status method with success status."""
         status = IRMStatus(0, "IRM_OK", "Success")

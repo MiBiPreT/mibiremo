@@ -70,15 +70,6 @@ class IRMStatus(NamedTuple):
         """
         return f"{self.name}: {self.message}"
 
-    @property
-    def is_success(self) -> bool:
-        """Check if the operation was successful.
-
-        Returns:
-            bool: True if code is 0 (success), False otherwise.
-        """
-        return self.code == 0
-
     def raise_for_status(self, context: str = "") -> None:
         """Raise an exception if the operation failed.
 
@@ -93,7 +84,7 @@ class IRMStatus(NamedTuple):
             >>> result.raise_for_status("Loading database")
             RuntimeError: Loading database: IRM_FAIL: Failure, Unspecified
         """
-        if not self.is_success:
+        if not self:
             prefix = f"{context}: " if context else ""
             raise RuntimeError(f"{prefix}{self}")
 
