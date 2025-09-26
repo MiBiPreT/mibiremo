@@ -59,6 +59,7 @@ plugins:
     handlers:
       python:
         options:
+          show_submodules: true
           show_source: true
           show_docstring_description: true
           docstring_style: google
