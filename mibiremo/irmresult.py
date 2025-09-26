@@ -94,7 +94,7 @@ def IRM_RESULT(code: int) -> IRMStatus:
 
     Args:
         code (int): Integer error code returned by PhreeqcRM functions.
-            Common codes include:
+            Return codes are listed below:
             - 0: Success (IRM_OK)
             - -1: Out of memory error
             - -2: Invalid variable type
