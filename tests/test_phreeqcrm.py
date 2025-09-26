@@ -484,7 +484,7 @@ class TestPhreeqcRMRunMethods:
 
         result = phr.RM_RunCells()
         assert result.code == 0
-        assert result.is_success
+        assert result
         mock_lib.RM_RunCells.assert_called_once_with(1)
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
