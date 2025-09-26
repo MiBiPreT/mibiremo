@@ -68,11 +68,11 @@ class PhreeqcRM:
 
     Note:
         This interface requires the PhreeqcRM dynamic library to be available
-        in the lib/ subdirectory. The library handles the underlying PHREEQC
+        in the [lib/](lib/) subdirectory. The library handles the underlying PHREEQC
         calculations and memory management.
 
     Examples:
-        See documentation for usage examples.
+        See folder [examples/](examples/) for usage examples.
     """
 
     def __init__(self):
@@ -90,7 +90,7 @@ class PhreeqcRM:
         self.components = None
         self.species = None
 
-    def create(self, dllpath="", nxyz=1, n_threads=1) -> None:
+    def create(self, dllpath=None, nxyz=1, n_threads=1) -> None:
         """Creates a PhreeqcRM reaction module instance.
 
         Initializes the PhreeqcRM library, loads the dynamic library, and creates
@@ -98,9 +98,9 @@ class PhreeqcRM:
         This method must be called before any other PhreeqcRM operations.
 
         Args:
-            dllpath (str, optional): Path to the PhreeqcRM library. If empty,
+            dllpath (str, optional): Path to the PhreeqcRM library. If None,
                 uses the default library path based on the operating system.
-                Defaults to "".
+                Defaults to None.
             nxyz (int, optional): Number of grid cells in the model. Must be
                 positive. Defaults to 1.
             n_threads (int, optional): Number of threads for parallel processing.
@@ -114,7 +114,7 @@ class PhreeqcRM:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100, n_threads=4)
         """
-        if dllpath == "":
+        if dllpath is None:
             # If no path is provided, use the default path, based on operating system
             if os.name == "nt":
                 dllpath = os.path.join(os.path.dirname(__file__), "lib", "PhreeqcRM.dll")
