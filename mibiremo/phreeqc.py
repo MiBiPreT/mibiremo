@@ -20,7 +20,7 @@ PhreeqcRM documentation and source code can be found at:
 - [PhreeqcRM Documentation](https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html)
 - [PhreeqcRM GitHub Repository](https://github.com/usgs-coupled/phreeqcrm)
 
-Last revision: 03/09/2025
+Last revision: 26/09/2025
 """
 
 import ctypes
