@@ -68,11 +68,11 @@ class PhreeqcRM:
 
     Note:
         This interface requires the PhreeqcRM dynamic library to be available
-        in the [lib/](lib/) subdirectory. The library handles the underlying PHREEQC
+        in the lib/ subdirectory. The library handles the underlying PHREEQC
         calculations and memory management.
 
     Examples:
-        See folder [examples/](examples/) for usage examples.
+        See page [Examples](examples.md) for usage examples.
     """
 
     def __init__(self):
