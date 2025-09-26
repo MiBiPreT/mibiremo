@@ -46,7 +46,7 @@ Examples are available in the [`examples`](examples/) directory.
 
 ## Documentation
 
-Include a link to your project's full documentation here.
+The project's full documentation is available [here](https://mibipret.github.io/mibiremo/).
 
 ## Contributing
 
