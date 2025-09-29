@@ -10,7 +10,7 @@ authors:
     given-names: Camphuijsen
     orcid: "https://orcid.org/0000-0002-8928-7831"
 date-released: 2025-04-08
-version: "0.1.0"
+version: "0.1.1"
 repository-code: "https://github.com/MiBiPret/mibiremo"
 keywords:
   - "Microbiome"
