@@ -133,7 +133,7 @@ no-lines-before = ["future","standard-library","third-party","first-party","loca
 current_version = "0.1.0"
 
 [[tool.bumpversion.files]]
-filename = "src/mibiremo/__init__.py"
+filename = "mibiremo/__init__.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
