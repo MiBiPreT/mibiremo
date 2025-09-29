@@ -6,11 +6,14 @@ authors:
   - family-names: Masi
     given-names: Matteo
     orcid: "https://orcid.org/0000-0002-1746-9150"
-  - family-names: Jaro
-    given-names: Camphuijsen
+  - family-names: Camphuijsen
+    given-names: Jaro
     orcid: "https://orcid.org/0000-0002-8928-7831"
-date-released: 2025-04-08
-version: "0.1.1"
+  - family-names: Richardson
+    given-names: Robin
+    orcid: "https://orcid.org/0000-0002-9984-2720"
+date-released: 2025-09-29
+version: "0.2.0"
 repository-code: "https://github.com/MiBiPret/mibiremo"
 keywords:
   - "Microbiome"
