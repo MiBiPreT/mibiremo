@@ -308,7 +308,7 @@ class TestPhreeqcRMSelectedOutput:
             phr = mibiremo.PhreeqcRM()
             phr.create()
 
-            result = phr.RM_GetSelectedOutputColumnCount()
+            result = phr.rm_get_selected_output_column_count()
             assert result == 5
 
 
@@ -336,17 +336,17 @@ class TestPhreeqcRMGetterMethods:
         phr = mibiremo.PhreeqcRM()
         phr.create(nxyz=100)
 
-        assert phr.RM_GetGridCellCount() == 100
-        assert phr.RM_GetChemistryCellCount() == 100
-        assert phr.RM_GetComponentCount() == 5
-        assert phr.RM_GetSpeciesCount() == 20
-        assert phr.RM_GetEquilibriumPhaseCount() == 3
-        assert phr.RM_GetThreadCount() == 4
-        assert phr.RM_GetSpeciesSaveOn() == 1
-        assert phr.RM_GetSelectedOutputColumnCount() == 10
-        assert phr.RM_GetSelectedOutputRowCount() == 100
-        assert phr.RM_GetTime() == 1000.0
-        assert phr.RM_GetTimeStep() == 1.0
+        assert phr.rm_get_grid_cell_count() == 100
+        assert phr.rm_get_chemistry_cell_count() == 100
+        assert phr.rm_get_component_count() == 5
+        assert phr.rm_get_species_count() == 20
+        assert phr.rm_get_equilibrium_phase_count() == 3
+        assert phr.rm_get_thread_count() == 4
+        assert phr.rm_get_species_save_on() == 1
+        assert phr.rm_get_selected_output_column_count() == 10
+        assert phr.rm_get_selected_output_row_count() == 100
+        assert phr.rm_get_time() == 1000.0
+        assert phr.rm_get_time_step() == 1.0
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
     def test_array_getters(self, mock_cdll):
@@ -365,27 +365,27 @@ class TestPhreeqcRMGetterMethods:
 
         # Test concentration getter
         conc = np.zeros(50)  # 10 cells * 5 components
-        result = phr.RM_GetConcentrations(conc)
+        result = phr.rm_get_concentrations(conc)
         assert result.code == 0
 
         # Test species concentration getter
         species_conc = np.zeros(200)  # 10 cells * 20 species
-        result = phr.RM_GetSpeciesConcentrations(species_conc)
+        result = phr.rm_get_species_concentrations(species_conc)
         assert result.code == 0
 
         # Test density getter
         density = np.zeros(10)
-        result = phr.RM_GetDensity(density)
+        result = phr.rm_get_density(density)
         assert result.code == 0
 
         # Test saturation getter
         saturation = np.zeros(10)
-        result = phr.RM_GetSaturation(saturation)
+        result = phr.rm_get_saturation(saturation)
         assert result.code == 0
 
         # Test gram formula weights
         gfw = np.zeros(5)
-        result = phr.RM_GetGfw(gfw)
+        result = phr.rm_get_gfw(gfw)
         assert result.code == 0
 
 
@@ -412,31 +412,31 @@ class TestPhreeqcRMSetterMethods:
         phr.create()
 
         # Test various setter methods
-        result = phr.RM_SetComponentH2O(1)
+        result = phr.rm_set_component_h2o(1)
         assert result.code == 0
 
-        result = phr.RM_SetSpeciesSaveOn(1)
+        result = phr.rm_set_species_save_on(1)
         assert result.code == 0
 
-        result = phr.RM_SetUnitsSolution(2)
+        result = phr.rm_set_units_solution(2)
         assert result.code == 0
 
-        result = phr.RM_SetUnitsExchange(1)
+        result = phr.rm_set_units_exchange(1)
         assert result.code == 0
 
-        result = phr.RM_SetUnitsSurface(1)
+        result = phr.rm_set_units_surface(1)
         assert result.code == 0
 
-        result = phr.RM_SetTime(100.0)
+        result = phr.rm_set_time(100.0)
         assert result.code == 0
 
-        result = phr.RM_SetTimeStep(1.0)
+        result = phr.rm_set_time_step(1.0)
         assert result.code == 0
 
-        result = phr.RM_SetRebalanceFraction(0.5)
+        result = phr.rm_set_rebalance_fraction(0.5)
         assert result.code == 0
 
-        result = phr.RM_SetFilePrefix("test")
+        result = phr.rm_set_file_prefix("test")
         assert result.code == 0
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
@@ -454,17 +454,17 @@ class TestPhreeqcRMSetterMethods:
 
         # Test concentration setter
         conc = np.ones(25)  # 5 cells * 5 components
-        result = phr.RM_SetConcentrations(conc)
+        result = phr.rm_set_concentrations(conc)
         assert result.code == 0
 
         # Test porosity setter
         porosity = np.full(5, 0.3)
-        result = phr.RM_SetPorosity(porosity)
+        result = phr.rm_set_porosity(porosity)
         assert result.code == 0
 
         # Test saturation setter
         saturation = np.full(5, 0.8)
-        result = phr.RM_SetSaturation(saturation)
+        result = phr.rm_set_saturation(saturation)
         assert result.code == 0
 
 
@@ -482,7 +482,7 @@ class TestPhreeqcRMRunMethods:
         phr = mibiremo.PhreeqcRM()
         phr.create()
 
-        result = phr.RM_RunCells()
+        result = phr.rm_run_cells()
         assert result.code == 0
         assert result
         mock_lib.RM_RunCells.assert_called_once_with(1)
@@ -498,7 +498,7 @@ class TestPhreeqcRMRunMethods:
         phr = mibiremo.PhreeqcRM()
         phr.create()
 
-        result = phr.RM_RunFile(1, 1, 0, "test.pqi")
+        result = phr.rm_run_file(1, 1, 0, "test.pqi")
         assert result.code == 0
         mock_lib.RM_RunFile.assert_called_once_with(1, 1, 1, 0, b"test.pqi")
 
@@ -514,7 +514,7 @@ class TestPhreeqcRMRunMethods:
         phr.create()
 
         input_string = "SOLUTION 1\npH 7\nEND"
-        result = phr.RM_RunString(0, 1, 0, input_string)
+        result = phr.rm_run_string(0, 1, 0, input_string)
         assert result.code == 0
         mock_lib.RM_RunString.assert_called_once_with(1, 0, 1, 0, input_string.encode())
 
@@ -529,7 +529,7 @@ class TestPhreeqcRMRunMethods:
         phr = mibiremo.PhreeqcRM()
         phr.create()
 
-        result = phr.RM_LoadDatabase("phreeqc.dat")
+        result = phr.rm_load_database("phreeqc.dat")
         assert result.code == 0
         mock_lib.RM_LoadDatabase.assert_called_once_with(1, b"phreeqc.dat")
 
@@ -567,12 +567,12 @@ class TestPhreeqcRMFileOperations:
         phr.create()
 
         # Test opening files
-        result = phr.RM_OpenFiles()
+        result = phr.rm_open_files()
         assert result.code == 0
         mock_lib.RM_OpenFiles.assert_called_once_with(1)
 
         # Test closing files
-        result = phr.RM_CloseFiles()
+        result = phr.rm_close_files()
         assert result.code == 0
         mock_lib.RM_CloseFiles.assert_called_once_with(1)
 
@@ -591,7 +591,7 @@ class TestPhreeqcRMCleanup:
         phr = mibiremo.PhreeqcRM()
         phr.create()
 
-        result = phr.RM_Destroy()
+        result = phr.rm_destroy()
         assert result.code == 0
         mock_lib.RM_Destroy.assert_called_once_with(1)
 
@@ -617,26 +617,26 @@ class TestPhreeqcRMAdditionalMethods:
         phr.create()
 
         # Test error methods
-        result = phr.RM_Abort(1, "Test abort")
+        result = phr.rm_abort(1, "Test abort")
         assert result.code == 0
 
-        result = phr.RM_ErrorMessage("Test error")
+        result = phr.rm_error_message("Test error")
         assert result.code == 0
 
-        error_msg = phr.RM_DecodeError(1)
+        error_msg = phr.rm_decode_error(1)
         assert error_msg == "Test error message"
 
         # Test message methods (these return raw integers)
-        result = phr.RM_LogMessage("Test log message")
+        result = phr.rm_log_message("Test log message")
         assert result == 0
 
-        result = phr.RM_ScreenMessage("Test screen message")
+        result = phr.rm_screen_message("Test screen message")
         assert result == 0
 
-        result = phr.RM_OutputMessage("Test output message")
+        result = phr.rm_output_message("Test output message")
         assert result == 0
 
-        result = phr.RM_WarningMessage("Test warning")
+        result = phr.rm_warning_message("Test warning")
         assert result == 0
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
@@ -656,16 +656,16 @@ class TestPhreeqcRMAdditionalMethods:
 
         # Test utility methods
         conc = np.array([1.0, 2.0, 3.0])
-        result = phr.RM_Concentrations2Utility(conc, 0, 25.0, 1.0)
+        result = phr.rm_concentrations2utility(conc, 0, 25.0, 1.0)
         assert result.code == 0
 
         # Test mapping methods
         grid2chem = np.array([0, 1, 2, 3, 4])
-        result = phr.RM_CreateMapping(grid2chem)
+        result = phr.rm_create_mapping(grid2chem)
         assert result.code == 0
 
         mapping_list = np.zeros(10, dtype=int)
-        result = phr.RM_GetBackwardMapping(0, mapping_list, 10)
+        result = phr.rm_get_backward_mapping(0, mapping_list, 10)
         assert result.code == 0
 
         # Test initial phreeqc methods (these return raw integers)
@@ -674,12 +674,12 @@ class TestPhreeqcRMAdditionalMethods:
         boundary_sol2 = np.array([4, 5, 6])
         fraction1 = np.array([0.5, 0.6, 0.7])
 
-        result = phr.RM_InitialPhreeqc2Concentrations(conc_array, 3, boundary_sol1, boundary_sol2, fraction1)
+        result = phr.rm_initial_phreeqc2_concentrations(conc_array, 3, boundary_sol1, boundary_sol2, fraction1)
         assert result == 0  # Raw integer return
 
         species_conc = np.zeros(50)  # 5 cells * 10 species
         n_boundary = np.array([3])
-        result = phr.RM_InitialPhreeqc2SpeciesConcentrations(
+        result = phr.rm_initial_phreeqc2_species_concentrations(
             species_conc, n_boundary, boundary_sol1, boundary_sol2, fraction1
         )
         assert result == 0  # Raw integer return
@@ -700,22 +700,22 @@ class TestPhreeqcRMAdditionalMethods:
 
         # Test species diffusion coefficients
         species_d25 = np.zeros(10)  # 10 species
-        result = phr.RM_GetSpeciesD25(species_d25)
+        result = phr.rm_get_species_d25(species_d25)
         assert result.code == 0
 
         # Test species activity coefficients
         species_gammas = np.zeros(30)  # 3 cells * 10 species
-        result = phr.RM_GetSpeciesLog10Gammas(species_gammas)
+        result = phr.rm_get_species_log10_gammas(species_gammas)
         assert result.code == 0
 
         # Test species charges
         species_z = np.zeros(10)
-        result = phr.RM_GetSpeciesZ(species_z)
+        result = phr.rm_get_species_z(species_z)
         assert result.code == 0
 
         # Test species concentrations to module transfer
         species_conc = np.ones(30)  # 3 cells * 10 species
-        result = phr.RM_SpeciesConcentrations2Module(species_conc)
+        result = phr.rm_species_concentrations2_module(species_conc)
         assert result == 0  # This returns raw integer
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
@@ -738,31 +738,31 @@ class TestPhreeqcRMAdditionalMethods:
 
         # Test array setters (these return raw integers, not irm_result)
         density = np.full(5, 1.0)
-        result = phr.RM_SetDensity(density)
+        result = phr.rm_set_density(density)
         assert result == 0  # Direct return value check
 
         pressure = np.full(5, 1.0)
-        result = phr.RM_SetPressure(pressure)
+        result = phr.rm_set_pressure(pressure)
         assert result == 0
 
         temperature = np.full(5, 25.0)
-        result = phr.RM_SetTemperature(temperature)
+        result = phr.rm_set_temperature(temperature)
         assert result == 0
 
         # Test scalar setters (these return raw integers, not irm_result)
-        result = phr.RM_SetTimeConversion(86400.0)  # seconds to days
+        result = phr.rm_set_time_conversion(86400.0)  # seconds to days
         assert result == 0
 
-        result = phr.RM_UseSolutionDensityVolume(1)
+        result = phr.rm_use_solution_density_volume(1)
         assert result == 0
 
-        result = phr.RM_SetCurrentSelectedOutputUserNumber(1)
+        result = phr.rm_set_current_selected_output_user_number(1)
         assert result == 0
 
-        result = phr.RM_SetScreenOn(1)
+        result = phr.rm_set_screen_on(1)
         assert result == 0
 
-        result = phr.RM_SetSelectedOutputOn(1)
+        result = phr.rm_set_selected_output_on(1)
         assert result == 0
 
     @patch("mibiremo.phreeqc.ctypes.CDLL")
@@ -787,14 +787,14 @@ class TestPhreeqcRMAdditionalMethods:
         phr.create()
 
         # Test getter methods
-        assert phr.RM_GetExchangeSpeciesCount() == 5
-        assert phr.RM_GetGasComponentsCount() == 3
-        assert phr.RM_GetKineticReactionsCount() == 2
-        assert phr.RM_GetMpiMyself() == 0
-        assert phr.RM_GetMpiTasks() == 1
-        assert phr.RM_GetNthSelectedOutputUserNumber(0) == 1
-        assert phr.RM_GetSelectedOutputCount() == 1
-        assert phr.RM_GetSICount() == 4
-        assert phr.RM_GetSolidSolutionComponentsCount() == 2
-        assert phr.RM_GetTimeConversion() == 86400.0
-        assert phr.RM_GetErrorStringLength() == 50
+        assert phr.rm_get_exchange_species_count() == 5
+        assert phr.rm_get_gas_components_count() == 3
+        assert phr.rm_get_kinetic_reactions_count() == 2
+        assert phr.rm_get_mpi_myself() == 0
+        assert phr.rm_get_mpi_tasks() == 1
+        assert phr.rm_get_nth_selected_output_user_number(0) == 1
+        assert phr.rm_get_selected_output_count() == 1
+        assert phr.rm_get_si_count() == 4
+        assert phr.rm_get_solid_solution_components_count() == 2
+        assert phr.rm_get_time_conversion() == 86400.0
+        assert phr.rm_get_error_string_length() == 50

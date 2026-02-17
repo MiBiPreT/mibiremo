@@ -52,8 +52,8 @@ n_species = len(species)  # Number of species
 # Initialize concentration vectors
 cc = np.zeros(n_cells * n_comps, dtype=np.float64)
 cs = np.zeros(n_cells * n_species, dtype=np.float64)
-phr.RM_GetConcentrations(cc)
-phr.RM_GetSpeciesConcentrations(cs)
+phr.rm_get_concentrations(cc)
+phr.rm_get_species_concentrations(cs)
 
 # Set HCl concentrations
 hcl = np.linspace(hcl_range[0], hcl_range[1], n_cells)  # mol/L
@@ -69,12 +69,12 @@ cs_r[:, indx_h] += hcl  # H+
 cs1 = cs_r.T.reshape(n_cells * n_species)
 
 # Run simulation with added HCl
-phr.RM_SpeciesConcentrations2Module(cs1)
-phr.RM_SetTime(1.0)
-phr.RM_SetTimeStep(1.0)
+phr.rm_species_concentrations2_module(cs1)
+phr.rm_set_time(1.0)
+phr.rm_set_time_step(1.0)
 
 start_time = time.time()
-phr.RM_RunCells()
+phr.rm_run_cells()
 elapsed = time.time() - start_time
 print(f"Simulation completed in {elapsed:.2f} seconds")
 

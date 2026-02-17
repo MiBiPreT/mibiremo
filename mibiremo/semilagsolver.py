@@ -58,7 +58,7 @@ class SemiLagSolver:
         x (numpy.ndarray): Spatial coordinate array (uniform spacing required).
         C (numpy.ndarray): Current concentration field at grid points.
         v (float): Advection velocity in consistent units with spatial coordinates.
-        D (float): Diffusion coefficient in consistent units (L²/T).
+        d (float): Diffusion coefficient in consistent units (L²/T).
         dt (float): Time step for numerical integration in consistent time units.
         dx (float): Spatial grid spacing (automatically calculated from x).
 
@@ -67,7 +67,7 @@ class SemiLagSolver:
         work correctly. Non-uniform grids are not supported in this implementation.
     """
 
-    def __init__(self, x, C_init, v, D, dt):
+    def __init__(self, x, c_init, v, d, dt):
         """Initialize the Semi-Lagrangian solver with transport parameters.
 
         Sets up the numerical solver with spatial discretization, initial conditions,
@@ -78,13 +78,13 @@ class SemiLagSolver:
             x (numpy.ndarray): Spatial coordinate array defining the 1D computational
                 domain. Must be uniformly spaced with at least 2 points. Units should
                 be consistent with velocity and diffusion coefficient.
-            C_init (numpy.ndarray): Initial concentration field at each grid point.
+            c_init (numpy.ndarray): Initial concentration field at each grid point.
                 Length must match the spatial coordinate array. Units are user-defined
                 but should be consistent throughout the simulation.
             v (float): Advection velocity (positive for left-to-right flow).
                 Units must be consistent with spatial coordinates and time step
                 (e.g., if x is in meters and dt in days, v should be in m/day).
-            D (float): Diffusion/dispersion coefficient (must be non-negative).
+            d (float): Diffusion/dispersion coefficient (must be non-negative).
                 Units must be L²/T where L and T are consistent with spatial
                 coordinates and time step (e.g., m²/day).
             dt (float): Time step for numerical integration (must be positive).
@@ -99,18 +99,18 @@ class SemiLagSolver:
         Examples:
             >>> x = np.linspace(0, 5, 51)      # 5 m domain, 0.1 m spacing
             >>> C0 = np.exp(-x**2)             # Gaussian initial condition
-            >>> solver = SemiLagSolver(x, C0, v=0.5, D=0.05, dt=0.01)
+            >>> solver = SemiLagSolver(x, C0, v=0.5, d=0.05, dt=0.01)
         """
-        if len(x) != len(C_init):
-            raise ValueError(f"Length of x ({len(x)}) must match length of C_init ({len(C_init)})")
+        if len(x) != len(c_init):
+            raise ValueError(f"Length of x ({len(x)}) must match length of c_init ({len(c_init)})")
 
         if len(x) < 2:
             raise ValueError(f"Grid must have at least 2 points, got {len(x)}")
 
         self.x = x
-        self.C = C_init
+        self.C = c_init
         self.v = v
-        self.D = D
+        self.d = d
         self.dt = dt
         self.dx = x[1] - x[0]
 
@@ -191,37 +191,37 @@ class SemiLagSolver:
             methods while maintaining computational efficiency.
         """
         dt = self.dt
-        theta = self.D * dt / (self.dx**2)
+        theta = self.d * dt / (self.dx**2)
 
         # Assign current C state as initial condition
-        C_init = self.C.copy()
-        CLR = self.C.copy()
-        CRL = self.C.copy()
+        c_init = self.C.copy()
+        clr = self.C.copy()
+        crl = self.C.copy()
 
         # A) L-R direction
-        for i in range(len(CLR)):
+        for i in range(len(clr)):
             if i == 0:  # left boundary
-                solA = theta * c_bound
+                sola = theta * c_bound
             else:
-                solA = theta * CLR[i - 1]
-            solB = (1 - theta) * C_init[i]
-            solC = theta * C_init[i + 1] if i < len(CLR) - 1 else theta * C_init[i]
+                sola = theta * clr[i - 1]
+            solb = (1 - theta) * c_init[i]
+            solc = theta * c_init[i + 1] if i < len(clr) - 1 else theta * c_init[i]
             # L-R Solution
-            CLR[i] = (solA + solB + solC) / (1 + theta)
+            clr[i] = (sola + solb + solc) / (1 + theta)
 
         # B) R-L direction
-        for i in range(len(CRL) - 1, -1, -1):
-            if i == len(CRL) - 1:  # right boundary (take from LR solution)
-                solA = theta * CLR[-1]
+        for i in range(len(crl) - 1, -1, -1):
+            if i == len(crl) - 1:  # right boundary (take from LR solution)
+                sola = theta * clr[-1]
             else:
-                solA = theta * CRL[i + 1]
-            solB = (1 - theta) * C_init[i]
-            solC = theta * C_init[i - 1] if i > 0 else theta * C_init[i]
+                sola = theta * crl[i + 1]
+            solb = (1 - theta) * c_init[i]
+            solc = theta * c_init[i - 1] if i > 0 else theta * c_init[i]
             # R-L Solution
-            CRL[i] = (solA + solB + solC) / (1 + theta)
+            crl[i] = (sola + solb + solc) / (1 + theta)
 
         # Average L-R and R-L solutions and update to final state
-        self.C = (CLR + CRL) / 2
+        self.C = (clr + crl) / 2
 
     def transport(self, c_bound) -> np.ndarray:
         """Perform one complete transport time step with coupled advection-diffusion.
