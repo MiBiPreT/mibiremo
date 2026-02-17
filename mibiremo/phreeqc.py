@@ -11,23 +11,25 @@ PhreeqcRM enables:
 - Equilibrium and kinetic geochemical reactions in porous media
 - Parallel processing for computationally intensive reactive transport
 
-This interface provides a Python wrapper around the PhreeqcRM C++ library,
+This interface provides a Python wrapper around the PhreeqcRM C library,
 simplifying the process of integrating geochemical calculations with transport models.
 
-All RM_* methods in this class correspond directly to PhreeqcRM C++ functions.
+All rm_* methods in this class correspond directly to PhreeqcRM C functions, converted to
+lowercase Python naming convention with underscores (e.g., RM_LoadDatabase -> rm_load_database).
+
 PhreeqcRM documentation and source code can be found at:
 
 - [PhreeqcRM Documentation](https://usgs-coupled.github.io/phreeqcrm/namespacephreeqcrm.html)
 - [PhreeqcRM GitHub Repository](https://github.com/usgs-coupled/phreeqcrm)
 
-Last revision: 26/09/2025
+Last revision: 17/02/2026
 """
 
 import ctypes
 import os
 import numpy as np
 import pandas as pd
-from .irmresult import irm_result
+from .irmresult import irm_result, IRMStatus
 
 
 class PhreeqcRM:
@@ -315,7 +317,7 @@ class PhreeqcRM:
         return pd.DataFrame(so.reshape(ncolsel, self.nxyz).T, columns=selout_h)
 
     ### PhreeqcRM functions
-    def rm_abort(self, result, err_str):
+    def rm_abort(self, result, err_str) -> IRMStatus:
         """Abort the PhreeqcRM run.
 
         Args:
@@ -327,7 +329,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_Abort(self.id, result, err_str))
 
-    def rm_close_files(self):
+    def rm_close_files(self) -> IRMStatus:
         """Close output files opened by RM_OpenFiles.
 
         Closes all output files that were opened by RM_OpenFiles, including
@@ -346,7 +348,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_CloseFiles(self.id))
 
-    def rm_concentrations2utility(self, c, n, tc, p_atm):
+    def rm_concentrations2utility(self, c, n, tc, p_atm) -> IRMStatus:
         """Transfer concentrations from a cell to the utility IPhreeqc instance.
 
         Transfers solution concentrations from a reaction cell to the utility
@@ -364,7 +366,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_Concentrations2Utility(self.id, c, n, tc, p_atm))
 
-    def rm_create_mapping(self, grid2chem):
+    def rm_create_mapping(self, grid2chem) -> IRMStatus:
         """Create a mapping from grid cells to reaction cells.
 
         Establishes the relationship between transport grid cells and reaction
@@ -387,7 +389,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_CreateMapping(self.id, grid2chem.ctypes))
 
-    def rm_decode_error(self, e):
+    def rm_decode_error(self, e) -> str:
         """Decode error code to human-readable message.
 
         Converts a numeric error code returned by PhreeqcRM functions into
@@ -407,7 +409,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_DecodeError(self.id, e)
 
-    def rm_destroy(self):
+    def rm_destroy(self) -> IRMStatus:
         """Destroy a PhreeqcRM instance and free all associated memory.
 
         Deallocates all memory associated with the PhreeqcRM instance, including
@@ -430,7 +432,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_Destroy(self.id))
 
-    def rm_dump_module(self, dump_on, append):
+    def rm_dump_module(self, dump_on, append) -> IRMStatus:
         """Enable or disable dumping of reaction module data to file.
         Controls the output of detailed reaction module data to a dump file
         for debugging and analysis purposes. The dump file contains complete
@@ -449,7 +451,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_DumpModule(self.id, dump_on, append))
 
-    def rm_error_message(self, errstr):
+    def rm_error_message(self, errstr) -> IRMStatus:
         """Print an error message to the error output file.
 
         Writes an error message to the PhreeqcRM error log file. The message
@@ -467,7 +469,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_ErrorMessage(self.id, errstr))
 
-    def rm_find_components(self):
+    def rm_find_components(self) -> int:
         """Find and count components for transport calculations.
 
         Analyzes all chemical definitions in the reaction module to determine
@@ -497,7 +499,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_FindComponents(self.id)
 
-    def rm_get_backward_mapping(self, n, list, size):
+    def rm_get_backward_mapping(self, n, list, size) -> IRMStatus:
         """Get backward mapping from reaction cells to grid cells.
 
         Retrieves the list of grid cell numbers that map to a specific
@@ -516,7 +518,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetBackwardMapping(self.id, n, list, size))
 
-    def rm_get_chemistry_cell_count(self):
+    def rm_get_chemistry_cell_count(self) -> int:
         """Get the number of reaction cells in the module.
 
         Returns the number of reaction cells currently defined in the
@@ -534,7 +536,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetChemistryCellCount(self.id)
 
-    def rm_get_component(self, num, chem_name, length):
+    def rm_get_component(self, num, chem_name, length) -> IRMStatus:
         """Get the name of a component by index.
 
         Retrieves the name of a transport component identified by its index.
@@ -559,7 +561,7 @@ class PhreeqcRM:
         chem_name[num] = string.value.decode()
         return irm_result(status)
 
-    def rm_get_concentrations(self, c):
+    def rm_get_concentrations(self, c) -> IRMStatus:
         """Retrieve component concentrations from reaction cells.
 
         Extracts current component concentrations from all reaction cells
@@ -590,7 +592,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetConcentrations(self.id, c.ctypes))
 
-    def rm_get_density(self, density):
+    def rm_get_density(self, density) -> IRMStatus:
         """Get solution density for all reaction cells.
 
         Retrieves the calculated solution density for each reaction cell
@@ -611,7 +613,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetDensity(self.id, density.ctypes))
 
-    def rm_get_end_cell(self, ec):
+    def rm_get_end_cell(self, ec) -> IRMStatus:
         """Get the ending cell number for the current MPI process.
 
         In parallel (MPI) calculations, each process handles a subset of
@@ -631,7 +633,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetEndCell(self.id, ec))
 
-    def rm_get_equilibrium_phase_count(self):
+    def rm_get_equilibrium_phase_count(self) -> int:
         """Get the number of equilibrium phases defined in the system.
 
         Returns the count of mineral phases that can potentially precipitate
@@ -648,7 +650,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetEquilibriumPhaseCount(self.id)
 
-    def rm_get_equilibrium_phase_name(self, num, name, l1):
+    def rm_get_equilibrium_phase_name(self, num, name, l1) -> IRMStatus:
         """Get the name of an equilibrium phase by index.
 
         Retrieves the name of a mineral phase that can precipitate or dissolve
@@ -664,7 +666,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetEquilibriumPhaseName(self.id, num, name, l1))
 
-    def rm_get_error_string(self, errstr, length):
+    def rm_get_error_string(self, errstr, length) -> IRMStatus:
         """Get the current error string from PhreeqcRM.
 
         Retrieves the most recent error message generated by PhreeqcRM
@@ -680,7 +682,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetErrorString(self.id, errstr, length))
 
-    def rm_get_error_string_length(self):
+    def rm_get_error_string_length(self) -> int:
         """Get the length of the current error string.
 
         Returns the length of the error message string that can be retrieved
@@ -710,7 +712,7 @@ class PhreeqcRM:
     def rm_get_gas_components_name(self, nun, name, l1):
         return self.libc.RM_GetGasComponentsName(self.id, nun, name, l1)
 
-    def rm_get_gfw(self, gfw):
+    def rm_get_gfw(self, gfw) -> IRMStatus:
         """Get gram formula weights for transport components.
 
         Retrieves the gram formula weights (molecular weights) for all
@@ -730,7 +732,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetGfw(self.id, gfw.ctypes))
 
-    def rm_get_grid_cell_count(self):
+    def rm_get_grid_cell_count(self) -> int:
         """Get the number of grid cells in the model.
 
         Returns the total number of grid cells defined for the transport
@@ -765,7 +767,7 @@ class PhreeqcRM:
     def rm_get_nth_selected_output_user_number(self, n):
         return self.libc.RM_GetNthSelectedOutputUserNumber(self.id, n)
 
-    def rm_get_saturation(self, sat_calc):
+    def rm_get_saturation(self, sat_calc) -> IRMStatus:
         """Get saturation values for all reaction cells.
 
         Retrieves the current saturation values for all reaction cells.
@@ -782,7 +784,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSaturation(self.id, sat_calc.ctypes))
 
-    def rm_get_selected_output(self, so):
+    def rm_get_selected_output(self, so) -> IRMStatus:
         """Retrieve selected output data from all reaction cells.
 
         Extracts the current selected output data, which includes calculated
@@ -818,7 +820,7 @@ class PhreeqcRM:
         headings[col] = string.value.decode()
         return irm_result(status)
 
-    def rm_get_selected_output_column_count(self):
+    def rm_get_selected_output_column_count(self) -> int:
         """Get number of columns in selected output.
 
         Returns:
@@ -826,7 +828,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSelectedOutputColumnCount(self.id)
 
-    def rm_get_selected_output_row_count(self):
+    def rm_get_selected_output_row_count(self) -> int:
         """Get number of rows in selected output.
 
         Returns:
@@ -852,7 +854,7 @@ class PhreeqcRM:
     def rm_get_solution_volume(self, vol):
         return self.libc.RM_GetSolutionVolume(self.id, vol.ctypes)
 
-    def rm_get_species_concentrations(self, species_conc):
+    def rm_get_species_concentrations(self, species_conc) -> IRMStatus:
         """Retrieve aqueous species concentrations from reaction cells.
 
         Extracts the concentrations of individual aqueous species from all
@@ -881,7 +883,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSpeciesConcentrations(self.id, species_conc.ctypes))
 
-    def rm_get_species_count(self):
+    def rm_get_species_count(self) -> int:
         """Get the number of aqueous species in the geochemical system.
 
         Returns the total number of dissolved aqueous species that can exist
@@ -908,7 +910,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSpeciesCount(self.id)
 
-    def rm_get_species_d25(self, diffc):
+    def rm_get_species_d25(self, diffc) -> IRMStatus:
         """Get diffusion coefficients at 25°C for all aqueous species.
 
         Retrieves the reference diffusion coefficients (at 25°C in water)
@@ -929,7 +931,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSpeciesD25(self.id, diffc.ctypes))
 
-    def rm_get_species_log10_gammas(self, species_log10gammas):
+    def rm_get_species_log10_gammas(self, species_log10gammas) -> IRMStatus:
         """Get log10 activity coefficients for all aqueous species.
 
         Retrieves the base-10 logarithm of activity coefficients for all
@@ -951,7 +953,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSpeciesLog10Gammas(self.id, species_log10gammas.ctypes))
 
-    def rm_get_species_name(self, num, chem_name, length):
+    def rm_get_species_name(self, num, chem_name, length) -> IRMStatus:
         """Get the name of an aqueous species by index.
 
         Retrieves the name of an aqueous species identified by its index.
@@ -979,7 +981,7 @@ class PhreeqcRM:
         chem_name[num] = string.value.decode()
         return irm_result(status)
 
-    def rm_get_species_save_on(self):
+    def rm_get_species_save_on(self) -> int:
         """Check if species concentration saving is enabled.
 
         Returns the current setting for species concentration saving. When
@@ -996,7 +998,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSpeciesSaveOn(self.id)
 
-    def rm_get_species_z(self, z):
+    def rm_get_species_z(self, z) -> IRMStatus:
         """Get charge values for all aqueous species.
 
         Retrieves the electric charge (valence) for each aqueous species
@@ -1030,7 +1032,7 @@ class PhreeqcRM:
     def rm_get_thread_count(self):
         return self.libc.RM_GetThreadCount(self.id)
 
-    def rm_get_time(self):
+    def rm_get_time(self) -> float:
         """Get the current simulation time.
 
         Returns the current time in the reactive transport simulation.
@@ -1053,11 +1055,11 @@ class PhreeqcRM:
         self.libc.RM_GetTime.restype = ctypes.c_double
         return self.libc.RM_GetTime(self.id)
 
-    def rm_get_time_conversion(self):
+    def rm_get_time_conversion(self) -> float:
         self.libc.RM_GetTimeConversion.restype = ctypes.c_double
         return self.libc.RM_GetTimeConversion(self.id)
 
-    def rm_get_time_step(self):
+    def rm_get_time_step(self) -> float:
         """Get the current time step duration.
 
         Returns the duration of the current time step used for kinetic
@@ -1079,7 +1081,7 @@ class PhreeqcRM:
         self.libc.RM_GetTimeStep.restype = ctypes.c_double
         return self.libc.RM_GetTimeStep(self.id)
 
-    def rm_initial_phreeqc2_module(self, ic1, ic2, f1):
+    def rm_initial_phreeqc2_module(self, ic1, ic2, f1) -> IRMStatus:
         """Transfer initial conditions from InitialPhreeqc to reaction module.
 
         Args:
@@ -1088,7 +1090,7 @@ class PhreeqcRM:
             f1 (numpy.ndarray): Mixing fractions for primary entities.
 
         Returns:
-            int: irm_result status code (0 for success).
+            IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
         return irm_result(self.libc.RM_InitialPhreeqc2Module(self.id, ic1.ctypes, ic2.ctypes, f1.ctypes))
 
@@ -1112,7 +1114,7 @@ class PhreeqcRM:
     def rm_initial_phreeqc_cell2_module(self, n, module_numbers, dim_module_numbers):
         return self.libc.RM_InitialPhreeqcCell2Module(self.id, n, module_numbers, dim_module_numbers)
 
-    def rm_load_database(self, db_name):
+    def rm_load_database(self, db_name) -> IRMStatus:
         """Load a thermodynamic database for geochemical calculations.
 
         Loads a PHREEQC-format thermodynamic database containing thermodynamic
@@ -1155,7 +1157,7 @@ class PhreeqcRM:
     def rm_mpi_worker_break(self):
         return self.libc.RM_MpiWorkerBreak(self.id)
 
-    def rm_open_files(self):
+    def rm_open_files(self) -> IRMStatus:
         """Open output files for logging, debugging, and error reporting.
 
         Creates and opens output files for PhreeqcRM logging, error messages,
@@ -1185,7 +1187,7 @@ class PhreeqcRM:
     def rm_output_message(self, str):
         return self.libc.RM_OutputMessage(self.id, str.encode())
 
-    def rm_run_cells(self):
+    def rm_run_cells(self) -> IRMStatus:
         """Run geochemical reactions for all reaction cells.
 
         Performs equilibrium speciation and kinetic reactions for the current
@@ -1223,7 +1225,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_RunCells(self.id))
 
-    def rm_run_file(self, workers, initial_phreeqc, utility, chem_name):
+    def rm_run_file(self, workers, initial_phreeqc, utility, chem_name) -> IRMStatus:
         """Run a PHREEQC input file in specified PhreeqcRM instances.
 
         Executes a PHREEQC input file (.pqi format) in one or more PhreeqcRM
@@ -1257,7 +1259,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_RunFile(self.id, workers, initial_phreeqc, utility, chem_name.encode()))
 
-    def rm_run_string(self, workers, initial_phreeqc, utility, input_string):
+    def rm_run_string(self, workers, initial_phreeqc, utility, input_string) -> IRMStatus:
         """Run PHREEQC input from a string in specified instances.
 
         Executes PHREEQC input commands provided as a string in one or more
@@ -1289,7 +1291,7 @@ class PhreeqcRM:
     def rm_screen_message(self, str):
         return self.libc.RM_ScreenMessage(self.id, str.encode())
 
-    def rm_set_component_h2o(self, tf):
+    def rm_set_component_h2o(self, tf) -> IRMStatus:
         """Set whether to include H2O as a transport component.
 
         Controls whether water (H2O) is included in the list of components
@@ -1316,7 +1318,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetComponentH2O(self.id, tf))
 
-    def rm_set_concentrations(self, c):
+    def rm_set_concentrations(self, c) -> IRMStatus:
         """Set component concentrations for all reaction cells.
 
         Transfers concentration data from the transport model to the reaction
@@ -1360,14 +1362,14 @@ class PhreeqcRM:
     def rm_set_error_handler_mode(self, mode):
         return self.libc.RM_SetErrorHandlerMode(self.id, mode)
 
-    def rm_set_file_prefix(self, prefix):
+    def rm_set_file_prefix(self, prefix) -> IRMStatus:
         """Set prefix for output files.
 
         Args:
             prefix (str): Prefix string for output file names.
 
         Returns:
-            int: irm_result status code (0 for success).
+            IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
         return irm_result(self.libc.RM_SetFilePrefix(self.id, prefix.encode()))
 
@@ -1377,7 +1379,7 @@ class PhreeqcRM:
     def rm_set_partition_uz_solids(self, tf):
         return self.libc.RM_SetPartitionUZSolids(self.id, tf)
 
-    def rm_set_porosity(self, por):
+    def rm_set_porosity(self, por) -> IRMStatus:
         """Set porosity values for all grid cells.
 
         Defines the porosity (void fraction) for each grid cell, which
@@ -1419,21 +1421,21 @@ class PhreeqcRM:
     def rm_set_rebalance_by_cell(self, method):
         return self.libc.RM_SetRebalanceByCell(self.id, method)
 
-    def rm_set_rebalance_fraction(self, f):
+    def rm_set_rebalance_fraction(self, f) -> IRMStatus:
         """Set load balancing algorithm fraction.
 
         Args:
             f (float): Fraction for load balancing (typically 0.5).
 
         Returns:
-            int: irm_result status code (0 for success).
+            IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
         return irm_result(self.libc.RM_SetRebalanceFraction(self.id, ctypes.c_double(f)))
 
     def rm_set_representative_volume(self, rv):
         return self.libc.RM_SetRepresentativeVolume(self.id, rv.ctypes)
 
-    def rm_set_saturation(self, sat):
+    def rm_set_saturation(self, sat) -> IRMStatus:
         """Set water saturation values for all grid cells.
 
         Defines the water saturation for each grid cell, representing the
@@ -1474,7 +1476,7 @@ class PhreeqcRM:
     def rm_set_selected_output_on(self, selected_output):
         return self.libc.RM_SetSelectedOutputOn(self.id, selected_output)
 
-    def rm_set_species_save_on(self, save_on):
+    def rm_set_species_save_on(self, save_on) -> IRMStatus:
         """Enable or disable saving of aqueous species concentrations.
 
         Controls whether PhreeqcRM calculates and stores individual aqueous
@@ -1508,7 +1510,7 @@ class PhreeqcRM:
     def rm_set_temperature(self, t):
         return self.libc.RM_SetTemperature(self.id, t.ctypes)
 
-    def rm_set_time(self, time):
+    def rm_set_time(self, time) -> IRMStatus:
         """Set the current simulation time for geochemical calculations.
 
         Updates the simulation time used by PhreeqcRM for kinetic rate
@@ -1540,7 +1542,7 @@ class PhreeqcRM:
     def rm_set_time_conversion(self, conv_factor):
         return self.libc.RM_SetTimeConversion(self.id, ctypes.c_double(conv_factor))
 
-    def rm_set_time_step(self, time_step):
+    def rm_set_time_step(self, time_step) -> IRMStatus:
         """Set the time step duration for kinetic calculations.
 
         Specifies the time interval over which kinetic reactions will be
@@ -1568,14 +1570,14 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetTimeStep(self.id, ctypes.c_double(time_step)))
 
-    def rm_set_units_exchange(self, option):
+    def rm_set_units_exchange(self, option) -> IRMStatus:
         """Set units for exchange reactions.
 
         Args:
             option (int): Units option for exchange calculations.
 
         Returns:
-            int: irm_result status code (0 for success).
+            IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
         return irm_result(self.libc.RM_SetUnitsExchange(self.id, option))
 
@@ -1588,7 +1590,7 @@ class PhreeqcRM:
     def rm_set_units_p_passemblage(self, option):
         return self.libc.RM_SetUnitsPPassemblage(self.id, option)
 
-    def rm_set_units_solution(self, option):
+    def rm_set_units_solution(self, option) -> IRMStatus:
         """Set concentration units for aqueous solutions.
 
         Specifies the units for solution concentrations used in all
@@ -1622,14 +1624,14 @@ class PhreeqcRM:
     def rm_set_units_ss_assemblage(self, option):
         return self.libc.RM_SetUnitsSSassemblage(self.id, option)
 
-    def rm_set_units_surface(self, option):
+    def rm_set_units_surface(self, option) -> IRMStatus:
         """Set units for surface complexation reactions.
 
         Args:
             option (int): Units option for surface calculations.
 
         Returns:
-            int: irm_result status code (0 for success).
+            IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
         return irm_result(self.libc.RM_SetUnitsSurface(self.id, option))
 
@@ -1642,7 +1644,7 @@ class PhreeqcRM:
     def rm_warning_message(self, warn_str):
         return self.libc.RM_WarningMessage(self.id, warn_str)
 
-    def rm_get_component_count(self):
+    def rm_get_component_count(self) -> int:
         """Get the number of transport components in the system.
 
         Returns the number of chemical components (elements plus charge balance)
