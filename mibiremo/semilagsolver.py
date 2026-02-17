@@ -1,7 +1,7 @@
 """Semi-Lagrangian solver for 1D advection-diffusion equation on a uniform grid.
 
 Author: Matteo Masi
-Last revision: 09/09/2024
+Last revision: 17/02/2026
 
 """
 
