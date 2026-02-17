@@ -1,11 +1,9 @@
 # MiBiReMo - Examples
 
-Currently, three examples are available. 
+Currently, three examples are available.
 To run the examples, navigate to the `examples` directory and run the desired example script:
 ```sh
-cd path/to/project_folder
-source mibiremo/bin/activate
-cd path/to/mibiremo_source/examples
+cd examples
 python ex1-titration.py
 ```
 
