@@ -736,7 +736,7 @@ class TestPhreeqcRMAdditionalMethods:
         phr = mibiremo.PhreeqcRM()
         phr.create(nxyz=5)
 
-        # Test array setters (these return raw integers, not IRM_RESULT)
+        # Test array setters (these return raw integers, not irm_result)
         density = np.full(5, 1.0)
         result = phr.RM_SetDensity(density)
         assert result == 0  # Direct return value check
@@ -749,7 +749,7 @@ class TestPhreeqcRMAdditionalMethods:
         result = phr.RM_SetTemperature(temperature)
         assert result == 0
 
-        # Test scalar setters (these return raw integers, not IRM_RESULT)
+        # Test scalar setters (these return raw integers, not irm_result)
         result = phr.RM_SetTimeConversion(86400.0)  # seconds to days
         assert result == 0
 
