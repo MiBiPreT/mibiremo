@@ -27,7 +27,7 @@ import ctypes
 import os
 import numpy as np
 import pandas as pd
-from .irmresult import IRM_RESULT
+from .irmresult import irm_result
 
 
 class PhreeqcRM:
@@ -325,7 +325,7 @@ class PhreeqcRM:
         Returns:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
-        return IRM_RESULT(self.libc.RM_Abort(self.id, result, err_str))
+        return irm_result(self.libc.RM_Abort(self.id, result, err_str))
 
     def RM_CloseFiles(self):
         """Close output files opened by RM_OpenFiles.
@@ -344,7 +344,7 @@ class PhreeqcRM:
             >>> if not result:
             >>>     print(f"Warning: {result}")
         """
-        return IRM_RESULT(self.libc.RM_CloseFiles(self.id))
+        return irm_result(self.libc.RM_CloseFiles(self.id))
 
     def RM_Concentrations2Utility(self, c, n, tc, p_atm):
         """Transfer concentrations from a cell to the utility IPhreeqc instance.
@@ -362,7 +362,7 @@ class PhreeqcRM:
         Returns:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
-        return IRM_RESULT(self.libc.RM_Concentrations2Utility(self.id, c, n, tc, p_atm))
+        return irm_result(self.libc.RM_Concentrations2Utility(self.id, c, n, tc, p_atm))
 
     def RM_CreateMapping(self, grid2chem):
         """Create a mapping from grid cells to reaction cells.
@@ -385,7 +385,7 @@ class PhreeqcRM:
             different from the number of grid cells, potentially reducing
             computational overhead.
         """
-        return IRM_RESULT(self.libc.RM_CreateMapping(self.id, grid2chem.ctypes))
+        return irm_result(self.libc.RM_CreateMapping(self.id, grid2chem.ctypes))
 
     def RM_DecodeError(self, e):
         """Decode error code to human-readable message.
@@ -428,7 +428,7 @@ class PhreeqcRM:
             >>> # ... use PhreeqcRM instance ...
             >>> rm.RM_Destroy()  # Clean up when finished
         """
-        return IRM_RESULT(self.libc.RM_Destroy(self.id))
+        return irm_result(self.libc.RM_Destroy(self.id))
 
     def RM_DumpModule(self, dump_on, append):
         """Enable or disable dumping of reaction module data to file.
@@ -447,7 +447,7 @@ class PhreeqcRM:
             The dump file name is set by RM_SetDumpFileName(). If no name
             is set, a default name will be used.
         """
-        return IRM_RESULT(self.libc.RM_DumpModule(self.id, dump_on, append))
+        return irm_result(self.libc.RM_DumpModule(self.id, dump_on, append))
 
     def RM_ErrorMessage(self, errstr):
         """Print an error message to the error output file.
@@ -465,7 +465,7 @@ class PhreeqcRM:
             Error logging must be enabled with RM_OpenFiles() for messages
             to be written to file.
         """
-        return IRM_RESULT(self.libc.RM_ErrorMessage(self.id, errstr))
+        return irm_result(self.libc.RM_ErrorMessage(self.id, errstr))
 
     def RM_FindComponents(self):
         """Find and count components for transport calculations.
@@ -514,7 +514,7 @@ class PhreeqcRM:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
                 The number of grid cells mapping to reaction cell n.
         """
-        return IRM_RESULT(self.libc.RM_GetBackwardMapping(self.id, n, list, size))
+        return irm_result(self.libc.RM_GetBackwardMapping(self.id, n, list, size))
 
     def RM_GetChemistryCellCount(self):
         """Get the number of reaction cells in the module.
@@ -557,7 +557,7 @@ class PhreeqcRM:
         String = ctypes.create_string_buffer(length)
         status = self.libc.RM_GetComponent(self.id, num, String, length)
         chem_name[num] = String.value.decode()
-        return IRM_RESULT(status)
+        return irm_result(status)
 
     def RM_GetConcentrations(self, c):
         """Retrieve component concentrations from reaction cells.
@@ -588,7 +588,7 @@ class PhreeqcRM:
             >>>     # Reshape to (nxyz, ncomp) for easier handling
             >>>     conc_2d = conc.reshape(nxyz, ncomp)
         """
-        return IRM_RESULT(self.libc.RM_GetConcentrations(self.id, c.ctypes))
+        return irm_result(self.libc.RM_GetConcentrations(self.id, c.ctypes))
 
     def RM_GetDensity(self, density):
         """Get solution density for all reaction cells.
@@ -609,7 +609,7 @@ class PhreeqcRM:
             the specific solution composition. This method should be called
             after RM_RunCells() to get current density values.
         """
-        return IRM_RESULT(self.libc.RM_GetDensity(self.id, density.ctypes))
+        return irm_result(self.libc.RM_GetDensity(self.id, density.ctypes))
 
     def RM_GetEndCell(self, ec):
         """Get the ending cell number for the current MPI process.
@@ -629,7 +629,7 @@ class PhreeqcRM:
             For MPI calculations, the range [start_cell, end_cell] defines
             the cells handled by the current process.
         """
-        return IRM_RESULT(self.libc.RM_GetEndCell(self.id, ec))
+        return irm_result(self.libc.RM_GetEndCell(self.id, ec))
 
     def RM_GetEquilibriumPhaseCount(self):
         """Get the number of equilibrium phases defined in the system.
@@ -662,7 +662,7 @@ class PhreeqcRM:
         Returns:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
-        return IRM_RESULT(self.libc.RM_GetEquilibriumPhaseName(self.id, num, name, l1))
+        return irm_result(self.libc.RM_GetEquilibriumPhaseName(self.id, num, name, l1))
 
     def RM_GetErrorString(self, errstr, length):
         """Get the current error string from PhreeqcRM.
@@ -678,7 +678,7 @@ class PhreeqcRM:
         Returns:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
-        return IRM_RESULT(self.libc.RM_GetErrorString(self.id, errstr, length))
+        return irm_result(self.libc.RM_GetErrorString(self.id, errstr, length))
 
     def RM_GetErrorStringLength(self):
         """Get the length of the current error string.
@@ -728,7 +728,7 @@ class PhreeqcRM:
             The gram formula weights correspond to the components identified
             by RM_FindComponents() and can be retrieved by RM_GetComponent().
         """
-        return IRM_RESULT(self.libc.RM_GetGfw(self.id, gfw.ctypes))
+        return irm_result(self.libc.RM_GetGfw(self.id, gfw.ctypes))
 
     def RM_GetGridCellCount(self):
         """Get the number of grid cells in the model.
@@ -780,7 +780,7 @@ class PhreeqcRM:
         Returns:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
         """
-        return IRM_RESULT(self.libc.RM_GetSaturation(self.id, sat_calc.ctypes))
+        return irm_result(self.libc.RM_GetSaturation(self.id, sat_calc.ctypes))
 
     def RM_GetSelectedOutput(self, so):
         """Retrieve selected output data from all reaction cells.
@@ -804,7 +804,7 @@ class PhreeqcRM:
             The get_selected_output_df() method provides a more convenient pandas
             DataFrame interface to this data.
         """
-        return IRM_RESULT(self.libc.RM_GetSelectedOutput(self.id, so.ctypes))
+        return irm_result(self.libc.RM_GetSelectedOutput(self.id, so.ctypes))
 
     def RM_GetNthSelectedOutputColumnCount(self):
         return self.libc.RM_GetNthSelectedOutputColumnCount(self.id)
@@ -816,7 +816,7 @@ class PhreeqcRM:
         String = ctypes.create_string_buffer(length)
         status = self.libc.RM_GetSelectedOutputHeading(self.id, col, String, length)
         headings[col] = String.value.decode()
-        return IRM_RESULT(status)
+        return irm_result(status)
 
     def RM_GetSelectedOutputColumnCount(self):
         """Get number of columns in selected output.
@@ -879,7 +879,7 @@ class PhreeqcRM:
             >>> species_c = np.zeros(nxyz * nspecies)
             >>> rm.RM_GetSpeciesConcentrations(species_c)
         """
-        return IRM_RESULT(self.libc.RM_GetSpeciesConcentrations(self.id, species_conc.ctypes))
+        return irm_result(self.libc.RM_GetSpeciesConcentrations(self.id, species_conc.ctypes))
 
     def RM_GetSpeciesCount(self):
         """Get the number of aqueous species in the geochemical system.
@@ -927,7 +927,7 @@ class PhreeqcRM:
             For transport at different temperatures, these values should be
             corrected using appropriate temperature relationships.
         """
-        return IRM_RESULT(self.libc.RM_GetSpeciesD25(self.id, diffc.ctypes))
+        return irm_result(self.libc.RM_GetSpeciesD25(self.id, diffc.ctypes))
 
     def RM_GetSpeciesLog10Gammas(self, species_log10gammas):
         """Get log10 activity coefficients for all aqueous species.
@@ -949,7 +949,7 @@ class PhreeqcRM:
             the activity model used in the thermodynamic database (e.g.,
             Debye-Hückel, Pitzer, SIT). Species saving must be enabled.
         """
-        return IRM_RESULT(self.libc.RM_GetSpeciesLog10Gammas(self.id, species_log10gammas.ctypes))
+        return irm_result(self.libc.RM_GetSpeciesLog10Gammas(self.id, species_log10gammas.ctypes))
 
     def RM_GetSpeciesName(self, num, chem_name, length):
         """Get the name of an aqueous species by index.
@@ -977,7 +977,7 @@ class PhreeqcRM:
         String = ctypes.create_string_buffer(length)
         status = self.libc.RM_GetSpeciesName(self.id, num, String, length)
         chem_name[num] = String.value.decode()
-        return IRM_RESULT(status)
+        return irm_result(status)
 
     def RM_GetSpeciesSaveOn(self):
         """Check if species concentration saving is enabled.
@@ -1016,7 +1016,7 @@ class PhreeqcRM:
             are used in activity coefficient calculations and electroneutrality
             constraints.
         """
-        return IRM_RESULT(self.libc.RM_GetSpeciesZ(self.id, Z.ctypes))
+        return irm_result(self.libc.RM_GetSpeciesZ(self.id, Z.ctypes))
 
     def RM_GetStartCell(self, sc):
         return self.libc.RM_GetStartCell(self.id, sc)
@@ -1088,9 +1088,9 @@ class PhreeqcRM:
             f1 (numpy.ndarray): Mixing fractions for primary entities.
 
         Returns:
-            int: IRM_RESULT status code (0 for success).
+            int: irm_result status code (0 for success).
         """
-        return IRM_RESULT(self.libc.RM_InitialPhreeqc2Module(self.id, ic1.ctypes, ic2.ctypes, f1.ctypes))
+        return irm_result(self.libc.RM_InitialPhreeqc2Module(self.id, ic1.ctypes, ic2.ctypes, f1.ctypes))
 
     def RM_InitialPhreeqc2Concentrations(self, c, n_boundary, boundary_solution1, boundary_solution2, fraction1):
         return self.libc.RM_InitialPhreeqc2Concentrations(
@@ -1144,7 +1144,7 @@ class PhreeqcRM:
             >>> if not result:
             >>>     raise RuntimeError(f"Failed to load database: {result}")
         """
-        return IRM_RESULT(self.libc.RM_LoadDatabase(self.id, db_name.encode()))
+        return irm_result(self.libc.RM_LoadDatabase(self.id, db_name.encode()))
 
     def RM_LogMessage(self, str):
         return self.libc.RM_LogMessage(self.id, str.encode())
@@ -1180,7 +1180,7 @@ class PhreeqcRM:
             >>> # ... run calculations ...
             >>> rm.RM_CloseFiles()  # Clean up
         """
-        return IRM_RESULT(self.libc.RM_OpenFiles(self.id))
+        return irm_result(self.libc.RM_OpenFiles(self.id))
 
     def RM_OutputMessage(self, str):
         return self.libc.RM_OutputMessage(self.id, str.encode())
@@ -1221,7 +1221,7 @@ class PhreeqcRM:
             >>> else:
             >>>     print(f"Reaction failed: {result}")
         """
-        return IRM_RESULT(self.libc.RM_RunCells(self.id))
+        return irm_result(self.libc.RM_RunCells(self.id))
 
     def RM_RunFile(self, workers, initial_phreeqc, utility, chem_name):
         """Run a PHREEQC input file in specified PhreeqcRM instances.
@@ -1255,7 +1255,7 @@ class PhreeqcRM:
             >>> if not result:
             >>>     print(f"Error running initial conditions file: {result}")
         """
-        return IRM_RESULT(self.libc.RM_RunFile(self.id, workers, initial_phreeqc, utility, chem_name.encode()))
+        return irm_result(self.libc.RM_RunFile(self.id, workers, initial_phreeqc, utility, chem_name.encode()))
 
     def RM_RunString(self, workers, initial_phreeqc, utility, input_string):
         """Run PHREEQC input from a string in specified instances.
@@ -1284,7 +1284,7 @@ class PhreeqcRM:
             >>> '''
             >>> rm.RM_RunString(0, 1, 0, phreeqc_input)
         """
-        return IRM_RESULT(self.libc.RM_RunString(self.id, workers, initial_phreeqc, utility, input_string.encode()))
+        return irm_result(self.libc.RM_RunString(self.id, workers, initial_phreeqc, utility, input_string.encode()))
 
     def RM_ScreenMessage(self, str):
         return self.libc.RM_ScreenMessage(self.id, str.encode())
@@ -1314,7 +1314,7 @@ class PhreeqcRM:
             >>> rm.RM_SetComponentH2O(0)  # Standard: don't transport H2O
             >>> ncomp = rm.RM_FindComponents()  # Get component count
         """
-        return IRM_RESULT(self.libc.RM_SetComponentH2O(self.id, tf))
+        return irm_result(self.libc.RM_SetComponentH2O(self.id, tf))
 
     def RM_SetConcentrations(self, c):
         """Set component concentrations for all reaction cells.
@@ -1346,7 +1346,7 @@ class PhreeqcRM:
             >>> if result:
             >>>     rm.RM_RunCells()  # Run geochemical reactions
         """
-        return IRM_RESULT(self.libc.RM_SetConcentrations(self.id, c.ctypes))
+        return irm_result(self.libc.RM_SetConcentrations(self.id, c.ctypes))
 
     def RM_SetCurrentSelectedOutputUserNumber(self, n_user):
         return self.libc.RM_SetCurrentSelectedOutputUserNumber(self.id, n_user)
@@ -1367,9 +1367,9 @@ class PhreeqcRM:
             prefix (str): Prefix string for output file names.
 
         Returns:
-            int: IRM_RESULT status code (0 for success).
+            int: irm_result status code (0 for success).
         """
-        return IRM_RESULT(self.libc.RM_SetFilePrefix(self.id, prefix.encode()))
+        return irm_result(self.libc.RM_SetFilePrefix(self.id, prefix.encode()))
 
     def RM_SetMpiWorkerCallbackCookie(self, cookie):
         return self.libc.RM_SetMpiWorkerCallbackCookie(self.id, cookie)
@@ -1405,7 +1405,7 @@ class PhreeqcRM:
             >>> porosity = np.full(nxyz, 0.25)  # 25% porosity for all cells
             >>> rm.RM_SetPorosity(porosity)
         """
-        return IRM_RESULT(self.libc.RM_SetPorosity(self.id, por.ctypes))
+        return irm_result(self.libc.RM_SetPorosity(self.id, por.ctypes))
 
     def RM_SetPressure(self, p):
         return self.libc.RM_SetPressure(self.id, p.ctypes)
@@ -1426,9 +1426,9 @@ class PhreeqcRM:
             f (float): Fraction for load balancing (typically 0.5).
 
         Returns:
-            int: IRM_RESULT status code (0 for success).
+            int: irm_result status code (0 for success).
         """
-        return IRM_RESULT(self.libc.RM_SetRebalanceFraction(self.id, ctypes.c_double(f)))
+        return irm_result(self.libc.RM_SetRebalanceFraction(self.id, ctypes.c_double(f)))
 
     def RM_SetRepresentativeVolume(self, rv):
         return self.libc.RM_SetRepresentativeVolume(self.id, rv.ctypes)
@@ -1466,7 +1466,7 @@ class PhreeqcRM:
             >>> sat_profile = np.linspace(0.3, 1.0, nxyz)  # Increasing with depth
             >>> rm.RM_SetSaturation(sat_profile)
         """
-        return IRM_RESULT(self.libc.RM_SetSaturation(self.id, sat.ctypes))
+        return irm_result(self.libc.RM_SetSaturation(self.id, sat.ctypes))
 
     def RM_SetScreenOn(self, tf):
         return self.libc.RM_SetScreenOn(self.id, tf)
@@ -1503,7 +1503,7 @@ class PhreeqcRM:
             >>> species_conc = np.zeros(nxyz * nspecies)
             >>> rm.RM_GetSpeciesConcentrations(species_conc)
         """
-        return IRM_RESULT(self.libc.RM_SetSpeciesSaveOn(self.id, save_on))
+        return irm_result(self.libc.RM_SetSpeciesSaveOn(self.id, save_on))
 
     def RM_SetTemperature(self, t):
         return self.libc.RM_SetTemperature(self.id, t.ctypes)
@@ -1535,7 +1535,7 @@ class PhreeqcRM:
             >>>     rm.RM_SetTimeStep(dt)
             >>>     rm.RM_RunCells()
         """
-        return IRM_RESULT(self.libc.RM_SetTime(self.id, ctypes.c_double(time)))
+        return irm_result(self.libc.RM_SetTime(self.id, ctypes.c_double(time)))
 
     def RM_SetTimeConversion(self, conv_factor):
         return self.libc.RM_SetTimeConversion(self.id, ctypes.c_double(conv_factor))
@@ -1566,7 +1566,7 @@ class PhreeqcRM:
             >>> rm.RM_SetTimeStep(dt)
             >>> rm.RM_RunCells()  # Integrate kinetics over dt
         """
-        return IRM_RESULT(self.libc.RM_SetTimeStep(self.id, ctypes.c_double(time_step)))
+        return irm_result(self.libc.RM_SetTimeStep(self.id, ctypes.c_double(time_step)))
 
     def RM_SetUnitsExchange(self, option):
         """Set units for exchange reactions.
@@ -1575,9 +1575,9 @@ class PhreeqcRM:
             option (int): Units option for exchange calculations.
 
         Returns:
-            int: IRM_RESULT status code (0 for success).
+            int: irm_result status code (0 for success).
         """
-        return IRM_RESULT(self.libc.RM_SetUnitsExchange(self.id, option))
+        return irm_result(self.libc.RM_SetUnitsExchange(self.id, option))
 
     def RM_SetUnitsGasPhase(self, option) -> None:
         self.libc.RM_SetUnitsGasPhase(self.id, option)
@@ -1617,7 +1617,7 @@ class PhreeqcRM:
             >>> conc_mmol = np.array([1.0, 0.5, 2.0])  # 1, 0.5, 2 mmol/L
             >>> rm.RM_SetConcentrations(conc_mmol)
         """
-        return IRM_RESULT(self.libc.RM_SetUnitsSolution(self.id, option))
+        return irm_result(self.libc.RM_SetUnitsSolution(self.id, option))
 
     def RM_SetUnitsSSassemblage(self, option):
         return self.libc.RM_SetUnitsSSassemblage(self.id, option)
@@ -1629,9 +1629,9 @@ class PhreeqcRM:
             option (int): Units option for surface calculations.
 
         Returns:
-            int: IRM_RESULT status code (0 for success).
+            int: irm_result status code (0 for success).
         """
-        return IRM_RESULT(self.libc.RM_SetUnitsSurface(self.id, option))
+        return irm_result(self.libc.RM_SetUnitsSurface(self.id, option))
 
     def RM_SpeciesConcentrations2Module(self, species_conc):
         return self.libc.RM_SpeciesConcentrations2Module(self.id, species_conc.ctypes)

@@ -13,7 +13,7 @@ Classes:
     IRMStatus: Named tuple containing status code, name, and message with convenience methods.
 
 Functions:
-    IRM_RESULT: Maps integer error codes to IRMStatus objects with enhanced functionality.
+    irm_result: Maps integer error codes to IRMStatus objects with enhanced functionality.
 
 References:
 
@@ -90,7 +90,7 @@ class IRMStatus(NamedTuple):
             raise RuntimeError(f"{prefix}{self}")
 
 
-def IRM_RESULT(code: int) -> IRMStatus:
+def irm_result(code: int) -> IRMStatus:
     """Map PhreeqcRM integer error codes to enhanced status objects.
 
     Args:
@@ -112,12 +112,12 @@ def IRM_RESULT(code: int) -> IRMStatus:
             - message (str): Human-readable error description
 
     Examples:
-        >>> result = IRM_RESULT(0)
+        >>> result = irm_result(0)
         >>> print(result)  # "IRM_OK: Success"
         >>> if result:  # True for success
         >>>     print("Operation successful")
         >>>
-        >>> error = IRM_RESULT(-1)
+        >>> error = irm_result(-1)
         >>> print(int(error))  # -1 (backwards compatibility)
         >>> error.raise_for_status("Memory allocation")  # Raises RuntimeError
     """
