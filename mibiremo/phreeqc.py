@@ -52,10 +52,10 @@ class PhreeqcRM:
         2. Load thermodynamic database with initialize_phreeqc()
         3. Set initial conditions with run_initial_from_file()
         4. In transport time loop:
-           - Transfer concentrations to reaction module with RM_SetConcentrations()
-           - Advance time with RM_SetTime() and RM_SetTimeStep()
-           - Run reactions with RM_RunCells()
-           - Retrieve updated concentrations with RM_GetConcentrations()
+           - Transfer concentrations to reaction module with rm_set_concentrations()
+           - Advance time with rm_set_time() and rm_set_time_step()
+           - Run reactions with rm_run_cells()
+           - Retrieve updated concentrations with rm_get_concentrations()
 
     Attributes:
         dllpath (str): Path to the PhreeqcRM dynamic library file.
@@ -181,34 +181,34 @@ class PhreeqcRM:
             raise RuntimeError("PhreeqcRM instance not initialized. Call create() first.")
 
         # Load database
-        status = self.RM_LoadDatabase(database_path)
+        status = self.rm_load_database(database_path)
         if not status:
             raise RuntimeError(f"Failed to load Phreeqc database: {status}")
 
         # Set properties/parameters
-        self.RM_SetComponentH2O(0)  # Don't include H2O in component list
-        self.RM_SetRebalanceFraction(0.5)  # Rebalance thread load
+        self.rm_set_component_h2o(0)  # Don't include H2O in component list
+        self.rm_set_rebalance_fraction(0.5)  # Rebalance thread load
 
         # Set units
-        self.RM_SetUnitsSolution(units_solution)
-        self.RM_SetUnitsPPassemblage(units)
-        self.RM_SetUnitsExchange(units)
-        self.RM_SetUnitsSurface(units)
-        self.RM_SetUnitsGasPhase(units)
-        self.RM_SetUnitsSSassemblage(units)
-        self.RM_SetUnitsKinetics(units)
+        self.rm_set_units_solution(units_solution)
+        self.rm_set_units_p_passemblage(units)
+        self.rm_set_units_exchange(units)
+        self.rm_set_units_surface(units)
+        self.rm_set_units_gas_phase(units)
+        self.rm_set_units_ss_assemblage(units)
+        self.rm_set_units_kinetics(units)
 
         # Set porosity and saturation
-        self.RM_SetPorosity(porosity * np.ones(self.nxyz))
-        self.RM_SetSaturation(saturation * np.ones(self.nxyz))
+        self.rm_set_porosity(porosity * np.ones(self.nxyz))
+        self.rm_set_saturation(saturation * np.ones(self.nxyz))
 
         # Create error log files
-        self.RM_SetFilePrefix("phr")
-        self.RM_OpenFiles()
+        self.rm_set_file_prefix("phr")
+        self.rm_open_files()
 
         # Multicomponent diffusion settings
         if multicomponent:
-            self.RM_SetSpeciesSaveOn(1)
+            self.rm_set_species_save_on(1)
 
     def run_initial_from_file(self, pqi_file, ic):
         """Set up initial conditions from PHREEQC input file and initial conditions array.
@@ -244,7 +244,7 @@ class PhreeqcRM:
         """
 
         # Run the initial setup file
-        status = self.RM_RunFile(1, 1, 1, pqi_file)
+        status = self.rm_run_file(1, 1, 1, pqi_file)
         if not status:
             raise RuntimeError(f"Failed to run Phreeqc input file: {status}")
 
@@ -268,24 +268,24 @@ class PhreeqcRM:
         # f1 contains the fractions of the first entity in each cell (here, it is set to 1.0)
         f1 = np.ones(self.nxyz * 7, dtype=np.float64)
 
-        status = self.RM_InitialPhreeqc2Module(ic1, ic2, f1)
+        status = self.rm_initial_phreeqc2_module(ic1, ic2, f1)
 
         # Get component and species information
-        n_comps = self.RM_FindComponents()
-        n_species = self.RM_GetSpeciesCount()
+        n_comps = self.rm_find_components()
+        n_species = self.rm_get_species_count()
 
         self.components = np.zeros(n_comps, dtype="U20")
         for i in range(n_comps):
-            self.RM_GetComponent(i, self.components, 20)
+            self.rm_get_component(i, self.components, 20)
 
         self.species = np.zeros(n_species, dtype="U20")
         for i in range(n_species):
-            self.RM_GetSpeciesName(i, self.species, 20)
+            self.rm_get_species_name(i, self.species, 20)
 
         # Run initial equilibrium step
-        self.RM_SetTime(0.0)
-        self.RM_SetTimeStep(0.0)
-        status = self.RM_RunCells()
+        self.rm_set_time(0.0)
+        self.rm_set_time_step(0.0)
+        status = self.rm_run_cells()
 
     def get_selected_output_df(self) -> pd.DataFrame:
         """Retrieve selected output data as a pandas DataFrame.
@@ -306,16 +306,16 @@ class PhreeqcRM:
             >>> print(df['pH'])     # Access pH values for all cells
         """
         # Get selected ouput headings
-        ncolsel = self.RM_GetSelectedOutputColumnCount()
+        ncolsel = self.rm_get_selected_output_column_count()
         selout_h = np.zeros(ncolsel, dtype="U100")
         for i in range(ncolsel):
-            self.RM_GetSelectedOutputHeading(i, selout_h, 100)
+            self.rm_get_selected_output_heading(i, selout_h, 100)
         so = np.zeros(ncolsel * self.nxyz).reshape(self.nxyz, ncolsel)
-        self.RM_GetSelectedOutput(so)
+        self.rm_get_selected_output(so)
         return pd.DataFrame(so.reshape(ncolsel, self.nxyz).T, columns=selout_h)
 
     ### PhreeqcRM functions
-    def RM_Abort(self, result, err_str):
+    def rm_abort(self, result, err_str):
         """Abort the PhreeqcRM run.
 
         Args:
@@ -327,7 +327,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_Abort(self.id, result, err_str))
 
-    def RM_CloseFiles(self):
+    def rm_close_files(self):
         """Close output files opened by RM_OpenFiles.
 
         Closes all output files that were opened by RM_OpenFiles, including
@@ -338,15 +338,15 @@ class PhreeqcRM:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
 
         Examples:
-            >>> rm.RM_OpenFiles()  # Open files for logging
+            >>> rm.rm_open_files()  # Open files for logging
             >>> # ... perform calculations ...
-            >>> result = rm.RM_CloseFiles()  # Close files when done
+            >>> result = rm.rm_close_files()  # Close files when done
             >>> if not result:
             >>>     print(f"Warning: {result}")
         """
         return irm_result(self.libc.RM_CloseFiles(self.id))
 
-    def RM_Concentrations2Utility(self, c, n, tc, p_atm):
+    def rm_concentrations2utility(self, c, n, tc, p_atm):
         """Transfer concentrations from a cell to the utility IPhreeqc instance.
 
         Transfers solution concentrations from a reaction cell to the utility
@@ -364,7 +364,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_Concentrations2Utility(self.id, c, n, tc, p_atm))
 
-    def RM_CreateMapping(self, grid2chem):
+    def rm_create_mapping(self, grid2chem):
         """Create a mapping from grid cells to reaction cells.
 
         Establishes the relationship between transport grid cells and reaction
@@ -387,7 +387,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_CreateMapping(self.id, grid2chem.ctypes))
 
-    def RM_DecodeError(self, e):
+    def rm_decode_error(self, e):
         """Decode error code to human-readable message.
 
         Converts a numeric error code returned by PhreeqcRM functions into
@@ -400,14 +400,14 @@ class PhreeqcRM:
             str: Human-readable error message corresponding to the error code.
 
         Examples:
-            >>> result = rm.RM_RunCells()
+            >>> result = rm.rm_run_cells()
             >>> if not result:
-            >>>     error_msg = rm.RM_DecodeError(result.code)
+            >>>     error_msg = rm.rm_decode_error(result.code)
             >>>     print(f"Error: {error_msg}")
         """
         return self.libc.RM_DecodeError(self.id, e)
 
-    def RM_Destroy(self):
+    def rm_destroy(self):
         """Destroy a PhreeqcRM instance and free all associated memory.
 
         Deallocates all memory associated with the PhreeqcRM instance, including
@@ -426,11 +426,11 @@ class PhreeqcRM:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100)
             >>> # ... use PhreeqcRM instance ...
-            >>> rm.RM_Destroy()  # Clean up when finished
+            >>> rm.rm_destroy()  # Clean up when finished
         """
         return irm_result(self.libc.RM_Destroy(self.id))
 
-    def RM_DumpModule(self, dump_on, append):
+    def rm_dump_module(self, dump_on, append):
         """Enable or disable dumping of reaction module data to file.
         Controls the output of detailed reaction module data to a dump file
         for debugging and analysis purposes. The dump file contains complete
@@ -449,7 +449,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_DumpModule(self.id, dump_on, append))
 
-    def RM_ErrorMessage(self, errstr):
+    def rm_error_message(self, errstr):
         """Print an error message to the error output file.
 
         Writes an error message to the PhreeqcRM error log file. The message
@@ -467,7 +467,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_ErrorMessage(self.id, errstr))
 
-    def RM_FindComponents(self):
+    def rm_find_components(self):
         """Find and count components for transport calculations.
 
         Analyzes all chemical definitions in the reaction module to determine
@@ -492,12 +492,12 @@ class PhreeqcRM:
 
         Examples:
             >>> rm.run_initial_from_file("initial.pqi", ic_array)
-            >>> ncomp = rm.RM_FindComponents()
+            >>> ncomp = rm.rm_find_components()
             >>> print(f"Transport requires {ncomp} components")
         """
         return self.libc.RM_FindComponents(self.id)
 
-    def RM_GetBackwardMapping(self, n, list, size):
+    def rm_get_backward_mapping(self, n, list, size):
         """Get backward mapping from reaction cells to grid cells.
 
         Retrieves the list of grid cell numbers that map to a specific
@@ -516,7 +516,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetBackwardMapping(self.id, n, list, size))
 
-    def RM_GetChemistryCellCount(self):
+    def rm_get_chemistry_cell_count(self):
         """Get the number of reaction cells in the module.
 
         Returns the number of reaction cells currently defined in the
@@ -534,7 +534,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetChemistryCellCount(self.id)
 
-    def RM_GetComponent(self, num, chem_name, length):
+    def rm_get_component(self, num, chem_name, length):
         """Get the name of a component by index.
 
         Retrieves the name of a transport component identified by its index.
@@ -554,12 +554,12 @@ class PhreeqcRM:
             This method is typically used in a loop to retrieve all component
             names after calling RM_FindComponents().
         """
-        String = ctypes.create_string_buffer(length)
-        status = self.libc.RM_GetComponent(self.id, num, String, length)
-        chem_name[num] = String.value.decode()
+        string = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetComponent(self.id, num, string, length)
+        chem_name[num] = string.value.decode()
         return irm_result(status)
 
-    def RM_GetConcentrations(self, c):
+    def rm_get_concentrations(self, c):
         """Retrieve component concentrations from reaction cells.
 
         Extracts current component concentrations from all reaction cells
@@ -581,16 +581,16 @@ class PhreeqcRM:
             RM_RunCells() to get updated concentrations for transport.
 
         Examples:
-            >>> ncomp = rm.RM_GetComponentCount()
+            >>> ncomp = rm.rm_get_component_count()
             >>> conc = np.zeros(nxyz * ncomp)
-            >>> result = rm.RM_GetConcentrations(conc)
+            >>> result = rm.rm_get_concentrations(conc)
             >>> if result:
             >>>     # Reshape to (nxyz, ncomp) for easier handling
             >>>     conc_2d = conc.reshape(nxyz, ncomp)
         """
         return irm_result(self.libc.RM_GetConcentrations(self.id, c.ctypes))
 
-    def RM_GetDensity(self, density):
+    def rm_get_density(self, density):
         """Get solution density for all reaction cells.
 
         Retrieves the calculated solution density for each reaction cell
@@ -611,7 +611,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetDensity(self.id, density.ctypes))
 
-    def RM_GetEndCell(self, ec):
+    def rm_get_end_cell(self, ec):
         """Get the ending cell number for the current MPI process.
 
         In parallel (MPI) calculations, each process handles a subset of
@@ -631,7 +631,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetEndCell(self.id, ec))
 
-    def RM_GetEquilibriumPhaseCount(self):
+    def rm_get_equilibrium_phase_count(self):
         """Get the number of equilibrium phases defined in the system.
 
         Returns the count of mineral phases that can potentially precipitate
@@ -648,7 +648,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetEquilibriumPhaseCount(self.id)
 
-    def RM_GetEquilibriumPhaseName(self, num, name, l1):
+    def rm_get_equilibrium_phase_name(self, num, name, l1):
         """Get the name of an equilibrium phase by index.
 
         Retrieves the name of a mineral phase that can precipitate or dissolve
@@ -664,7 +664,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetEquilibriumPhaseName(self.id, num, name, l1))
 
-    def RM_GetErrorString(self, errstr, length):
+    def rm_get_error_string(self, errstr, length):
         """Get the current error string from PhreeqcRM.
 
         Retrieves the most recent error message generated by PhreeqcRM
@@ -680,7 +680,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetErrorString(self.id, errstr, length))
 
-    def RM_GetErrorStringLength(self):
+    def rm_get_error_string_length(self):
         """Get the length of the current error string.
 
         Returns the length of the error message string that can be retrieved
@@ -692,25 +692,25 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetErrorStringLength(self.id)
 
-    def RM_GetExchangeName(self, num, name, l1):
+    def rm_get_exchange_name(self, num, name, l1):
         return self.libc.RM_GetExchangeName(self.id, num, name, l1)
 
-    def RM_GetExchangeSpeciesCount(self):
+    def rm_get_exchange_species_count(self):
         return self.libc.RM_GetExchangeSpeciesCount(self.id)
 
-    def RM_GetExchangeSpeciesName(self, num, name, l1):
+    def rm_get_exchange_species_name(self, num, name, l1):
         return self.libc.RM_GetExchangeSpeciesName(self.id, num, name, l1)
 
-    def RM_GetFilePrefix(self, prefix, length):
+    def rm_get_file_prefix(self, prefix, length):
         return self.libc.RM_GetFilePrefix(self.id, prefix.encode(), length)
 
-    def RM_GetGasComponentsCount(self):
+    def rm_get_gas_components_count(self):
         return self.libc.RM_GetGasComponentsCount(self.id)
 
-    def RM_GetGasComponentsName(self, nun, name, l1):
+    def rm_get_gas_components_name(self, nun, name, l1):
         return self.libc.RM_GetGasComponentsName(self.id, nun, name, l1)
 
-    def RM_GetGfw(self, gfw):
+    def rm_get_gfw(self, gfw):
         """Get gram formula weights for transport components.
 
         Retrieves the gram formula weights (molecular weights) for all
@@ -730,7 +730,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetGfw(self.id, gfw.ctypes))
 
-    def RM_GetGridCellCount(self):
+    def rm_get_grid_cell_count(self):
         """Get the number of grid cells in the model.
 
         Returns the total number of grid cells defined for the transport
@@ -747,25 +747,25 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetGridCellCount(self.id)
 
-    def RM_GetIPhreeqcId(self, i):
+    def rm_get_iphreeqc_id(self, i):
         return self.libc.RM_GetIPhreeqcId(self.id, i)
 
-    def RM_GetKineticReactionsCount(self):
+    def rm_get_kinetic_reactions_count(self):
         return self.libc.RM_GetKineticReactionsCount(self.id)
 
-    def RM_GetKineticReactionsName(self, num, name, l1):
+    def rm_get_kinetic_reactions_name(self, num, name, l1):
         return self.libc.RM_GetKineticReactionsName(self.id, num, name, l1)
 
-    def RM_GetMpiMyself(self):
+    def rm_get_mpi_myself(self):
         return self.libc.RM_GetMpiMyself(self.id)
 
-    def RM_GetMpiTasks(self):
+    def rm_get_mpi_tasks(self):
         return self.libc.RM_GetMpiTasks(self.id)
 
-    def RM_GetNthSelectedOutputUserNumber(self, n):
+    def rm_get_nth_selected_output_user_number(self, n):
         return self.libc.RM_GetNthSelectedOutputUserNumber(self.id, n)
 
-    def RM_GetSaturation(self, sat_calc):
+    def rm_get_saturation(self, sat_calc):
         """Get saturation values for all reaction cells.
 
         Retrieves the current saturation values for all reaction cells.
@@ -782,7 +782,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSaturation(self.id, sat_calc.ctypes))
 
-    def RM_GetSelectedOutput(self, so):
+    def rm_get_selected_output(self, so):
         """Retrieve selected output data from all reaction cells.
 
         Extracts the current selected output data, which includes calculated
@@ -806,19 +806,19 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSelectedOutput(self.id, so.ctypes))
 
-    def RM_GetNthSelectedOutputColumnCount(self):
+    def rm_get_nth_selected_output_column_count(self):
         return self.libc.RM_GetNthSelectedOutputColumnCount(self.id)
 
-    def RM_GetSelectedOutputCount(self):
+    def rm_get_selected_output_count(self):
         return self.libc.RM_GetSelectedOutputCount(self.id)
 
-    def RM_GetSelectedOutputHeading(self, col, headings, length):
-        String = ctypes.create_string_buffer(length)
-        status = self.libc.RM_GetSelectedOutputHeading(self.id, col, String, length)
-        headings[col] = String.value.decode()
+    def rm_get_selected_output_heading(self, col, headings, length):
+        string = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetSelectedOutputHeading(self.id, col, string, length)
+        headings[col] = string.value.decode()
         return irm_result(status)
 
-    def RM_GetSelectedOutputColumnCount(self):
+    def rm_get_selected_output_column_count(self):
         """Get number of columns in selected output.
 
         Returns:
@@ -826,7 +826,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSelectedOutputColumnCount(self.id)
 
-    def RM_GetSelectedOutputRowCount(self):
+    def rm_get_selected_output_row_count(self):
         """Get number of rows in selected output.
 
         Returns:
@@ -834,25 +834,25 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSelectedOutputRowCount(self.id)
 
-    def RM_GetSICount(self):
+    def rm_get_si_count(self):
         return self.libc.RM_GetSICount(self.id)
 
-    def RM_GetSIName(self, num, name, l1):
+    def rm_get_si_name(self, num, name, l1):
         return self.libc.RM_GetSIName(self.id, num, name, l1)
 
-    def RM_GetSolidSolutionComponentsCount(self):
+    def rm_get_solid_solution_components_count(self):
         return self.libc.RM_GetSolidSolutionComponentsCount(self.id)
 
-    def RM_GetSolidSolutionComponentsName(self, num, name, l1):
+    def rm_get_solid_solution_components_name(self, num, name, l1):
         return self.libc.RM_GetSolidSolutionComponentsName(self.id, num, name, l1)
 
-    def RM_GetSolidSolutionName(self, num, name, l1):
+    def rm_get_solid_solution_name(self, num, name, l1):
         return self.libc.RM_GetSolidSolutionName(self.id, num, name, l1)
 
-    def RM_GetSolutionVolume(self, vol):
+    def rm_get_solution_volume(self, vol):
         return self.libc.RM_GetSolutionVolume(self.id, vol.ctypes)
 
-    def RM_GetSpeciesConcentrations(self, species_conc):
+    def rm_get_species_concentrations(self, species_conc):
         """Retrieve aqueous species concentrations from reaction cells.
 
         Extracts the concentrations of individual aqueous species from all
@@ -873,15 +873,15 @@ class PhreeqcRM:
             number of species and RM_GetSpeciesName() to get species names.
 
         Examples:
-            >>> rm.RM_SetSpeciesSaveOn(1)  # Enable species saving
-            >>> rm.RM_RunCells()  # Run reactions
-            >>> nspecies = rm.RM_GetSpeciesCount()
+            >>> rm.rm_set_species_save_on(1)  # Enable species saving
+            >>> rm.rm_run_cells()  # Run reactions
+            >>> nspecies = rm.rm_get_species_count()
             >>> species_c = np.zeros(nxyz * nspecies)
-            >>> rm.RM_GetSpeciesConcentrations(species_c)
+            >>> rm.rm_get_species_concentrations(species_c)
         """
         return irm_result(self.libc.RM_GetSpeciesConcentrations(self.id, species_conc.ctypes))
 
-    def RM_GetSpeciesCount(self):
+    def rm_get_species_count(self):
         """Get the number of aqueous species in the geochemical system.
 
         Returns the total number of dissolved aqueous species that can exist
@@ -899,16 +899,16 @@ class PhreeqcRM:
             retrieved using RM_GetSpeciesName() with indices from 0 to count-1.
 
         Examples:
-            >>> nspecies = rm.RM_GetSpeciesCount()
+            >>> nspecies = rm.rm_get_species_count()
             >>> print(f"System contains {nspecies} aqueous species")
             >>> # Get all species names
             >>> species_names = np.zeros(nspecies, dtype='U20')
             >>> for i in range(nspecies):
-            >>>     rm.RM_GetSpeciesName(i, species_names, 20)
+            >>>     rm.rm_get_species_name(i, species_names, 20)
         """
         return self.libc.RM_GetSpeciesCount(self.id)
 
-    def RM_GetSpeciesD25(self, diffc):
+    def rm_get_species_d25(self, diffc):
         """Get diffusion coefficients at 25°C for all aqueous species.
 
         Retrieves the reference diffusion coefficients (at 25°C in water)
@@ -929,7 +929,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSpeciesD25(self.id, diffc.ctypes))
 
-    def RM_GetSpeciesLog10Gammas(self, species_log10gammas):
+    def rm_get_species_log10_gammas(self, species_log10gammas):
         """Get log10 activity coefficients for all aqueous species.
 
         Retrieves the base-10 logarithm of activity coefficients for all
@@ -951,7 +951,7 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_GetSpeciesLog10Gammas(self.id, species_log10gammas.ctypes))
 
-    def RM_GetSpeciesName(self, num, chem_name, length):
+    def rm_get_species_name(self, num, chem_name, length):
         """Get the name of an aqueous species by index.
 
         Retrieves the name of an aqueous species identified by its index.
@@ -968,18 +968,18 @@ class PhreeqcRM:
             IRMStatus: Status object with code, name, and message. Use bool(result) to check success.
 
         Examples:
-            >>> nspecies = rm.RM_GetSpeciesCount()
+            >>> nspecies = rm.rm_get_species_count()
             >>> species_names = np.zeros(nspecies, dtype='U20')
             >>> for i in range(nspecies):
-            >>>     rm.RM_GetSpeciesName(i, species_names, 20)
+            >>>     rm.rm_get_species_name(i, species_names, 20)
             >>> print(species_names)  # ['H2O', 'H+', 'OH-', 'Ca+2', ...]
         """
-        String = ctypes.create_string_buffer(length)
-        status = self.libc.RM_GetSpeciesName(self.id, num, String, length)
-        chem_name[num] = String.value.decode()
+        string = ctypes.create_string_buffer(length)
+        status = self.libc.RM_GetSpeciesName(self.id, num, string, length)
+        chem_name[num] = string.value.decode()
         return irm_result(status)
 
-    def RM_GetSpeciesSaveOn(self):
+    def rm_get_species_save_on(self):
         """Check if species concentration saving is enabled.
 
         Returns the current setting for species concentration saving. When
@@ -996,7 +996,7 @@ class PhreeqcRM:
         """
         return self.libc.RM_GetSpeciesSaveOn(self.id)
 
-    def RM_GetSpeciesZ(self, Z):
+    def rm_get_species_z(self, z):
         """Get charge values for all aqueous species.
 
         Retrieves the electric charge (valence) for each aqueous species
@@ -1004,7 +1004,7 @@ class PhreeqcRM:
         calculations and charge balance constraints.
 
         Args:
-            Z (numpy.ndarray): Array to receive charge values with length
+            z (numpy.ndarray): Array to receive charge values with length
                 equal to the number of species. Values are dimensionless
                 (e.g., +2 for Ca+2, -1 for Cl-, 0 for neutral species).
 
@@ -1016,21 +1016,21 @@ class PhreeqcRM:
             are used in activity coefficient calculations and electroneutrality
             constraints.
         """
-        return irm_result(self.libc.RM_GetSpeciesZ(self.id, Z.ctypes))
+        return irm_result(self.libc.RM_GetSpeciesZ(self.id, z.ctypes))
 
-    def RM_GetStartCell(self, sc):
+    def rm_get_start_cell(self, sc):
         return self.libc.RM_GetStartCell(self.id, sc)
 
-    def RM_GetSurfaceName(self, num, name, l1):
+    def rm_get_surface_name(self, num, name, l1):
         return self.libc.RM_GetSurfaceName(self.id, num, name, l1)
 
-    def RM_GetSurfaceType(self, num, name, l1):
+    def rm_get_surface_type(self, num, name, l1):
         return self.libc.RM_GetSurfaceType(self.id, num, name, l1)
 
-    def RM_GetThreadCount(self):
+    def rm_get_thread_count(self):
         return self.libc.RM_GetThreadCount(self.id)
 
-    def RM_GetTime(self):
+    def rm_get_time(self):
         """Get the current simulation time.
 
         Returns the current time in the reactive transport simulation.
@@ -1047,17 +1047,17 @@ class PhreeqcRM:
             consistent with kinetic rate constants in the database.
 
         Examples:
-            >>> current_time = rm.RM_GetTime()
+            >>> current_time = rm.rm_get_time()
             >>> print(f"Current simulation time: {current_time} days")
         """
         self.libc.RM_GetTime.restype = ctypes.c_double
         return self.libc.RM_GetTime(self.id)
 
-    def RM_GetTimeConversion(self):
+    def rm_get_time_conversion(self):
         self.libc.RM_GetTimeConversion.restype = ctypes.c_double
         return self.libc.RM_GetTimeConversion(self.id)
 
-    def RM_GetTimeStep(self):
+    def rm_get_time_step(self):
         """Get the current time step duration.
 
         Returns the duration of the current time step used for kinetic
@@ -1073,13 +1073,13 @@ class PhreeqcRM:
             solutions but require more computational time.
 
         Examples:
-            >>> dt = rm.RM_GetTimeStep()
+            >>> dt = rm.rm_get_time_step()
             >>> print(f"Current time step: {dt} days")
         """
         self.libc.RM_GetTimeStep.restype = ctypes.c_double
         return self.libc.RM_GetTimeStep(self.id)
 
-    def RM_InitialPhreeqc2Module(self, ic1, ic2, f1):
+    def rm_initial_phreeqc2_module(self, ic1, ic2, f1):
         """Transfer initial conditions from InitialPhreeqc to reaction module.
 
         Args:
@@ -1092,12 +1092,12 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_InitialPhreeqc2Module(self.id, ic1.ctypes, ic2.ctypes, f1.ctypes))
 
-    def RM_InitialPhreeqc2Concentrations(self, c, n_boundary, boundary_solution1, boundary_solution2, fraction1):
+    def rm_initial_phreeqc2_concentrations(self, c, n_boundary, boundary_solution1, boundary_solution2, fraction1):
         return self.libc.RM_InitialPhreeqc2Concentrations(
             self.id, c.ctypes, n_boundary, boundary_solution1.ctypes, boundary_solution2.ctypes, fraction1.ctypes
         )
 
-    def RM_InitialPhreeqc2SpeciesConcentrations(
+    def rm_initial_phreeqc2_species_concentrations(
         self, species_c, n_boundary, boundary_solution1, boundary_solution2, fraction1
     ):
         return self.libc.RM_InitialPhreeqc2SpeciesConcentrations(
@@ -1109,10 +1109,10 @@ class PhreeqcRM:
             fraction1.ctypes,
         )
 
-    def RM_InitialPhreeqcCell2Module(self, n, module_numbers, dim_module_numbers):
+    def rm_initial_phreeqc_cell2_module(self, n, module_numbers, dim_module_numbers):
         return self.libc.RM_InitialPhreeqcCell2Module(self.id, n, module_numbers, dim_module_numbers)
 
-    def RM_LoadDatabase(self, db_name):
+    def rm_load_database(self, db_name):
         """Load a thermodynamic database for geochemical calculations.
 
         Loads a PHREEQC-format thermodynamic database containing thermodynamic
@@ -1140,22 +1140,22 @@ class PhreeqcRM:
         Examples:
             >>> rm = PhreeqcRM()
             >>> rm.create(nxyz=100)
-            >>> result = rm.RM_LoadDatabase("phreeqc.dat")
+            >>> result = rm.rm_load_database("phreeqc.dat")
             >>> if not result:
             >>>     raise RuntimeError(f"Failed to load database: {result}")
         """
         return irm_result(self.libc.RM_LoadDatabase(self.id, db_name.encode()))
 
-    def RM_LogMessage(self, str):
+    def rm_log_message(self, str):
         return self.libc.RM_LogMessage(self.id, str.encode())
 
-    def RM_MpiWorker(self):
+    def rm_mpi_worker(self):
         return self.libc.RM_MpiWorker(self.id)
 
-    def RM_MpiWorkerBreak(self):
+    def rm_mpi_worker_break(self):
         return self.libc.RM_MpiWorkerBreak(self.id)
 
-    def RM_OpenFiles(self):
+    def rm_open_files(self):
         """Open output files for logging, debugging, and error reporting.
 
         Creates and opens output files for PhreeqcRM logging, error messages,
@@ -1175,17 +1175,17 @@ class PhreeqcRM:
             prefix. Use RM_CloseFiles() to properly close files when finished.
 
         Examples:
-            >>> rm.RM_SetFilePrefix("simulation")
-            >>> rm.RM_OpenFiles()  # Creates simulation.log, simulation.err, etc.
+            >>> rm.rm_set_file_prefix("simulation")
+            >>> rm.rm_open_files()  # Creates simulation.log, simulation.err, etc.
             >>> # ... run calculations ...
-            >>> rm.RM_CloseFiles()  # Clean up
+            >>> rm.rm_close_files()  # Clean up
         """
         return irm_result(self.libc.RM_OpenFiles(self.id))
 
-    def RM_OutputMessage(self, str):
+    def rm_output_message(self, str):
         return self.libc.RM_OutputMessage(self.id, str.encode())
 
-    def RM_RunCells(self):
+    def rm_run_cells(self):
         """Run geochemical reactions for all reaction cells.
 
         Performs equilibrium speciation and kinetic reactions for the current
@@ -1212,18 +1212,18 @@ class PhreeqcRM:
             - Temperature and pressure are set if needed
 
         Examples:
-            >>> rm.RM_SetConcentrations(concentrations)
-            >>> rm.RM_SetTime(current_time)
-            >>> rm.RM_SetTimeStep(dt)
-            >>> result = rm.RM_RunCells()
+            >>> rm.rm_set_concentrations(concentrations)
+            >>> rm.rm_set_time(current_time)
+            >>> rm.rm_set_time_step(dt)
+            >>> result = rm.rm_run_cells()
             >>> if result:
-            >>>     rm.RM_GetConcentrations(updated_concentrations)
+            >>>     rm.rm_get_concentrations(updated_concentrations)
             >>> else:
             >>>     print(f"Reaction failed: {result}")
         """
         return irm_result(self.libc.RM_RunCells(self.id))
 
-    def RM_RunFile(self, workers, initial_phreeqc, utility, chem_name):
+    def rm_run_file(self, workers, initial_phreeqc, utility, chem_name):
         """Run a PHREEQC input file in specified PhreeqcRM instances.
 
         Executes a PHREEQC input file (.pqi format) in one or more PhreeqcRM
@@ -1251,13 +1251,13 @@ class PhreeqcRM:
 
         Examples:
             >>> # Run initial conditions file in initial PhreeqcRM instance
-            >>> result = rm.RM_RunFile(0, 1, 0, "initial_conditions.pqi")
+            >>> result = rm.rm_run_file(0, 1, 0, "initial_conditions.pqi")
             >>> if not result:
             >>>     print(f"Error running initial conditions file: {result}")
         """
         return irm_result(self.libc.RM_RunFile(self.id, workers, initial_phreeqc, utility, chem_name.encode()))
 
-    def RM_RunString(self, workers, initial_phreeqc, utility, input_string):
+    def rm_run_string(self, workers, initial_phreeqc, utility, input_string):
         """Run PHREEQC input from a string in specified instances.
 
         Executes PHREEQC input commands provided as a string in one or more
@@ -1282,14 +1282,14 @@ class PhreeqcRM:
             >>>     Cl 2.0
             >>> END
             >>> '''
-            >>> rm.RM_RunString(0, 1, 0, phreeqc_input)
+            >>> rm.rm_run_string(0, 1, 0, phreeqc_input)
         """
         return irm_result(self.libc.RM_RunString(self.id, workers, initial_phreeqc, utility, input_string.encode()))
 
-    def RM_ScreenMessage(self, str):
+    def rm_screen_message(self, str):
         return self.libc.RM_ScreenMessage(self.id, str.encode())
 
-    def RM_SetComponentH2O(self, tf):
+    def rm_set_component_h2o(self, tf):
         """Set whether to include H2O as a transport component.
 
         Controls whether water (H2O) is included in the list of components
@@ -1311,12 +1311,12 @@ class PhreeqcRM:
             be necessary for some specialized applications.
 
         Examples:
-            >>> rm.RM_SetComponentH2O(0)  # Standard: don't transport H2O
-            >>> ncomp = rm.RM_FindComponents()  # Get component count
+            >>> rm.rm_set_component_h2o(0)  # Standard: don't transport H2O
+            >>> ncomp = rm.rm_find_components()  # Get component count
         """
         return irm_result(self.libc.RM_SetComponentH2O(self.id, tf))
 
-    def RM_SetConcentrations(self, c):
+    def rm_set_concentrations(self, c):
         """Set component concentrations for all reaction cells.
 
         Transfers concentration data from the transport model to the reaction
@@ -1342,25 +1342,25 @@ class PhreeqcRM:
             >>> # Transport model updates concentrations
             >>> new_conc = transport_step(old_conc, velocity, dt)
             >>> # Transfer to reaction module
-            >>> result = rm.RM_SetConcentrations(new_conc.flatten())
+            >>> result = rm.rm_set_concentrations(new_conc.flatten())
             >>> if result:
-            >>>     rm.RM_RunCells()  # Run geochemical reactions
+            >>>     rm.rm_run_cells()  # Run geochemical reactions
         """
         return irm_result(self.libc.RM_SetConcentrations(self.id, c.ctypes))
 
-    def RM_SetCurrentSelectedOutputUserNumber(self, n_user):
+    def rm_set_current_selected_output_user_number(self, n_user):
         return self.libc.RM_SetCurrentSelectedOutputUserNumber(self.id, n_user)
 
-    def RM_SetDensity(self, density):
+    def rm_set_density(self, density):
         return self.libc.RM_SetDensity(self.id, density.ctypes)
 
-    def RM_SetDumpFileName(self, dump_name):
+    def rm_set_dump_file_name(self, dump_name):
         return self.libc.RM_SetDumpFileName(self.id, dump_name)
 
-    def RM_SetErrorHandlerMode(self, mode):
+    def rm_set_error_handler_mode(self, mode):
         return self.libc.RM_SetErrorHandlerMode(self.id, mode)
 
-    def RM_SetFilePrefix(self, prefix):
+    def rm_set_file_prefix(self, prefix):
         """Set prefix for output files.
 
         Args:
@@ -1371,13 +1371,13 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetFilePrefix(self.id, prefix.encode()))
 
-    def RM_SetMpiWorkerCallbackCookie(self, cookie):
+    def rm_set_mpi_worker_callback_cookie(self, cookie):
         return self.libc.RM_SetMpiWorkerCallbackCookie(self.id, cookie)
 
-    def RM_SetPartitionUZSolids(self, tf):
+    def rm_set_partition_uz_solids(self, tf):
         return self.libc.RM_SetPartitionUZSolids(self.id, tf)
 
-    def RM_SetPorosity(self, por):
+    def rm_set_porosity(self, por):
         """Set porosity values for all grid cells.
 
         Defines the porosity (void fraction) for each grid cell, which
@@ -1403,23 +1403,23 @@ class PhreeqcRM:
 
         Examples:
             >>> porosity = np.full(nxyz, 0.25)  # 25% porosity for all cells
-            >>> rm.RM_SetPorosity(porosity)
+            >>> rm.rm_set_porosity(porosity)
         """
         return irm_result(self.libc.RM_SetPorosity(self.id, por.ctypes))
 
-    def RM_SetPressure(self, p):
+    def rm_set_pressure(self, p):
         return self.libc.RM_SetPressure(self.id, p.ctypes)
 
-    def RM_SetPrintChemistryMask(self, cell_mask):
+    def rm_set_print_chemistry_mask(self, cell_mask):
         return self.libc.RM_SetPrintChemistryMask(self.id, cell_mask.ctypes)
 
-    def RM_SetPrintChemistryOn(self, workers, initial_phreeqc, utility):
+    def rm_set_print_chemistry_on(self, workers, initial_phreeqc, utility):
         return self.libc.RM_SetPrintChemistryOn(self.id, workers, initial_phreeqc, utility)
 
-    def RM_SetRebalanceByCell(self, method):
+    def rm_set_rebalance_by_cell(self, method):
         return self.libc.RM_SetRebalanceByCell(self.id, method)
 
-    def RM_SetRebalanceFraction(self, f):
+    def rm_set_rebalance_fraction(self, f):
         """Set load balancing algorithm fraction.
 
         Args:
@@ -1430,10 +1430,10 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetRebalanceFraction(self.id, ctypes.c_double(f)))
 
-    def RM_SetRepresentativeVolume(self, rv):
+    def rm_set_representative_volume(self, rv):
         return self.libc.RM_SetRepresentativeVolume(self.id, rv.ctypes)
 
-    def RM_SetSaturation(self, sat):
+    def rm_set_saturation(self, sat):
         """Set water saturation values for all grid cells.
 
         Defines the water saturation for each grid cell, representing the
@@ -1460,21 +1460,21 @@ class PhreeqcRM:
         Examples:
             >>> # Fully saturated conditions
             >>> saturation = np.ones(nxyz)
-            >>> rm.RM_SetSaturation(saturation)
+            >>> rm.rm_set_saturation(saturation)
             >>>
             >>> # Partially saturated (vadose zone)
             >>> sat_profile = np.linspace(0.3, 1.0, nxyz)  # Increasing with depth
-            >>> rm.RM_SetSaturation(sat_profile)
+            >>> rm.rm_set_saturation(sat_profile)
         """
         return irm_result(self.libc.RM_SetSaturation(self.id, sat.ctypes))
 
-    def RM_SetScreenOn(self, tf):
+    def rm_set_screen_on(self, tf):
         return self.libc.RM_SetScreenOn(self.id, tf)
 
-    def RM_SetSelectedOutputOn(self, selected_output):
+    def rm_set_selected_output_on(self, selected_output):
         return self.libc.RM_SetSelectedOutputOn(self.id, selected_output)
 
-    def RM_SetSpeciesSaveOn(self, save_on):
+    def rm_set_species_save_on(self, save_on):
         """Enable or disable saving of aqueous species concentrations.
 
         Controls whether PhreeqcRM calculates and stores individual aqueous
@@ -1498,17 +1498,17 @@ class PhreeqcRM:
             - Species-specific output and post-processing
 
         Examples:
-            >>> rm.RM_SetSpeciesSaveOn(1)  # Enable species saving
-            >>> rm.RM_RunCells()  # Calculate with species saving
+            >>> rm.rm_set_species_save_on(1)  # Enable species saving
+            >>> rm.rm_run_cells()  # Calculate with species saving
             >>> species_conc = np.zeros(nxyz * nspecies)
-            >>> rm.RM_GetSpeciesConcentrations(species_conc)
+            >>> rm.rm_get_species_concentrations(species_conc)
         """
         return irm_result(self.libc.RM_SetSpeciesSaveOn(self.id, save_on))
 
-    def RM_SetTemperature(self, t):
+    def rm_set_temperature(self, t):
         return self.libc.RM_SetTemperature(self.id, t.ctypes)
 
-    def RM_SetTime(self, time):
+    def rm_set_time(self, time):
         """Set the current simulation time for geochemical calculations.
 
         Updates the simulation time used by PhreeqcRM for kinetic rate
@@ -1531,16 +1531,16 @@ class PhreeqcRM:
         Examples:
             >>> for step in range(num_steps):
             >>>     current_time = step * dt
-            >>>     rm.RM_SetTime(current_time)
-            >>>     rm.RM_SetTimeStep(dt)
-            >>>     rm.RM_RunCells()
+            >>>     rm.rm_set_time(current_time)
+            >>>     rm.rm_set_time_step(dt)
+            >>>     rm.rm_run_cells()
         """
         return irm_result(self.libc.RM_SetTime(self.id, ctypes.c_double(time)))
 
-    def RM_SetTimeConversion(self, conv_factor):
+    def rm_set_time_conversion(self, conv_factor):
         return self.libc.RM_SetTimeConversion(self.id, ctypes.c_double(conv_factor))
 
-    def RM_SetTimeStep(self, time_step):
+    def rm_set_time_step(self, time_step):
         """Set the time step duration for kinetic calculations.
 
         Specifies the time interval over which kinetic reactions will be
@@ -1563,12 +1563,12 @@ class PhreeqcRM:
 
         Examples:
             >>> dt = 0.1  # 0.1 day time step
-            >>> rm.RM_SetTimeStep(dt)
-            >>> rm.RM_RunCells()  # Integrate kinetics over dt
+            >>> rm.rm_set_time_step(dt)
+            >>> rm.rm_run_cells()  # Integrate kinetics over dt
         """
         return irm_result(self.libc.RM_SetTimeStep(self.id, ctypes.c_double(time_step)))
 
-    def RM_SetUnitsExchange(self, option):
+    def rm_set_units_exchange(self, option):
         """Set units for exchange reactions.
 
         Args:
@@ -1579,16 +1579,16 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetUnitsExchange(self.id, option))
 
-    def RM_SetUnitsGasPhase(self, option) -> None:
+    def rm_set_units_gas_phase(self, option) -> None:
         self.libc.RM_SetUnitsGasPhase(self.id, option)
 
-    def RM_SetUnitsKinetics(self, option) -> None:
+    def rm_set_units_kinetics(self, option) -> None:
         self.libc.RM_SetUnitsKinetics(self.id, option)
 
-    def RM_SetUnitsPPassemblage(self, option):
+    def rm_set_units_p_passemblage(self, option):
         return self.libc.RM_SetUnitsPPassemblage(self.id, option)
 
-    def RM_SetUnitsSolution(self, option):
+    def rm_set_units_solution(self, option):
         """Set concentration units for aqueous solutions.
 
         Specifies the units for solution concentrations used in all
@@ -1612,17 +1612,17 @@ class PhreeqcRM:
             - Initial condition concentration scaling
 
         Examples:
-            >>> rm.RM_SetUnitsSolution(2)  # Use mmol/L
+            >>> rm.rm_set_units_solution(2)  # Use mmol/L
             >>> # Now all concentrations are in millimolar units
             >>> conc_mmol = np.array([1.0, 0.5, 2.0])  # 1, 0.5, 2 mmol/L
-            >>> rm.RM_SetConcentrations(conc_mmol)
+            >>> rm.rm_set_concentrations(conc_mmol)
         """
         return irm_result(self.libc.RM_SetUnitsSolution(self.id, option))
 
-    def RM_SetUnitsSSassemblage(self, option):
+    def rm_set_units_ss_assemblage(self, option):
         return self.libc.RM_SetUnitsSSassemblage(self.id, option)
 
-    def RM_SetUnitsSurface(self, option):
+    def rm_set_units_surface(self, option):
         """Set units for surface complexation reactions.
 
         Args:
@@ -1633,16 +1633,16 @@ class PhreeqcRM:
         """
         return irm_result(self.libc.RM_SetUnitsSurface(self.id, option))
 
-    def RM_SpeciesConcentrations2Module(self, species_conc):
+    def rm_species_concentrations2_module(self, species_conc):
         return self.libc.RM_SpeciesConcentrations2Module(self.id, species_conc.ctypes)
 
-    def RM_UseSolutionDensityVolume(self, tf):
+    def rm_use_solution_density_volume(self, tf):
         return self.libc.RM_UseSolutionDensityVolume(self.id, tf)
 
-    def RM_WarningMessage(self, warn_str):
+    def rm_warning_message(self, warn_str):
         return self.libc.RM_WarningMessage(self.id, warn_str)
 
-    def RM_GetComponentCount(self):
+    def rm_get_component_count(self):
         """Get the number of transport components in the system.
 
         Returns the number of chemical components (elements plus charge balance)
@@ -1664,8 +1664,8 @@ class PhreeqcRM:
 
         Examples:
             >>> rm.run_initial_from_file("initial.pqi", ic_array)
-            >>> ncomp = rm.RM_GetComponentCount()
+            >>> ncomp = rm.rm_get_component_count()
             >>> conc_array = np.zeros(nxyz * ncomp)
-            >>> rm.RM_GetConcentrations(conc_array)
+            >>> rm.rm_get_concentrations(conc_array)
         """
         return self.libc.RM_GetComponentCount(self.id)

@@ -90,7 +90,7 @@ def run_simulation(pqi_file, kinetic=False):
 
     # Get initial concentrations
     cc = np.zeros(n_cells * n_comps, dtype=np.float64)
-    phr.RM_GetConcentrations(cc)
+    phr.rm_get_concentrations(cc)
 
     # Prepare monitoring
     monitored_species = ["Benz", "Ethyl"]
@@ -120,10 +120,10 @@ def run_simulation(pqi_file, kinetic=False):
         time_vector[step] = current_time
 
         # 1) Reactive step
-        phr.RM_SetTime(current_time * 3600 * 24)  # Convert to seconds
-        phr.RM_SetTimeStep(dt * 3600 * 24)
-        phr.RM_RunCells()
-        phr.RM_GetConcentrations(cc)
+        phr.rm_set_time(current_time * 3600 * 24)  # Convert to seconds
+        phr.rm_set_time_step(dt * 3600 * 24)
+        phr.rm_run_cells()
+        phr.rm_get_concentrations(cc)
         conc_matrix = cc.reshape((n_comps, n_cells)).T
 
         # 2) Transport step
@@ -143,7 +143,7 @@ def run_simulation(pqi_file, kinetic=False):
 
         # Update concentrations in PhreeqcRM
         cc = conc_matrix.T.flatten()
-        phr.RM_SetConcentrations(cc)
+        phr.rm_set_concentrations(cc)
 
     elapsed = time.time() - start_time
     print(f"Simulation completed in {elapsed:.2f} seconds")

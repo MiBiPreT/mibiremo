@@ -55,8 +55,8 @@ n_species = len(species)
 # Get initial concentrations
 cc = np.zeros(n_cells * n_comps, dtype=np.float64)
 cs = np.zeros(n_cells * n_species, dtype=np.float64)
-phr.RM_GetConcentrations(cc)
-phr.RM_GetSpeciesConcentrations(cs)
+phr.rm_get_concentrations(cc)
+phr.rm_get_species_concentrations(cs)
 
 # Time step setup
 dt = sim_duration / n_steps * 24 * 3600.0  # Convert days to seconds
@@ -81,12 +81,12 @@ for step in range(1, n_steps):
     time_vector[step] = current_time
 
     # Run simulation step
-    phr.RM_SetTime(current_time)
-    phr.RM_SetTimeStep(dt)
-    status = phr.RM_RunCells()
+    phr.rm_set_time(current_time)
+    phr.rm_set_time_step(dt)
+    status = phr.rm_run_cells()
 
     # Store results
-    status = phr.RM_GetConcentrations(cc)
+    status = phr.rm_get_concentrations(cc)
     concentration_results[step, :] = cc[component_map]
 
 elapsed = time.time() - start_time
@@ -104,10 +104,10 @@ plt.title("BTEX dissolution")
 
 # Create second y-axis for dissolved concentrations (mg/L)
 ax2 = plt.twinx()
-dissolved_mgL = concentration_results[:, [0, 2]].copy()
-dissolved_mgL[:, 0] *= 78.11 * 1000  # Benzene: mol/L to mg/L
-dissolved_mgL[:, 1] *= 106.17 * 1000  # Ethylbenzene: mol/L to mg/L
-ax2.plot(time_vector / 86400.0, dissolved_mgL, "--")
+dissolved_mgl = concentration_results[:, [0, 2]].copy()
+dissolved_mgl[:, 0] *= 78.11 * 1000  # Benzene: mol/L to mg/L
+dissolved_mgl[:, 1] *= 106.17 * 1000  # Ethylbenzene: mol/L to mg/L
+ax2.plot(time_vector / 86400.0, dissolved_mgl, "--")
 ax2.set_ylabel("Dissolved concentration (mg/L)")
 ax2.legend([component_headings[0], component_headings[2]])
 

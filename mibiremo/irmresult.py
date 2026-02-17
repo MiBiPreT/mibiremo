@@ -44,7 +44,7 @@ class IRMStatus(NamedTuple):
         """Return True if the operation was successful (code == 0).
 
         Examples:
-            >>> result = rm.RM_RunCells()
+            >>> result = rm.rm_run_cells()
             >>> if result:
             >>>     print("Success!")
             >>> else:
@@ -56,7 +56,7 @@ class IRMStatus(NamedTuple):
         """Return the raw integer code for backwards compatibility.
 
         Examples:
-            >>> result = rm.RM_RunCells()
+            >>> result = rm.rm_run_cells()
             >>> if int(result) == 0:  # Still works
             >>>     print("Success!")
         """
@@ -80,7 +80,7 @@ class IRMStatus(NamedTuple):
             RuntimeError: If the status code indicates failure (non-zero).
 
         Examples:
-            >>> result = rm.RM_LoadDatabase("invalid.dat")
+            >>> result = rm.rm_load_database("invalid.dat")
             >>> result.raise_for_status("Loading database")
             RuntimeError: Loading database: IRM_FAIL: Failure, Unspecified
         """
