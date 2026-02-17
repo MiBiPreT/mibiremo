@@ -1,2 +1,4 @@
+dirs:
+  - "."
 ignorePatterns:
   - pattern: "https://doi.org/.*"
