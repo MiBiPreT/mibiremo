@@ -6,7 +6,7 @@ CaCO3(s) + 2HCl(aq) → CaCl2(aq) + CO2(g) + H2O(l)
 assuming chemical reactions at equilibrium.
 
 Author: Matteo Masi
-Last revision: 10/06/2025
+Last revision: 17/02/2026
 """
 
 import time

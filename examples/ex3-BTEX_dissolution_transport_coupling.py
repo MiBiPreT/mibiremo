@@ -10,7 +10,7 @@ Compares two simulation types:
 - Kinetic dissolution (NAPL kinetic dissolution)
 
 Author: Matteo Masi
-Last revision: 09/06/2025
+Last revision: 17/02/2026
 """
 
 import time
