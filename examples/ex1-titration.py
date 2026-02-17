@@ -13,13 +13,15 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import mibiremo
+from pathlib import Path
+from importlib.resources import files
 
 
 # Global settings
-database_path = "../mibiremo/database/phreeqc.dat"  # .dat database path
+database_path = str(files("mibiremo").joinpath("database/phreeqc.dat"))  # .dat database path
 n_cells = 1000  # Number of model cells
 n_threads = 4  # Multithread calculation (-1 for all CPUs)
-pqi_file = "pqi/ex1_Calcite_titration.pqi"  # Phreeqc input file
+pqi_file = str(Path(__file__).parent / "pqi/ex1_Calcite_titration.pqi")  # Phreeqc input file
 hcl_range = [0.0, 4.0]  # mol/L
 
 # Unit settings
