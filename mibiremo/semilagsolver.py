@@ -114,7 +114,7 @@ class SemiLagSolver:
         self.dt = dt
         self.dx = x[1] - x[0]
 
-    def cubic_spline_advection(self, C_bound) -> None:
+    def cubic_spline_advection(self, c_bound) -> None:
         """Solve the advection step using cubic spline interpolation.
 
         Implements the Method of Characteristics (MOC) for the advection equation
@@ -128,7 +128,7 @@ class SemiLagSolver:
             3. Applying inlet boundary condition for points that tracked outside domain
 
         Args:
-            C_bound (float): Inlet concentration value applied at the left boundary
+            c_bound (float): Inlet concentration value applied at the left boundary
                 (x=0) for any characteristic lines that originated from outside the
                 computational domain. Units should match the concentration field.
 
@@ -149,10 +149,10 @@ class SemiLagSolver:
         k0 = xi <= 0
         xi[k0] = 0
         yi = cs(xi)
-        yi[k0] = C_bound
+        yi[k0] = c_bound
         self.C = yi
 
-    def saulyev_solver_alt(self, C_bound) -> None:
+    def saulyev_solver_alt(self, c_bound) -> None:
         """Solve the diffusion step using the Saul'yev alternating direction method.
 
         Implements the Saul'yev scheme for the diffusion equation ∂C/∂t = D∂²C/∂x²
@@ -163,7 +163,7 @@ class SemiLagSolver:
             3. Final solution is the average of both sweeps
 
         Args:
-            C_bound (float): Inlet concentration value applied at the left boundary
+            c_bound (float): Inlet concentration value applied at the left boundary
                 during the diffusion solve. This maintains consistency with the
                 advection boundary condition.
 
@@ -175,7 +175,7 @@ class SemiLagSolver:
             - **Averaging**: Combines both solutions to achieve second-order accuracy
 
         Boundary Conditions:
-            - **Left boundary (x=0)**: Dirichlet condition with prescribed C_bound
+            - **Left boundary (x=0)**: Dirichlet condition with prescribed c_bound
             - **Right boundary**: Zero gradient (Neumann) condition implemented
               by using the same concentration as the last interior point
 
@@ -201,7 +201,7 @@ class SemiLagSolver:
         # A) L-R direction
         for i in range(len(CLR)):
             if i == 0:  # left boundary
-                solA = theta * C_bound
+                solA = theta * c_bound
             else:
                 solA = theta * CLR[i - 1]
             solB = (1 - theta) * C_init[i]
@@ -223,7 +223,7 @@ class SemiLagSolver:
         # Average L-R and R-L solutions and update to final state
         self.C = (CLR + CRL) / 2
 
-    def transport(self, C_bound) -> np.ndarray:
+    def transport(self, c_bound) -> np.ndarray:
         """Perform one complete transport time step with coupled advection-diffusion.
 
         Executes the full semi-Lagrangian algorithm by sequentially applying
@@ -236,7 +236,7 @@ class SemiLagSolver:
             2. **Diffusion Step** using Saul'yev method
 
         Args:
-            C_bound (float): Inlet boundary concentration applied at x=0 for both
+            c_bound (float): Inlet boundary concentration applied at x=0 for both
                 advection and diffusion steps. This represents the concentration
                 of material entering the domain (e.g., injection well concentration,
                 upstream boundary condition, etc.).
@@ -253,9 +253,9 @@ class SemiLagSolver:
             to the returned concentration field.
         """
         # Step 1: Solve advection equation using cubic spline MOC
-        self.cubic_spline_advection(C_bound)
+        self.cubic_spline_advection(c_bound)
 
         # Step 2: Solve diffusion equation using Saul'yev alternating direction method
-        self.saulyev_solver_alt(C_bound)
+        self.saulyev_solver_alt(c_bound)
 
         return self.C
