@@ -1,0 +1,21 @@
+SOLUTION 1
+    temp      25
+    pH        8
+	units     mol/kgw
+    Cl        0.05 
+    Na        0.05 
+    Ca        1e-6
+	-water    1 # kg
+	
+EQUILIBRIUM_PHASES 1
+ O2(g)  -0.7 # Atm pressure
+ CO2(g) -3.5 # Atm pressure
+ Calcite 0 1
+
+SELECTED_OUTPUT 1
+    -high_precision       true
+    -charge_balance true
+    -pH true
+    -pe true
+    -water true
+    -molalities           H+  OH- 
