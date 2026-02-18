@@ -33,13 +33,8 @@ jobs:
         run: python -m pytest --cov --cov-report term --cov-report xml --junitxml=xunit-result.xml tests/
       - name: Correct coverage paths
         run: sed -i "s+$PWD/++g" coverage.xml
-      - name: Validate SonarCloud token
-        run: |
-          curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
-          "https://sonarcloud.io/api/authentication/validate" | grep -q '"valid":true' \
-          && echo "Token OK" || echo "Token INVALID"
       - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
