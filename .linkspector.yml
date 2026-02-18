@@ -3,3 +3,5 @@ dirs:
 useGitIgnore: true
 excludedFiles:
   - ./README.dev.md
+ignorePatterns:
+  - pattern: "https://doi.org/.*"
