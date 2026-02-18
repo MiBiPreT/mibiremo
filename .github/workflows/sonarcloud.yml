@@ -39,8 +39,7 @@ jobs:
           "https://sonarcloud.io/api/authentication/validate" | grep -q '"valid":true' \
           && echo "Token OK" || echo "Token INVALID"
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
