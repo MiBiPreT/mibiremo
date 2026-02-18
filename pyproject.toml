@@ -53,6 +53,7 @@ doc = [
     "mkdocs-autorefs >=1.4.0",
     "mdx-include >=1.4.1",
     "mkdocs-markdownextradata-plugin >=0.2.5",
+    "mike >=2.1.3",
 ]
 publishing = [
     "build",
