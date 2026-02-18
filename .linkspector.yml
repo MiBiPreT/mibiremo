@@ -1,6 +1,7 @@
 dirs:
-  - "."
+  - ./
+useGitIgnore: true
+excludedFiles:
+  - ./README.dev.md
 ignorePatterns:
   - pattern: "https://doi.org/.*"
-excludedFiles:
-  - README.dev.md
