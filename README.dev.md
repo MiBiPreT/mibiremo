@@ -121,3 +121,20 @@ Before you make a new release:
 1. Run the unit tests with `pytest -v`
 
 Now, make a [release on GitHub](https://github.com/MiBiPret/mibiremo/releases/new). The `publish.yml` workflow will publish the software on PyPI. GitHub-Zenodo integration will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.
+
+
+## Getting a new `SONAR_TOKEN`
+If the Sonar pipeline does not run for 60 days, the `SONAR_TOKEN` expires.
+You can see the original announcement [in this thread](https://community.sonarsource.com/t/removing-inactive-tokens-after-60-days/142451/6).
+
+The expiry happens silently, so any github action workflows using Sonar will appear to suddenly fail with cryptic errors such as `"ERROR Failed to query JRE metadata: . Please check the property sonar.token or the environment variable SONAR_TOKEN. "`. If you see this, it means you need to recreate the `SONAR_TOKEN` for this repository. You will need some admin privileges to carry out the following steps:
+
+1. Go to 'My Account' on the sonarcloud.io site after logging in (or try following this URL: <https://sonarcloud.io/account>)
+1. Click on the 'Security' tab (<https://sonarcloud.io/account/security>)
+1. Enter a token name in the field under "Generate Tokens" and click "Generate Token"
+1. Copy the text for the generated token (you will not be able to see this text again)
+1. Go to the "Actions secrets and variables" section of the `mibiremo` repository on GitHub (<https://github.com/MiBiPreT/mibiremo/settings/secrets/actions>)
+1. Edit the existing `SONAR_TOKEN` (or create it, if it does not exist). Paste in the token text you copied from sonarcloud earlier
+1. Click "Update Secret"
+
+This should result in the newly created `SONAR_TOKEN` being used in any new github workflow runs. You may also choose to rerun some previously failed workflows (these should now succeed).
