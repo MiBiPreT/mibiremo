@@ -2,3 +2,5 @@ dirs:
   - "."
 ignorePatterns:
   - pattern: "https://doi.org/.*"
+excludedFiles:
+  - README.dev.md
