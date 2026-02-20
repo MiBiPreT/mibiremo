@@ -1,17 +1,22 @@
 site_name: mibiremo
 site_description: Microbiome Bioremediation Reaction Module, a Python interface to PhreeqcRM library
-site_author: Matteo Masi, Jaro Camphuijsen
+site_author: Matteo Masi, Jaro Camphuijsen, Robin Richardson
 site_url: https://MiBiPreT.github.io/mibiremo
 repo_name: MiBiPreT/mibiremo
 repo_url: https://github.com/MiBiPreT/mibiremo
 edit_uri: "edit/main/docs/"
-copyright: Copyright &copy; 2025, MIBIREM Project
+copyright: Copyright &copy; 2026, MIBIREM Project
 
 nav:
   - Home: index.md
   - Introduction: introduction.md
   - Development: development.md
   - Examples: examples.md
+  - Tutorial Notebooks:
+    - Titration: notebooks/ex1-titration.ipynb
+    - BTEX dissolution: notebooks/ex2-BTEX_dissolution.ipynb
+    - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
+
   - API Reference: reference.md
 
 theme:
@@ -52,20 +57,24 @@ theme:
 
 
 plugins:
-- search
-- autorefs
-- mkdocstrings:
-    default_handler: python
-    handlers:
-      python:
-        options:
-          show_submodules: true
-          show_source: true
-          show_docstring_description: true
-          docstring_style: google
-          docstring_section_style: table
-          filters:
-            - "!^RM_"
+  - search
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_submodules: true
+            show_source: true
+            show_docstring_description: true
+            docstring_style: google
+            docstring_section_style: table
+            filters:
+              - "!^RM_"
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+      custom_mathjax_url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"
 
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:

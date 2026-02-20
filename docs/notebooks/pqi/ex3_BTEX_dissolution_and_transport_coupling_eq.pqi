@@ -1,0 +1,35 @@
+##################################
+# PHASES
+##################################
+PHASES
+	Benznapl; Benz = Benz; 			log_k -1.64 	# Solubility benzene: 0.0228 mol/L 
+	Ethylnapl; Ethyl = Ethyl; 		log_k -2.81 	# Solubility ethyilbenzene: 0.00152 mol/l
+
+
+#########################
+# SOLUTIONS
+#########################
+SOLUTION 0  Groundwater
+	units            mmol/kgw
+	temp             20.0
+	pH               7.0     charge
+	Cl        		 5.0    
+	K        		 5.0
+
+SOLUTION 1  Initial solution
+	units            mmol/kgw
+	temp             20.0
+	pH               7.0     charge
+	Cl        		 1.0    
+	K        		 1.0
+
+EQUILIBRIUM_PHASES 1
+	Ethylnapl 0 0.03
+	Benznapl  0 0.03
+
+SOLUTION 2  Initial solution
+	units            mmol/kgw
+	temp             20.0
+	pH               7.0     charge
+	Cl        		 1.0    
+	K        		 1.0
