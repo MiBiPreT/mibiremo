@@ -3,8 +3,7 @@ BTEX dissolution modeling using MiBiReMo and PhreeqcRM.
 
 Models the dissolution of benzene and ethylbenzene from NAPL phase into aqueous phase.
 
-Author: Matteo Masi
-Last revision: 17/02/2026
+Last revision: 20/02/2026
 """
 
 import time
