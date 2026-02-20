@@ -1,11 +1,13 @@
 # MiBiReMo - Examples
 
-Currently, three examples are available.
-To run the examples, navigate to the `examples` directory and run the desired example script:
+Currently, three examples are available as both Python scripts and Jupyter notebooks.
+To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
 python ex1-titration.py
 ```
+
+Interactive Jupyter notebooks are also available in the `examples` folder, and can be viewed in the [Notebooks](notebooks/ex1-titration.ipynb) section.
 
 ## Example 1 - Titration
 The first example `ex1-titration.py` demonstrates the use of the package to simulate a simple titration in a batch, where a solution is equilibrated with a mineral phase (calcite) and the pH is adjusted by adding HCl.
