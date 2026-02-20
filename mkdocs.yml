@@ -13,8 +13,9 @@ nav:
   - Development: development.md
   - Examples: examples.md
   - Tutorial Notebooks:
-    - Hello: notebooks/hello.ipynb
     - Titration: notebooks/ex1-titration.ipynb
+    - BTEX dissolution: notebooks/ex2-BTEX_dissolution.ipynb
+    - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
 
   - API Reference: reference.md
 
@@ -71,7 +72,7 @@ plugins:
             filters:
               - "!^RM_"
   - mkdocs-jupyter:
-      execute: true
+      execute: false
       include_source: true
       custom_mathjax_url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"
 
