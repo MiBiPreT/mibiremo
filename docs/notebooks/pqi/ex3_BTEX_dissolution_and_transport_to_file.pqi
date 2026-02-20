@@ -1,0 +1,78 @@
+TITLE BTEX dissolution and transport - export .sel file
+
+###################################
+# 1) REDEFINE PURE PHASE AS PHASES
+##################################
+PHASES
+	Benznapl; Benz = Benz; 			log_k -1.64 	# Solubility benzene: 0.0228 mol/L 
+	Ethylnapl; Ethyl = Ethyl; 		log_k -2.81 	# Solubility ethyilbenzene: 0.00152 mol/l
+
+
+
+#########################
+# 2) DEFINE SOLUTIONS
+#########################
+
+# Contaminated spot
+EQUILIBRIUM_PHASES 1
+	Ethylnapl 0 0.03
+	Benznapl  0 0.03
+
+SOLUTION 1  Contaminated spot
+	units            mmol/kgw
+	temp             25.0
+	pH               7.0     charge
+	Cl        		 1.0    
+	K        		 1.0
+
+
+# Left boundary condition
+SOLUTION 0  Groundwater
+	units            mmol/kgw
+	temp             25.0
+	pH               7.0     charge
+	Cl        		 5.0    
+	K        		 5.0
+
+# Other cells in the domain - initial solution
+SOLUTION 2-100  Initial solutions
+	units            mmol/kgw
+	temp             25.0
+	pH               7.0     charge
+	Cl        		 1.0    
+	K        		 1.0
+END
+
+
+#########################
+# 3) TRANSPORT
+#########################
+
+# dx = L/num_cells
+# PV = (number of shifts + 0.5) / number of cells
+# Pore velocity = dx / dt
+# dt = dx / v
+# v = 1.0 m/d
+
+TRANSPORT
+        -cells           100 				# Number of cells
+        -lengths         100*0.5 			# Length (m) of one cell
+		-time_step       43200	        	# in seconds
+        -shifts          200				# Number of steps
+        -flow_direction  forward 			# "forward", "back" or "diffusion_only": from lower to higher cell numbers
+        -boundary_conditions   flux  flux	# "constant", "closed", or "flux". "Flux" boundary condition for column ends.
+        -diffusion_coefficient 0.0e-9 		# Global effective diffusion coefficient De.    DL = De + alpha*v
+        -dispersivities  100*0.05 			# Dispersivity (m) - alpha.
+        -correct_disp    false 				# Dispersivity is multiplied by (1 + 1/cells) for column ends with flux boundary conditions
+        -punch_cells     100    			# Output: outlet cell for punch/graph
+        -punch_frequency 1
+PRINT; -reset false; -status false  		# Avoid printing results (speed-up the simulation)
+
+SELECTED_OUTPUT 1
+		-file ex3_BTEX_dissolution_and_transport.sel
+        -time
+		-distance
+        -totals          Benz Ethyl
+        -high_precision  true
+END
+
