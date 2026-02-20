@@ -9,8 +9,7 @@ Compares two simulation types:
 - Equilibrium dissolution (NAPL as equilibrium phases)
 - Kinetic dissolution (NAPL kinetic dissolution)
 
-Author: Matteo Masi
-Last revision: 17/02/2026
+Last revision: 20/02/2026
 """
 
 import time
