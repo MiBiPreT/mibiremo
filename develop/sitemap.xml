@@ -2,22 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/</loc>
-         <lastmod>2026-02-19</lastmod>
+         <lastmod>2026-02-20</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/development/</loc>
-         <lastmod>2026-02-19</lastmod>
+         <lastmod>2026-02-20</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/examples/</loc>
-         <lastmod>2026-02-19</lastmod>
+         <lastmod>2026-02-20</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/introduction/</loc>
-         <lastmod>2026-02-19</lastmod>
+         <lastmod>2026-02-20</lastmod>
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/</loc>
-         <lastmod>2026-02-19</lastmod>
+         <lastmod>2026-02-20</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/notebooks/ex1-titration/</loc>
+         <lastmod>2026-02-20</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/notebooks/ex2-BTEX_dissolution/</loc>
+         <lastmod>2026-02-20</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/notebooks/ex3-BTEX_dissolution_transport_coupling/</loc>
+         <lastmod>2026-02-20</lastmod>
     </url>
 </urlset>
