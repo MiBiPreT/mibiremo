@@ -1058,10 +1058,12 @@ In general it should not be necessary to test this, but if necessary, use <a hre
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>bump-my-version<span class="w"> </span>bump<span class="w"> </span>patch<span class="w">  </span><span class="c1"># bumps from e.g. 0.3.2 to 0.3.3</span>
 </code></pre></div>
 <h2 id="making-a-release">Making a release</h2>
-<p>Before you make a new release:
-1. Verify that the information in <code>CITATION.cff</code> is correct.
-1. Make sure the <a href="#versioning">version has been updated</a>.
-1. Run the unit tests with <code>pytest -v</code></p>
+<p>Before you make a new release:</p>
+<ol>
+<li>Verify that the information in <code>CITATION.cff</code> is correct.</li>
+<li>Make sure the <a href="#versioning">version has been updated</a>.</li>
+<li>Run the unit tests with <code>pytest -v</code></li>
+</ol>
 <p>Now, make a <a href="https://github.com/MiBiPret/mibiremo/releases/new">release on GitHub</a>. The <code>publish.yml</code> workflow will publish the software on PyPI. GitHub-Zenodo integration will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.</p>
 <h2 id="getting-a-new-sonar_token">Getting a new <code>SONAR_TOKEN</code></h2>
 <p>If the Sonar pipeline does not run for 60 days, the <code>SONAR_TOKEN</code> expires.
