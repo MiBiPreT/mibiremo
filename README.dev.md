@@ -116,6 +116,7 @@ bump-my-version bump patch  # bumps from e.g. 0.3.2 to 0.3.3
 ## Making a release
 
 Before you make a new release:
+
 1. Verify that the information in `CITATION.cff` is correct.
 1. Make sure the [version has been updated](#versioning).
 1. Run the unit tests with `pytest -v`
