@@ -1,0 +1,35 @@
+SOLUTION 1
+units   	mol/kgw
+temp    	20.0
+density		1.0
+pH 			7.0000 charge 
+pe			4.0			
+Ethylnapl   1.0				# Ethylbenzene/MAH NAPL
+Ethyl		0.0				# Ethylbenzene dissolved
+Benznapl	1.0				# Benzene NAPL
+Benz		0.0				# Benzene dissolved
+-water 		1				# kg	
+
+
+KINETICS 1
+Benznapl
+	-formula Benznapl -1.0  Benz	1.0  
+	-parms  1.0e-05
+
+Ethylnapl
+	-formula  Ethylnapl -1.0  Ethyl   1.0   
+	-parms  1.0e-05
+
+INCREMENTAL_REACTIONS true
+
+END
+
+SELECTED_OUTPUT 1
+    -high_precision       true
+    -charge_balance true
+    -pH true
+    -pe true
+    -water true
+
+
+

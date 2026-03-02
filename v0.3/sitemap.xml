@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/development/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/examples/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/introduction/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/reference/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/notebooks/ex1-titration/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/notebooks/ex2-BTEX_dissolution/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/v0.3/notebooks/ex3-BTEX_dissolution_transport_coupling/</loc>
+         <lastmod>2026-03-02</lastmod>
+    </url>
+</urlset>
