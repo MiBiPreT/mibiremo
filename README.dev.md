@@ -68,7 +68,9 @@ To see the results on the command line, run
 coverage report
 ```
 
-`coverage` can also generate output in HTML and other formats; see `coverage help` for more information.## Running linters locally
+`coverage` can also generate output in HTML and other formats; see `coverage help` for more information.
+
+## Running linters locally
 
 For linting and sorting imports we will use [ruff](https://beta.ruff.rs/docs/). Running the linters requires an
 activated virtual environment with the development tools installed.
