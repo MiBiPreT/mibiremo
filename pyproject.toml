@@ -27,6 +27,7 @@ dependencies = [
     "matplotlib",
     "pyqt5",
     "scipy",
+    "numba>=0.64",
 ]
 description = "Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
