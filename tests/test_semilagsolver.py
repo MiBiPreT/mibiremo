@@ -2,6 +2,7 @@
 
 import pytest
 import numpy as np
+import mibiremo.semilagsolver as _mod
 from mibiremo.semilagsolver import SemiLagSolver
 
 
@@ -321,3 +322,20 @@ class TestTransportMethod:
         assert c_result is solver.C
         # Should be a numpy array
         assert isinstance(c_result, np.ndarray)
+
+
+class TestNumericalConsistency:
+    """Tests for the JIT-compiled Saul'yev kernel."""
+
+    def test_numba_function_directly(self):
+        """Call _saulyev_alt_numba directly and verify output shape and finiteness."""
+        rng = np.random.default_rng(7)
+        c_init = rng.random(51)
+        theta = 0.5
+        c_bound = 0.3
+
+        result = _mod._saulyev_alt_numba(c_init.copy(), theta, c_bound)
+
+        assert isinstance(result, np.ndarray)
+        assert result.shape == c_init.shape
+        assert np.all(np.isfinite(result))
