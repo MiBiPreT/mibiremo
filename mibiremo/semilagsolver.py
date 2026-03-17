@@ -1,15 +1,41 @@
 """Semi-Lagrangian solver for 1D advection-diffusion equation on a uniform grid.
 
 Author: Matteo Masi
-Last revision: 17/02/2026
+Last revision: 17/03/2026
 
 """
 
 import warnings
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from numba import njit as _njit
 
 warnings.filterwarnings("ignore")
+
+
+@_njit(cache=True)
+def _saulyev_alt_numba(c_init, theta, c_bound):
+    """JIT-compiled Saul'yev alternating-direction."""
+    n = len(c_init)
+    clr = c_init.copy()
+    crl = c_init.copy()
+    inv = 1.0 / (1.0 + theta)
+
+    # L-R sweep
+    for i in range(n):
+        sola = theta * c_bound if i == 0 else theta * clr[i - 1]
+        solb = (1.0 - theta) * c_init[i]
+        solc = theta * c_init[i + 1] if i < n - 1 else theta * c_init[i]
+        clr[i] = (sola + solb + solc) * inv
+
+    # R-L sweep
+    for i in range(n - 1, -1, -1):
+        sola = theta * clr[-1] if i == n - 1 else theta * crl[i + 1]
+        solb = (1.0 - theta) * c_init[i]
+        solc = theta * c_init[i - 1] if i > 0 else theta * c_init[i]
+        crl[i] = (sola + solb + solc) * inv
+
+    return (clr + crl) * 0.5
 
 
 class SemiLagSolver:
@@ -190,38 +216,8 @@ class SemiLagSolver:
             approach eliminates the restrictive stability constraint of explicit
             methods while maintaining computational efficiency.
         """
-        dt = self.dt
-        theta = self.d * dt / (self.dx**2)
-
-        # Assign current C state as initial condition
-        c_init = self.C.copy()
-        clr = self.C.copy()
-        crl = self.C.copy()
-
-        # A) L-R direction
-        for i in range(len(clr)):
-            if i == 0:  # left boundary
-                sola = theta * c_bound
-            else:
-                sola = theta * clr[i - 1]
-            solb = (1 - theta) * c_init[i]
-            solc = theta * c_init[i + 1] if i < len(clr) - 1 else theta * c_init[i]
-            # L-R Solution
-            clr[i] = (sola + solb + solc) / (1 + theta)
-
-        # B) R-L direction
-        for i in range(len(crl) - 1, -1, -1):
-            if i == len(crl) - 1:  # right boundary (take from LR solution)
-                sola = theta * clr[-1]
-            else:
-                sola = theta * crl[i + 1]
-            solb = (1 - theta) * c_init[i]
-            solc = theta * c_init[i - 1] if i > 0 else theta * c_init[i]
-            # R-L Solution
-            crl[i] = (sola + solb + solc) / (1 + theta)
-
-        # Average L-R and R-L solutions and update to final state
-        self.C = (clr + crl) / 2
+        theta = self.d * self.dt / (self.dx**2)
+        self.C = _saulyev_alt_numba(self.C, theta, float(c_bound))
 
     def transport(self, c_bound) -> np.ndarray:
         """Perform one complete transport time step with coupled advection-diffusion.
