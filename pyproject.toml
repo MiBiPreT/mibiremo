@@ -28,6 +28,7 @@ dependencies = [
     "pyqt5",
     "scipy",
     "numba>=0.64",
+    "phreeqcrm",
 ]
 description = "Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
@@ -74,6 +75,9 @@ packages = ["mibiremo"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:builtin type SwigPy:DeprecationWarning",
+]
 
 [tool.coverage.run]
 branch = true
