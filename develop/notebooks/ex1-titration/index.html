@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/icon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -1663,7 +1663,7 @@ Chemical reactions within each step are assumed to be istantaneous (i.e., equili
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-1">
@@ -1913,10 +1913,8 @@ Species:
 
 
 <span class="c1"># Initialize concentration vectors</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cells</span> <span class="o">*</span> <span class="n">n_comps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-<span class="n">cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cells</span> <span class="o">*</span> <span class="n">n_species</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_get_concentrations</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_get_species_concentrations</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">GetConcentrations</span><span class="p">()</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">GetSpeciesConcentrations</span><span class="p">()</span>
 
 <span class="c1"># HCl concentration vector</span>
 <span class="n">hcl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">hcl_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hcl_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_cells</span><span class="p">)</span>  <span class="c1"># mol/L</span>
@@ -1926,7 +1924,7 @@ Species:
 <span class="n">indx_h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">species</span> <span class="o">==</span> <span class="s2">"H+"</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
 <span class="c1"># Add HCl</span>
-<span class="n">cs_r</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_species</span><span class="p">,</span> <span class="n">n_cells</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">cs_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_species</span><span class="p">,</span> <span class="n">n_cells</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 <span class="n">cs_r</span><span class="p">[:,</span> <span class="n">indx_cl</span><span class="p">]</span> <span class="o">+=</span> <span class="n">hcl</span>  <span class="c1"># Cl-</span>
 <span class="n">cs_r</span><span class="p">[:,</span> <span class="n">indx_h</span><span class="p">]</span> <span class="o">+=</span> <span class="n">hcl</span>  <span class="c1"># H+</span>
 <span class="n">cs1</span> <span class="o">=</span> <span class="n">cs_r</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">n_cells</span> <span class="o">*</span> <span class="n">n_species</span><span class="p">)</span>  <span class="c1"># Updated concentrations (after adding HCl)</span>
@@ -1939,10 +1937,8 @@ n_species = len(phr.species)
 
 
 # Initialize concentration vectors
-cc = np.zeros(n_cells * n_comps, dtype=np.float64)
-cs = np.zeros(n_cells * n_species, dtype=np.float64)
-phr.rm_get_concentrations(cc)
-phr.rm_get_species_concentrations(cs)
+cc = phr.rm.GetConcentrations()
+cs = phr.rm.GetSpeciesConcentrations()
 
 # HCl concentration vector
 hcl = np.linspace(hcl_range[0], hcl_range[1], n_cells)  # mol/L
@@ -1952,7 +1948,7 @@ indx_cl = np.where(species == "Cl-")[0][0]
 indx_h = np.where(species == "H+")[0][0]
 
 # Add HCl
-cs_r = cs.reshape(n_species, n_cells).T
+cs_r = np.array(cs).reshape(n_species, n_cells).T
 cs_r[:, indx_cl] += hcl  # Cl-
 cs_r[:, indx_h] += hcl  # H+
 cs1 = cs_r.T.reshape(n_cells * n_species)  # Updated concentrations (after adding HCl)</div>
@@ -1992,24 +1988,24 @@ cs1 = cs_r.T.reshape(n_cells * n_species)  # Updated concentrations (after addin
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Tranfer the modified species concentrations back to PhreeqcRM</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_species_concentrations2_module</span><span class="p">(</span><span class="n">cs1</span><span class="p">)</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_set_time</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_set_time_step</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">SpeciesConcentrations2Module</span><span class="p">(</span><span class="n">cs1</span><span class="p">)</span>
+<span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">SetTime</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">SetTimeStep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
 <span class="c1"># Run the simulation</span>
 <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">phr</span><span class="o">.</span><span class="n">rm_run_cells</span><span class="p">()</span>
+<span class="n">phr</span><span class="o">.</span><span class="n">rm</span><span class="o">.</span><span class="n">RunCells</span><span class="p">()</span>
 <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Simulation completed in </span><span class="si">{</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5"># Tranfer the modified species concentrations back to PhreeqcRM
-phr.rm_species_concentrations2_module(cs1)
-phr.rm_set_time(1.0)
-phr.rm_set_time_step(1.0)
+phr.rm.SpeciesConcentrations2Module(cs1)
+phr.rm.SetTime(1.0)
+phr.rm.SetTimeStep(1.0)
 
 # Run the simulation
 start_time = time.time()
-phr.rm_run_cells()
+phr.rm.RunCells()
 elapsed = time.time() - start_time
 print(f"Simulation completed in {elapsed:.2f} seconds")</div>
 </div>
