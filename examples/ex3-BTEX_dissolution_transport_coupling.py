@@ -9,7 +9,7 @@ Compares two simulation types:
 - Equilibrium dissolution (NAPL as equilibrium phases)
 - Kinetic dissolution (NAPL kinetic dissolution)
 
-Last revision: 20/02/2026
+Last revision: 10/04/2026
 """
 
 import time
@@ -32,9 +32,9 @@ n_cells = 1000  # Number of model cells
 dt = 0.1  # Coupling time step (days)
 domain_length = 100.0  # Length of domain (m)
 n_threads = 6  # Threads for calculation (-1 for all CPUs)
-dispersivity = 0.05  # Dispersivity (m²)
+dispersivity = 0.05  # Dispersivity (m2)
 velocity = 1.0  # Groundwater velocity (m/d)
-diffusion_coeff = 0.0  # Molecular diffusion (m²/s)
+diffusion_coeff = 0.0  # Molecular diffusion (m2/s)
 sim_duration = 100.0  # Simulation duration (days)
 
 # Physical properties
@@ -47,7 +47,7 @@ saturation = 1.0  # Saturation
 probe_location = 49.75  # Probe location (m) for results extraction
 
 # Derived parameters
-dispersion_coeff = dispersivity * velocity  # Dispersion coefficient (m²/d)
+dispersion_coeff = dispersivity * velocity  # Dispersion coefficient (m2/d)
 n_steps = int(sim_duration / dt)  # Number of time steps
 contaminant_spot = int(0.5 * n_cells / domain_length)  # Contaminant spot size
 
@@ -90,8 +90,7 @@ def run_simulation(pqi_file, kinetic=False):
     n_comps = len(components)
 
     # Get initial concentrations
-    cc = np.zeros(n_cells * n_comps, dtype=np.float64)
-    phr.rm_get_concentrations(cc)
+    cc = np.array(phr.rm.GetConcentrations())
 
     # Prepare monitoring
     monitored_species = ["Benz", "Ethyl"]
@@ -121,10 +120,10 @@ def run_simulation(pqi_file, kinetic=False):
         time_vector[step] = current_time
 
         # 1) Reactive step
-        phr.rm_set_time(current_time * 3600 * 24)  # Convert to seconds
-        phr.rm_set_time_step(dt * 3600 * 24)
-        phr.rm_run_cells()
-        phr.rm_get_concentrations(cc)
+        phr.rm.SetTime(current_time * 3600 * 24)  # Convert to seconds
+        phr.rm.SetTimeStep(dt * 3600 * 24)
+        phr.rm.RunCells()
+        cc = np.array(phr.rm.GetConcentrations())
         conc_matrix = cc.reshape((n_comps, n_cells)).T
 
         # 2) Transport step
@@ -144,7 +143,7 @@ def run_simulation(pqi_file, kinetic=False):
 
         # Update concentrations in PhreeqcRM
         cc = conc_matrix.T.flatten()
-        phr.rm_set_concentrations(cc)
+        phr.rm.SetConcentrations(cc)
 
     elapsed = time.time() - start_time
     print(f"Simulation completed in {elapsed:.2f} seconds")

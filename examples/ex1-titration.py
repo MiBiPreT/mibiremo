@@ -2,10 +2,10 @@
 MiBiReMo - Example - Calculate calcite titration curve.
 
 This script models the reaction:
-CaCO3(s) + 2HCl(aq) → CaCl2(aq) + CO2(g) + H2O(l)
+CaCO3(s) + 2HCl(aq) -> CaCl2(aq) + CO2(g) + H2O(l)
 assuming chemical reactions at equilibrium.
 
-Last revision: 20/02/2026
+Last revision: 10/04/2026
 """
 
 import time
@@ -51,10 +51,8 @@ n_comps = len(components)  # Number of components
 n_species = len(species)  # Number of species
 
 # Initialize concentration vectors
-cc = np.zeros(n_cells * n_comps, dtype=np.float64)
-cs = np.zeros(n_cells * n_species, dtype=np.float64)
-phr.rm_get_concentrations(cc)
-phr.rm_get_species_concentrations(cs)
+cc = phr.rm.GetConcentrations()
+cs = phr.rm.GetSpeciesConcentrations()
 
 # Set HCl concentrations
 hcl = np.linspace(hcl_range[0], hcl_range[1], n_cells)  # mol/L
@@ -64,18 +62,18 @@ indx_cl = np.where(species == "Cl-")[0][0]
 indx_h = np.where(species == "H+")[0][0]
 
 # Update species concentrations with HCl
-cs_r = cs.reshape(n_species, n_cells).T
+cs_r = np.array(cs).reshape(n_species, n_cells).T
 cs_r[:, indx_cl] += hcl  # Cl-
 cs_r[:, indx_h] += hcl  # H+
 cs1 = cs_r.T.reshape(n_cells * n_species)
 
 # Run simulation with added HCl
-phr.rm_species_concentrations2_module(cs1)
-phr.rm_set_time(1.0)
-phr.rm_set_time_step(1.0)
+phr.rm.SpeciesConcentrations2Module(cs1)
+phr.rm.SetTime(1.0)
+phr.rm.SetTimeStep(1.0)
 
 start_time = time.time()
-phr.rm_run_cells()
+phr.rm.RunCells()
 elapsed = time.time() - start_time
 print(f"Simulation completed in {elapsed:.2f} seconds")
 

@@ -3,7 +3,7 @@ BTEX dissolution modeling using MiBiReMo and PhreeqcRM.
 
 Models the dissolution of benzene and ethylbenzene from NAPL phase into aqueous phase.
 
-Last revision: 20/02/2026
+Last revision: 10/04/2026
 """
 
 import time
@@ -54,10 +54,8 @@ n_comps = len(components)
 n_species = len(species)
 
 # Get initial concentrations
-cc = np.zeros(n_cells * n_comps, dtype=np.float64)
-cs = np.zeros(n_cells * n_species, dtype=np.float64)
-phr.rm_get_concentrations(cc)
-phr.rm_get_species_concentrations(cs)
+cc = np.array(phr.rm.GetConcentrations())
+cs = np.array(phr.rm.GetSpeciesConcentrations())
 
 # Time step setup
 dt = sim_duration / n_steps * 24 * 3600.0  # Convert days to seconds
@@ -82,12 +80,12 @@ for step in range(1, n_steps):
     time_vector[step] = current_time
 
     # Run simulation step
-    phr.rm_set_time(current_time)
-    phr.rm_set_time_step(dt)
-    status = phr.rm_run_cells()
+    phr.rm.SetTime(current_time)
+    phr.rm.SetTimeStep(dt)
+    phr.rm.RunCells()
 
     # Store results
-    status = phr.rm_get_concentrations(cc)
+    cc = np.array(phr.rm.GetConcentrations())
     concentration_results[step, :] = cc[component_map]
 
 elapsed = time.time() - start_time
