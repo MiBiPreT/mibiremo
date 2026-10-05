@@ -17,7 +17,7 @@
 
 # `mibiremo`
 
-MiBiReMo (Microbiome Bioremediation Reaction Module) is a Python interface to the PhreeqcRM library. The package is designed to be coupled with transport models to simulate reactive transport in porous media, with applications in environmental and geochemical engineering. Developed as part of the [MIBIREM](https://www.mibirem.eu/) toolbox for Bioremediation.
+MiBiReMo (MiBiPreT Remediation Module) is a Python package for designing and testing bioremediation installations. It currently provides a Python interface to the PhreeqcRM geochemical reaction module and a 1D advection–dispersion solver for reactive transport in porous media. Field-scale simulations with MODFLOW 6, coupled to PhreeqcRM through [mf6rtm](https://github.com/p-ortega/mf6rtm), are under development. MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) tools, developed within the [MIBIREM](https://www.mibirem.eu/) toolbox for bioremediation.
 
 ## Installation
 
@@ -40,6 +40,14 @@ python -m pip install .
 ```
 
 Note that this is the (possibly unstable) development version from the `main` branch. If you want a stable release, use the PyPI installation method instead.
+
+### MODFLOW 6
+
+Field-scale simulations require the MODFLOW 6 executable and shared library. After installing mibiremo, install them into the active Python environment with:
+
+```console
+get-modflow :python --subset mf6,libmf6
+```
 
 ## Examples
 Examples are available in the [`examples`](examples/) directory. 
