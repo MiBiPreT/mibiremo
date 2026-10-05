@@ -29,8 +29,11 @@ dependencies = [
     "scipy",
     "numba>=0.64",
     "phreeqcrm",
+    "flopy",
+    "mf6rtm>=0.5.2,<0.6",
+    "geopandas",
 ]
-description = "Microbiome Bioremediation Reaction Module: a Python interface to PhreeqcRM library"
+description = "MiBiPreT Remediation Module: a Python interface for designing and testing bioremediation installations"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
 license = "Apache-2.0"
 name = "mibiremo"
