@@ -129,6 +129,7 @@ class FieldModel:
         )
         periods = self.stress_periods
 
+        # Create the MF6 simulation object and the temporal discretization package (TDIS)
         simulation = flopy.mf6.MFSimulation(sim_name="field", sim_ws=str(self.workspace))
         flopy.mf6.ModflowTdis(
             simulation,
@@ -136,6 +137,8 @@ class FieldModel:
             nper=len(periods),
             perioddata=[(d, n, 1.0) for d, n in zip(periods["duration"], periods["n_time_steps"])],
         )
+
+        # Initialise the Iterative Model Solution (IMS) package
         flopy.mf6.ModflowIms(simulation, complexity="simple", outer_dvclose=1e-6, inner_dvclose=1e-8)
         gwf = flopy.mf6.ModflowGwf(simulation, modelname="gwf", save_flows=True)
         flopy.mf6.ModflowGwfdis(
@@ -151,6 +154,8 @@ class FieldModel:
             xorigin=grid.xoffset,
             yorigin=grid.yoffset,
         )
+
+        # Create the node property flow (NPF) package for the groundwater flow model
         flopy.mf6.ModflowGwfnpf(
             gwf,
             icelltype=0,  # confined: constant saturated thickness
@@ -161,12 +166,17 @@ class FieldModel:
 
         # Initial heads and lateral boundary heads from the regional flow
         head = self.head_from_gradient(grid.xcellcenters, grid.ycellcenters)
+
+        # Create the initial conditions (IC) package for the groundwater flow model
         flopy.mf6.ModflowGwfic(gwf, strt=np.broadcast_to(head, grid.shape))
+
+        # Create the constant head (CHD) package for the groundwater flow model
         rows, columns = np.indices((grid.nrow, grid.ncol))
         boundary = (rows == 0) | (rows == grid.nrow - 1) | (columns == 0) | (columns == grid.ncol - 1)
         chd = [((k, i, j), head[i, j]) for k in range(grid.nlay) for i, j in zip(*np.nonzero(boundary))]
         flopy.mf6.ModflowGwfchd(gwf, stress_period_data={0: chd})
 
+        # Create the well (WEL) package for the groundwater flow model
         # All screened cells of all pumped wells in every stress period, in the same order (Q = 0 when off)
         cells = {w.name: _screened_cells(w, grid) for w in pumped}
         wel = {
@@ -174,6 +184,8 @@ class FieldModel:
             for kper, q in enumerate(periods.to_dict("records"))
         }
         flopy.mf6.ModflowGwfwel(gwf, boundnames=True, stress_period_data=wel)
+
+        # Create the output control (OC) package for the groundwater flow model
         flopy.mf6.ModflowGwfoc(
             gwf,
             head_filerecord="gwf.hds",
@@ -324,7 +336,7 @@ def _equal_widths(length, spacing):
 
 
 def _growing_widths(length, fine, coarse):
-    """Widths growing from fine by MAX_GROWTH_FACTOR up to coarse, scaled down to fill length exactly."""
+    """Widths growing from fine by MAX_GROWTH_FACTOR."""
     widths = []
     while sum(widths) < length:
         widths.append(min(fine * MAX_GROWTH_FACTOR ** (len(widths) + 1), coarse))
