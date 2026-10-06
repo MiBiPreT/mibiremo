@@ -1,4 +1,4 @@
-"""Injection and extraction wells: definition, layouts, and file import and export."""
+"""Wells (injection, extraction, or monitoring): geometry, layouts, and file import and export."""
 
 import math
 from dataclasses import asdict
@@ -11,7 +11,7 @@ import pandas as pd
 
 @dataclass
 class Well:
-    """Injection or extraction well with a vertical screen.
+    """Geometry of a well with a vertical screen.
 
     Azimuths in this module are measured in degrees clockwise from north (the y axis).
 
@@ -24,7 +24,6 @@ class Well:
         diameter: Well diameter [m].
         screen_top: Elevation of the top of the screen [m].
         screen_bottom: Elevation of the bottom of the screen [m].
-        flow_rate: Volumetric flow rate Q [m³ s⁻¹]; positive for injection, negative for extraction.
     """
 
     name: str
@@ -35,7 +34,6 @@ class Well:
     diameter: float
     screen_top: float
     screen_bottom: float
-    flow_rate: float
 
     def __post_init__(self):
         if not self.well_bottom <= self.screen_bottom < self.screen_top <= self.well_top:
@@ -99,8 +97,8 @@ def array_linear(well, n_wells, spacing, azimuth=90.0):
 def read_wells(path, well=None):
     """Read wells from a point file (shapefile, GeoPackage, GeoJSON) or a CSV file.
 
-    Each `Well` field is read from the attribute column of the same name; a CSV file also needs
-    columns ``x`` and ``y``. Fields missing from the file are copied from ``well``; without a
+    Each `Well` field is read from the attribute column of the same name and other columns are ignored;
+    a CSV file also needs columns ``x`` and ``y``. Fields missing from the file are copied from ``well``; without a
     ``name`` column, wells are named ``{well.name}_1``, ``{well.name}_2``, ... Coordinates must be
     in metres (projected coordinate reference system); they are used as they are.
 
