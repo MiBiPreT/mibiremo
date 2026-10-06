@@ -37,7 +37,7 @@ class FieldModel:
         domain_size: Size of the domain along x and y [m], centred on the pumped wells.
         top: Elevation of the top of the aquifer [m].
         bottom: Elevation of the bottom of the aquifer [m].
-        n_layers: Number of layers.
+        n_layers: Number of layers; one is enough when all pumped wells are screened over the whole aquifer.
         hydraulic_conductivity: Horizontal hydraulic conductivity K [m s⁻¹].
         vertical_anisotropy: Ratio of vertical to horizontal hydraulic conductivity Kz/K [-].
         porosity: Effective porosity n [-].
@@ -66,7 +66,7 @@ class FieldModel:
     domain_size: tuple
     top: float
     bottom: float
-    n_layers: int
+    n_layers: int = 1
     hydraulic_conductivity: float
     vertical_anisotropy: float = 1.0
     porosity: float
