@@ -31,10 +31,12 @@ MODEL = {  # 5 layers of 1 m
     "bottom": 90.5,
     "n_layers": 5,
     "hydraulic_conductivity": 5e-6,
+    "porosity": 0.25,
     "reference_head": 93.7,
     "grid_spacing": 4.0,
     "grid_spacing_at_wells": FINE,
 }
+requires_mf6 = pytest.mark.skipif(shutil.which("mf6") is None, reason="MODFLOW 6 not found")
 
 
 @pytest.mark.parametrize(
@@ -77,12 +79,14 @@ def test_stress_periods(tmp_path):
         workspace=tmp_path,
         wells=DESIGN,
         flow_rates={"EXT_1": -3 * Q, "INJ_1": intermittent(Q, 8 * HOUR, 16 * HOUR, end_time=2 * DAY)},
+        injection_concentration=[(0.0, 1.0), (12 * HOUR, 0.0)],
         simulation_time=2 * DAY,
         time_step=[(0.0, HOUR), (DAY, 4 * HOUR)],
     )
     periods = model.stress_periods
-    assert list(periods["start"]) == [0.0, 8 * HOUR, DAY, DAY + 8 * HOUR]
-    assert list(periods["n_time_steps"]) == [8, 16, 2, 4]
+    assert list(periods["start"]) == [0.0, 8 * HOUR, 12 * HOUR, DAY, DAY + 8 * HOUR]
+    assert list(periods["n_time_steps"]) == [8, 4, 12, 2, 4]
+    assert list(periods["injection_concentration"]) == [1.0, 1.0, 0.0, 0.0, 0.0]
     assert (periods["INJ_1"] * periods["duration"]).sum() == pytest.approx(2 * 8 * HOUR * Q)
     assert (periods["EXT_1"] * periods["duration"]).sum() == pytest.approx(-3 * Q * 2 * DAY)
 
@@ -109,7 +113,7 @@ def test_well_rates(tmp_path):
         assert records[records["boundname"] == "INJ_1"]["q"].sum() == pytest.approx(injection)
 
 
-@pytest.mark.skipif(shutil.which("mf6") is None, reason="MODFLOW 6 not found")
+@requires_mf6
 def test_regional_flow(tmp_path):
     """Without pumping, the specific discharge is K i towards the regional flow azimuth (Darcy's law)."""
     gradient, azimuth = 0.008, math.radians(22.0)
@@ -129,3 +133,38 @@ def test_regional_flow(tmp_path):
     assert discharge["qx"] == pytest.approx(darcy * math.sin(azimuth))
     assert discharge["qy"] == pytest.approx(darcy * math.cos(azimuth))
     assert discharge["qz"] == pytest.approx(0.0, abs=1e-15)
+
+
+@requires_mf6
+def test_tracer_mass(tmp_path):
+    """The tracer mass in the aquifer, Σ n V C, equals the injected mass Q C_in t (no tracer reaches the boundary)."""
+    model = FieldModel(
+        **MODEL,
+        workspace=tmp_path,
+        wells=DESIGN,
+        flow_rates={"INJ_1": Q},
+        injection_concentration=[(0.0, 1.0), (12 * HOUR, 0.0)],  # pulse of 12 h, then clean water
+        simulation_time=DAY,
+        time_step=HOUR,
+    )
+    model.run()
+    grid = model.grid
+    volume = grid.delc[:, None] * grid.delr * grid.cell_thickness
+    injected = Q * 1.0 * 12 * HOUR
+    assert (MODEL["porosity"] * volume * model.concentration()).sum() == pytest.approx(injected, rel=1e-5)
+    assert model.mass_balance().iloc[-1]["in_aquifer"] == pytest.approx(injected, rel=1e-4)
+
+
+@requires_mf6
+def test_extraction_concentration(tmp_path):
+    """Without regional flow EXT_1 captures all the water of INJ_1: at steady state C_ext = Q_inj C_in / Q_ext."""
+    model = FieldModel(
+        **(MODEL | {"n_layers": 1}),
+        workspace=tmp_path,
+        wells=DESIGN,
+        flow_rates={"EXT_1": -3 * Q, "INJ_1": Q},
+        simulation_time=2000 * DAY,
+        time_step=20 * DAY,
+    )
+    model.run()
+    assert model.well_concentration("EXT_1")["concentration"].iloc[-1] == pytest.approx(1 / 3, rel=1e-3)
