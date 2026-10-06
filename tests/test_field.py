@@ -1,8 +1,12 @@
 """Tests for the mibiremo.field module."""
 
+import math
+import shutil
 from dataclasses import replace
 import numpy as np
 import pytest
+from mibiremo.field import FieldModel
+from mibiremo.field import intermittent
 from mibiremo.field import structured_grid
 from mibiremo.wells import Well
 from mibiremo.wells import array_radial
@@ -19,6 +23,18 @@ REAL = [
 ]
 GRID = {"domain_size": (148.0, 116.0), "top": 95.5, "bottom": 90.5, "n_layers": 7, "grid_spacing": 4.0}
 FINE = 0.5  # grid spacing at the wells [m]
+HOUR, DAY = 3600.0, 86400.0
+Q = 2.75e-5  # flow rate [m3 s-1]
+MODEL = {  # 5 layers of 1 m
+    "domain_size": (40.0, 40.0),
+    "top": 95.5,
+    "bottom": 90.5,
+    "n_layers": 5,
+    "hydraulic_conductivity": 5e-6,
+    "reference_head": 93.7,
+    "grid_spacing": 4.0,
+    "grid_spacing_at_wells": FINE,
+}
 
 
 @pytest.mark.parametrize(
@@ -52,3 +68,64 @@ def test_cell_widths():
         assert widths.max() <= GRID["grid_spacing"] + 1e-9
         near_wells = (centres > min(wells_xy) - margin) & (centres < max(wells_xy) + margin)
         assert widths[near_wells] == pytest.approx(FINE, rel=0.05)
+
+
+def test_stress_periods(tmp_path):
+    """Stress periods start at every change time of the schedules and preserve the volume of each well."""
+    model = FieldModel(
+        **MODEL,
+        workspace=tmp_path,
+        wells=DESIGN,
+        flow_rates={"EXT_1": -3 * Q, "INJ_1": intermittent(Q, 8 * HOUR, 16 * HOUR, end_time=2 * DAY)},
+        simulation_time=2 * DAY,
+        time_step=[(0.0, HOUR), (DAY, 4 * HOUR)],
+    )
+    periods = model.stress_periods
+    assert list(periods["start"]) == [0.0, 8 * HOUR, DAY, DAY + 8 * HOUR]
+    assert list(periods["n_time_steps"]) == [8, 16, 2, 4]
+    assert (periods["INJ_1"] * periods["duration"]).sum() == pytest.approx(2 * 8 * HOUR * Q)
+    assert (periods["EXT_1"] * periods["duration"]).sum() == pytest.approx(-3 * Q * 2 * DAY)
+
+
+def test_well_rates(tmp_path):
+    """In every stress period, Q of a well is split among the layers in proportion to the screened thickness."""
+    partial = replace(EXTRACTION, screen_top=94.75, screen_bottom=92.0)  # 0.25, 1, 1, and 0.5 m in layers 1-4
+    model = FieldModel(
+        **MODEL,
+        workspace=tmp_path,
+        wells=[partial, *DESIGN[1:]],
+        flow_rates={"EXT_1": -Q, "INJ_1": [(0.0, Q), (DAY, 0.0)]},
+        simulation_time=2 * DAY,
+        time_step=DAY,
+    )
+    model.build()
+    wel = model.simulation.get_model("gwf").wel.stress_period_data
+    for period, injection in enumerate([Q, 0.0]):
+        records = wel.get_data(period)
+        assert len(records) == 4 + 5  # all records in every stress period, with Q = 0 when off
+        extraction = records[records["boundname"] == "EXT_1"]
+        assert [layer for layer, _, _ in extraction["cellid"]] == [0, 1, 2, 3]
+        assert extraction["q"] == pytest.approx(-Q * np.array([0.25, 1.0, 1.0, 0.5]) / 2.75)
+        assert records[records["boundname"] == "INJ_1"]["q"].sum() == pytest.approx(injection)
+
+
+@pytest.mark.skipif(shutil.which("mf6") is None, reason="MODFLOW 6 not found")
+def test_regional_flow(tmp_path):
+    """Without pumping, the specific discharge is K i towards the regional flow azimuth (Darcy's law)."""
+    gradient, azimuth = 0.008, math.radians(22.0)
+    model = FieldModel(
+        **MODEL,
+        workspace=tmp_path,
+        wells=DESIGN,
+        flow_rates={"EXT_1": 0.0},
+        regional_hydraulic_gradient=gradient,
+        regional_flow_azimuth=22.0,
+        simulation_time=1.0,
+        time_step=1.0,
+    )
+    model.run()
+    discharge = model.simulation.get_model("gwf").output.budget().get_data(text="DATA-SPDIS")[0]
+    darcy = MODEL["hydraulic_conductivity"] * gradient
+    assert discharge["qx"] == pytest.approx(darcy * math.sin(azimuth))
+    assert discharge["qy"] == pytest.approx(darcy * math.cos(azimuth))
+    assert discharge["qz"] == pytest.approx(0.0, abs=1e-15)
