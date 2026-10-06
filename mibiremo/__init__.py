@@ -1,3 +1,5 @@
+from .field import FieldModel as FieldModel
+from .field import intermittent as intermittent
 from .phreeqc import PhreeqcRM as PhreeqcRM
 from .semilagsolver import SemiLagSolver as SemiLagSolver
 from .wells import Well as Well
