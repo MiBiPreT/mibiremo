@@ -9,19 +9,19 @@ from mibiremo.wells import array_linear
 from mibiremo.wells import array_radial
 from mibiremo.wells import write_wells
 
-# Injection well template (coordinates in EPSG:27572, from pilot site)
-PILOT = {"well_top": 96.16, "well_bottom": 90.5, "diameter": 0.1, "screen_top": 95.5, "screen_bottom": 90.5}
-INJ = Well("INJ", x=222049.6162, y=2401812.2549, **PILOT)
+# Example injection well template (field location in EPSG:27572)
+GEOMETRY = {"well_top": 96.16, "well_bottom": 90.5, "diameter": 0.1, "screen_top": 95.5, "screen_bottom": 90.5}
+INJ = Well("INJ", x=222049.6162, y=2401812.2549, **GEOMETRY)
 
 
 def test_screen_within_well():
     with pytest.raises(ValueError, match="within the well"):
-        Well("W", x=0.0, y=0.0, **(PILOT | {"screen_bottom": 90.0}))
+        Well("W", x=0.0, y=0.0, **(GEOMETRY | {"screen_bottom": 90.0}))
 
 
 def test_array_radial_clockwise():
-    """Pilot layout: three copies of an injection well on a 4 m circle, the first one starting north"""
-    template = Well("INJ", x=10.0, y=20.0, **PILOT)
+    """Three copies of an injection well on a 4 m circle, the first one starting north."""
+    template = Well("INJ", x=10.0, y=20.0, **GEOMETRY)
     wells = array_radial(template, 3, radius=4.0)
     s = 4.0 * math.sqrt(3) / 2
     expected = [(10.0, 24.0), (10.0 + s, 18.0), (10.0 - s, 18.0)]  # azimuths 0°, 120°, 240°
@@ -33,7 +33,7 @@ def test_array_radial_clockwise():
 def test_array_linear():
     """Test array perpendicular to groundwater flow."""
     flow_azimuth = math.radians(22.0)  # Groundwater flow direction
-    template = Well("INJ", x=0.0, y=0.0, **PILOT)
+    template = Well("INJ", x=0.0, y=0.0, **GEOMETRY)
     wells = array_linear(template, 4, spacing=5.0, azimuth=22.0 + 90.0)
     along_flow = [w.x * math.sin(flow_azimuth) + w.y * math.cos(flow_azimuth) for w in wells]
     across_flow = [w.x * math.cos(flow_azimuth) - w.y * math.sin(flow_azimuth) for w in wells]
@@ -43,7 +43,7 @@ def test_array_linear():
 
 @pytest.mark.parametrize("suffix", [".shp", ".csv"])
 def test_write_read(tmp_path, suffix):
-    extraction = Well("EXT_1", x=222049.7016, y=2401808.1922, **(PILOT | {"well_top": 96.35}))
+    extraction = Well("EXT_1", x=222049.7016, y=2401808.1922, **(GEOMETRY | {"well_top": 96.35}))
     path = tmp_path / f"wells{suffix}"
     write_wells([extraction, INJ], path, crs="EPSG:27572")
     assert read_wells(path) == [extraction, INJ]
