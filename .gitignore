@@ -80,5 +80,7 @@ CLAUDE.md
 *.log.txt
 phout_sel.dat
 examples/pqi/*.sel
+examples/output/
+docs/notebooks/output/
 phreeqc.log
 !ex3_BTEX_dissolution_and_transport.sel
