@@ -23,6 +23,7 @@ nav:
     - Tracer test in a layered aquifer: notebooks/ex6-field_tracer_layered.ipynb
     - Validation against mibitrans: notebooks/ex7-validation-vs-mibitrans.ipynb
     - Laboratory column test: notebooks/ex8-column_test.ipynb
+    - Column validation against mibitrans: notebooks/ex9-column_validation-vs-mibitrans.ipynb
 
   - API Reference: reference.md
 
