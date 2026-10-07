@@ -39,15 +39,17 @@ def test_dispersion_variance():
 
 
 def test_ogata_banks():
-    """A constant inlet concentration gives the Ogata-Banks solution (cell Péclet number 1, Courant number 0.5)."""
+    """A constant inlet concentration at x = 0 gives the Ogata-Banks solution (cell Péclet number 1, Courant number
+    0.5), for every component in proportion to its inlet concentration (linear transport)."""
     v, d, dx, dt, t = 0.5, 0.05, 0.1, 0.1, 10.0  # v [m s⁻¹], D [m² s⁻¹], Δx [m], Δt [s], t [s]
-    x = np.arange(0.0, 12.0 + dx / 2, dx)
-    solver = SemiLagSolver(x, np.zeros_like(x), v, d, dt)
+    x = np.arange(1, 121) * dx  # the inlet is one grid spacing upstream of x[0]
+    solver = SemiLagSolver(x, np.zeros((len(x), 2)), v, d, dt)
     for _ in range(round(t / dt)):
-        solver.transport(1.0)
+        solver.transport([1.0, 0.5])
     spread = 2 * np.sqrt(d * t)
     exact = 0.5 * (erfc((x - v * t) / spread) + np.exp(v * x / d) * erfc((x + v * t) / spread))
-    assert solver.C == pytest.approx(exact, abs=0.03)  # numerical dispersion of the scheme
+    assert solver.C[:, 0] == pytest.approx(exact, abs=0.005)  # numerical dispersion of the scheme
+    assert solver.C[:, 1] == pytest.approx(0.5 * solver.C[:, 0])
 
 
 @pytest.mark.parametrize(
