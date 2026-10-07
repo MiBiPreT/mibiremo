@@ -1,5 +1,6 @@
 from .field import FieldModel as FieldModel
-from .field import intermittent as intermittent
+from .field import intermittent_pumping as intermittent_pumping
+from . import plotting as plotting
 from .phreeqc import PhreeqcRM as PhreeqcRM
 from .semilagsolver import SemiLagSolver as SemiLagSolver
 from .wells import Well as Well
