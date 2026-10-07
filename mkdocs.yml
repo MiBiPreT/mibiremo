@@ -11,6 +11,7 @@ nav:
   - Home: index.md
   - Introduction: introduction.md
   - Field model: field_model.md
+  - Column model: column_model.md
   - Development: development.md
   - Examples: examples.md
   - Tutorial Notebooks:
@@ -19,7 +20,9 @@ nav:
     - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
     - Tracer test of a field model: notebooks/ex4-field_tracer_test.ipynb
     - Tracer test with three well layouts: notebooks/ex5-field_tracer_sweep.ipynb
-    - Validation against mibitrans: notebooks/ex6-validation-vs-mibitrans.ipynb
+    - Tracer test in a layered aquifer: notebooks/ex6-field_tracer_layered.ipynb
+    - Validation against mibitrans: notebooks/ex7-validation-vs-mibitrans.ipynb
+    - Laboratory column test: notebooks/ex8-column_test.ipynb
 
   - API Reference: reference.md
 
