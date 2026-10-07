@@ -6,8 +6,8 @@ advection and dispersion of every component of the PHREEQC solutions with the se
 (sequential non-iterative approach). The inputs follow the conventions of the [field model](field_model.md), so the
 same PHREEQC solutions and kinetics can be used in both.
 
-Examples: [laboratory column test](notebooks/ex8-column_test.ipynb) and
-[column validation against mibitrans](notebooks/ex9-column_validation-vs-mibitrans.ipynb).
+Examples: [laboratory column test](notebooks/column_reactive_transport_test.ipynb) and
+[column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb).
 
 ## Workflow
 
@@ -76,4 +76,4 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
 The column model is verified against the exact analytical solution of
 [mibitrans](https://github.com/MiBiPreT/mibitrans) (one-dimensional limit, constant influent concentration, no
 transverse dispersion), for a conservative component and for one with first-order decay
-([Example 9](notebooks/ex9-column_validation-vs-mibitrans.ipynb)).
+([column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb)).

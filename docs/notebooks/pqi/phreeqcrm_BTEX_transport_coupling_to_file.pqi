@@ -69,7 +69,7 @@ TRANSPORT
 PRINT; -reset false; -status false  		# Avoid printing results (speed-up the simulation)
 
 SELECTED_OUTPUT 1
-		-file ex3_BTEX_dissolution_and_transport.sel
+		-file phreeqcrm_BTEX_transport_coupling.sel
         -time
 		-distance
         -totals          Benz Ethyl
