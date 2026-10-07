@@ -75,7 +75,7 @@ class FieldModel:
         regional_hydraulic_gradient: Regional hydraulic gradient i [m/m].
         regional_flow_azimuth: Direction of the regional flow, clockwise from north [°].
         boundary_conductance: Conductance C [m² s⁻¹] of each lateral boundary cell for a general-head boundary (GHB)
-            with the head of the regional flow; when it is set to None (default), constant heads (CHD) are applied instead.
+            with the head of the regional flow; when it is set to None (default), constant heads (CHD) are applied.
         tracer_concentration: Tracer concentration of the injected water, constant or schedule, for all
             injection wells. The concentration is 0 in the aquifer at the start and in the inflow across the
             boundary. Default is 1.0.
