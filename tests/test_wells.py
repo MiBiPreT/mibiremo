@@ -49,6 +49,14 @@ def test_write_read(tmp_path, suffix):
     assert read_wells(path) == [extraction, INJ]
 
 
+def test_geographic_coordinates(tmp_path):
+    """Wells in degrees (geographic CRS) are rejected: the model uses x and y in metres."""
+    path = tmp_path / "wells.gpkg"
+    write_wells([Well("INJ", x=2.35, y=48.85, **GEOMETRY)], path, crs="EPSG:4326")
+    with pytest.raises(ValueError, match="geographic"):
+        read_wells(path)
+
+
 def test_read_locations(tmp_path):
     path = tmp_path / "wells.csv"
     pd.DataFrame({"x": [1.0, 2.0], "y": [3.0, 4.0]}).to_csv(path, index=False)
