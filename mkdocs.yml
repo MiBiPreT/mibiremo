@@ -10,12 +10,16 @@ copyright: Copyright &copy; 2026, MIBIREM Project
 nav:
   - Home: index.md
   - Introduction: introduction.md
+  - Field model: field_model.md
   - Development: development.md
   - Examples: examples.md
   - Tutorial Notebooks:
     - Titration: notebooks/ex1-titration.ipynb
     - BTEX dissolution: notebooks/ex2-BTEX_dissolution.ipynb
     - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
+    - Tracer test of a field model: notebooks/ex4-field_tracer_test.ipynb
+    - Tracer test with three well layouts: notebooks/ex5-field_tracer_sweep.ipynb
+    - Validation against mibitrans: notebooks/ex6-validation-vs-mibitrans.ipynb
 
   - API Reference: reference.md
 
@@ -69,10 +73,13 @@ plugins:
             show_docstring_description: true
             docstring_style: google
             docstring_section_style: table
+            docstring_options:
+              returns_multiple_items: false
             filters:
               - "!^RM_"
   - mkdocs-jupyter:
       execute: false
+      ignore: ["*.md"]  # Markdown pages are not notebooks; parsing them with pandoc warns about "::: mibiremo"
       include_source: true
       custom_mathjax_url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"
 
