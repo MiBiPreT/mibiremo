@@ -36,7 +36,7 @@ def pqi_file(tmp_path, monkeypatch):
     return str(path)
 
 
-@pytest.mark.parametrize("ic_type", [np.array, pd.DataFrame])
+@pytest.mark.parametrize("ic_type", [np.array, pd.DataFrame, list])
 def test_calcite_equilibrium(pqi_file, ic_type):
     """Pure water in equilibrium with calcite has pH 9.9 and Ca = dissolved C; the cells keep the order of ic."""
     phr = mibiremo.PhreeqcRM()
