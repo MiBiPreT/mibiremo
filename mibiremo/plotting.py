@@ -1,13 +1,23 @@
 """Plotting functions"""
 
 import math
+from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
 from flopy.plot import PlotCrossSection
 from flopy.plot import PlotMapView
+from .field import FieldModel
 
 
-def map_view(model, values, layer=0, label=None, ax=None, **kwargs):
+def map_view(
+    model: FieldModel,
+    values: np.ndarray,
+    layer: int = 0,
+    label: str | None = None,
+    ax: Axes | None = None,
+    **kwargs: Any,
+) -> Axes:
     """Plots a map of `FieldModel`, wells, and a selected value field.
 
     Args:
@@ -30,7 +40,14 @@ def map_view(model, values, layer=0, label=None, ax=None, **kwargs):
     return ax
 
 
-def cross_section(model, values, line, label=None, ax=None, **kwargs):
+def cross_section(
+    model: FieldModel,
+    values: np.ndarray,
+    line: tuple,
+    label: str | None = None,
+    ax: Axes | None = None,
+    **kwargs: Any,
+) -> Axes:
     """Cross section of `FieldModel` along a line.
 
     Args:
@@ -62,7 +79,7 @@ def cross_section(model, values, line, label=None, ax=None, **kwargs):
     return ax
 
 
-def wells(ax, wells, flow_rates=None, labels=True, **kwargs):
+def wells(ax: Axes, wells: list, flow_rates: dict | None = None, labels: bool = True, **kwargs: Any) -> None:
     """Map view of wells.
 
     Args:
@@ -85,7 +102,7 @@ def wells(ax, wells, flow_rates=None, labels=True, **kwargs):
     ax.set_aspect("equal")
 
 
-def flow_arrow(ax, azimuth):
+def flow_arrow(ax: Axes, azimuth: float) -> None:
     """Plots the direction of groundwater flow.
 
     Args:
