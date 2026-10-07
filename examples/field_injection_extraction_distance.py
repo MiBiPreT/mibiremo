@@ -1,10 +1,10 @@
 """
-MiBiReMo Example 5: Field model tracer test with three well layouts.
+MiBiReMo Example: Field model tracer test with three well layouts.
 
-The tracer test of Example 4 is repeated with the four injection wells (INJ_1–4) at three distances from the
-extraction well (EXT_1): 4 m, 6 m, and 10 m. The aquifer, the flow rates, and the tracer injection (1.0 g m⁻³
-during the first day) are the same as in Example 4. The breakthrough curves and the tracer mass recovery at the
-extraction well are compared for the three layouts.
+The tracer test of the example field_tracer_test is repeated with the four injection wells (INJ_1–4) at three
+distances from the extraction well (EXT_1): 4 m, 6 m, and 10 m. The aquifer, the flow rates, and the tracer injection
+(1.0 g m⁻³ during the first day) are the same as in field_tracer_test. The breakthrough curves and the tracer mass
+recovery at the extraction well are compared for the three layouts.
 
 MODFLOW 6 is required for running this script. Please install it using: get-modflow :python --subset mf6,libmf6
 """
@@ -42,13 +42,13 @@ for ax, (distance, wells) in zip(axes, layouts.items()):
 plt.show()
 
 # Model setup and simulation
-# The model is the same as in Example 4 and runs for 90 days instead of 30, so that the tracer injected 10 m from the
-# extraction well also reaches it. One model is built and run for each layout, in its own workspace. The grid is
-# refined around all the wells, so it grows with the injection-extraction distance.
+# The model is the same as in field_tracer_test and runs for 90 days instead of 30, so that the tracer injected 10 m
+# from the extraction well also reaches it. One model is built and run for each layout, in its own workspace. The grid
+# is refined around all the wells, so it grows with the injection-extraction distance.
 models = {}
 for distance, wells in layouts.items():
     model = mb.FieldModel(
-        workspace=OUTPUT / "ex5" / f"distance_{distance:g}m",
+        workspace=OUTPUT / "field_injection_extraction_distance" / f"distance_{distance:g}m",
         wells=wells,
         flow_rates=flow_rates,
         domain_size=(100.0, 100.0),

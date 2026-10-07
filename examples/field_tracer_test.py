@@ -1,5 +1,5 @@
 """
-MiBiReMo Example 4: Field model tracer test.
+MiBiReMo Example: Field model tracer test.
 
 An in situ biological flushing installation is modelled with one extraction well (EXT_1) and four injection wells
 (INJ_1–4) at the corners of a square at a distance of 4 m from the extraction well. The model consists of a
@@ -54,7 +54,7 @@ plt.show()
 #
 # With C_in = 1 and tracer-free groundwater, the concentration C equals the fraction of injected water.
 model = mb.FieldModel(
-    workspace=OUTPUT / "ex4",
+    workspace=OUTPUT / "field_tracer_test",
     wells=wells,
     flow_rates=flow_rates,
     domain_size=(100.0, 100.0),
@@ -120,4 +120,4 @@ plt.show()
 
 # Further options of FieldModel are: time-dependent flow rates (schedules, e.g. mb.intermittent_pumping), multiple
 # layers (n_layers, vertical_anisotropy) for partially screened wells, dispersion (dispersion=True with dispersivities),
-# the advection scheme, and reactive transport with PHREEQC coupling. See next examples for more details.
+# the advection scheme, and reactive transport with PHREEQC coupling. See the other examples for more details.

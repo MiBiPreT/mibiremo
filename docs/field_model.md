@@ -6,10 +6,10 @@ tracer, and reactive transport with PHREEQC through [mf6rtm](https://github.com/
 built with [flopy](https://github.com/modflowpy/flopy), and the flopy simulation is always available as
 `model.simulation`.
 
-Examples: [tracer test](notebooks/ex4-field_tracer_test.ipynb),
-[tracer test with three well layouts](notebooks/ex5-field_tracer_sweep.ipynb),
-[tracer test in a layered aquifer](notebooks/ex6-field_tracer_layered.ipynb), and
-[validation against mibitrans](notebooks/ex7-validation-vs-mibitrans.ipynb).
+Examples: [tracer test](notebooks/field_tracer_test.ipynb),
+[tracer test with three well layouts](notebooks/field_injection_extraction_distance.ipynb),
+[tracer test in a layered aquifer](notebooks/field_layered_model.ipynb), and
+[validation against mibitrans](notebooks/validation_field_vs_mibitrans.ipynb).
 
 ## Requirements
 
@@ -147,4 +147,4 @@ model.well_concentration("EXT_1", component="Tr")
 
 The tracer and the reactive transport are verified against the exact analytical solution of
 [mibitrans](https://github.com/MiBiPreT/mibitrans) for a plume from a constant-concentration source in uniform flow,
-conservative and with first-order decay ([Example 7](notebooks/ex7-validation-vs-mibitrans.ipynb)).
+conservative and with first-order decay ([validation against mibitrans](notebooks/validation_field_vs_mibitrans.ipynb)).

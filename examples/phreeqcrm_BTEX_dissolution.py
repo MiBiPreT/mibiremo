@@ -18,7 +18,7 @@ from importlib.resources import files
 database_path = str(files("mibiremo").joinpath("database/mibirem.dat"))  # Database path
 n_cells = 1  # Number of model cells
 n_threads = 4  # Threads for calculation (-1 for all CPUs)
-pqi_file = str(Path(__file__).parent / "pqi/ex2_BTEX_dissolution.pqi")  # Phreeqc input file
+pqi_file = str(Path(__file__).parent / "pqi/phreeqcrm_BTEX_dissolution.pqi")  # Phreeqc input file
 
 # Unit settings
 unit_solution = 2  # 1: mg/L; 2: mol/L; 3: kg/kgs

@@ -23,9 +23,9 @@ from importlib.resources import files
 
 # Simulation settings
 database_path = str(files("mibiremo").joinpath("database/mibirem.dat"))  # Database path
-pqi_eq = str(Path(__file__).parent / "pqi/ex3_BTEX_dissolution_and_transport_coupling_eq.pqi")  # Equilibrium input
-pqi_kin = str(Path(__file__).parent / "pqi/ex3_BTEX_dissolution_and_transport_coupling_kin.pqi")  # Kinetics input
-sel_file = str(Path(__file__).parent / "pqi/ex3_BTEX_dissolution_and_transport.sel")  # PHREEQC results
+pqi_eq = str(Path(__file__).parent / "pqi/phreeqcrm_BTEX_transport_coupling_eq.pqi")  # Equilibrium input
+pqi_kin = str(Path(__file__).parent / "pqi/phreeqcrm_BTEX_transport_coupling_kin.pqi")  # Kinetics input
+sel_file = str(Path(__file__).parent / "pqi/phreeqcrm_BTEX_transport_coupling.sel")  # PHREEQC results
 
 # Model parameters
 n_cells = 1000  # Number of model cells

@@ -1,11 +1,11 @@
 """
-MiBiReMo Example 6: Field model tracer test in a layered aquifer.
+MiBiReMo Example: Field model tracer test in a layered aquifer.
 
-The tracer test of Example 4 (one extraction well EXT_1 and four injection wells INJ_1–4 at the corners of a square,
-4 m from EXT_1) is repeated in a layered aquifer made of three hydrostratigraphic units: an upper sandy unit, a middle
-silty unit, and a lower unit of low permeability. The top of the aquifer dips towards the east. The wells are screened
-over the upper and middle units, from 95.5 to 90.5 m a.s.l. A monitoring well with two sampling levels (MON_1 in the
-upper unit, MON_2 in the middle unit) lies between INJ_4 and EXT_1.
+The tracer test of the example field_tracer_test (one extraction well EXT_1 and four injection wells INJ_1–4 at the
+corners of a square, 4 m from EXT_1) is repeated in a layered aquifer made of three hydrostratigraphic units: an upper
+sandy unit, a middle silty unit, and a lower unit of low permeability. The top of the aquifer dips towards the east.
+The wells are screened over the upper and middle units, from 95.5 to 90.5 m a.s.l. A monitoring well with two sampling
+levels (MON_1 in the upper unit, MON_2 in the middle unit) lies between INJ_4 and EXT_1.
 
 The lateral boundary is a general-head boundary (GHB): water enters and leaves the domain in proportion to the
 difference between the head of the regional groundwater flow and the head in the boundary cells.
@@ -26,8 +26,8 @@ HOUR, DAY = 3600.0, 86400.0
 OUTPUT = (Path(__file__).parent if "__file__" in globals() else Path()) / "output"  # next to this script or notebook
 
 # Wells
-# The extraction and injection wells are those of Example 4. The two monitoring wells are at the same location, with
-# short screens in the upper (MON_1) and middle (MON_2) units. They have no flow rate.
+# The extraction and injection wells are those of field_tracer_test. The two monitoring wells are at the same location,
+# with short screens in the upper (MON_1) and middle (MON_2) units. They have no flow rate.
 extraction = mb.Well(
     "EXT_1", x=0.0, y=0.0, well_top=96.3, well_bottom=90.5, diameter=0.1, screen_top=95.5, screen_bottom=90.5
 )
@@ -75,7 +75,7 @@ common = dict(
 # by 1 cm per metre, and is 95.5 m a.s.l. at the wells. Elevations measured at a few points can be interpolated with
 # scipy, e.g. scipy.interpolate.NearestNDInterpolator(points, z).
 layered = mb.FieldModel(
-    workspace=OUTPUT / "ex6" / "layered",
+    workspace=OUTPUT / "field_layered_model" / "layered",
     top=lambda x, y: 95.5 - 0.01 * x,
     bottom=[93.5, 90.5, 87.0],  # upper, middle, and lower unit
     n_layers=[4, 3, 1],
@@ -88,7 +88,7 @@ layered = mb.FieldModel(
 # upper (2 m) and middle (3 m) units. The lower unit carries almost no flow.
 conductivity = (5e-5 * 2.0 + 5e-6 * 3.0) / 5.0
 homogeneous = mb.FieldModel(
-    workspace=OUTPUT / "ex6" / "homogeneous",
+    workspace=OUTPUT / "field_layered_model" / "homogeneous",
     top=95.5,
     bottom=90.5,
     hydraulic_conductivity=conductivity,

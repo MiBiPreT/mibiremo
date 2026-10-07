@@ -1,5 +1,5 @@
 """
-MiBiReMo Example 8: Laboratory column test.
+MiBiReMo Example: Laboratory column test.
 
 A soil column 30 cm long, with an inner diameter of 5 cm, is flushed from the bottom at 1 mL/min with a solution
 containing two pseudo-components: a conservative tracer (Tr) and a solute degraded with first-order kinetics (Dk), both
@@ -50,7 +50,7 @@ database.write_text(text.replace("\nEND\n", definitions + "END\n", 1), encoding=
 flow_rate = 1e-6 / MINUTE  # 1 mL/min in m3/s
 half_life = 2 * HOUR
 model = mb.ColumnModel(
-    workspace=OUTPUT / "ex8",
+    workspace=OUTPUT / "column_reactive_transport_test",
     length=0.3,
     diameter=0.05,
     porosity=0.38,

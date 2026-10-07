@@ -15,15 +15,19 @@ nav:
   - Development: development.md
   - Examples: examples.md
   - Tutorial Notebooks:
-    - Titration: notebooks/ex1-titration.ipynb
-    - BTEX dissolution: notebooks/ex2-BTEX_dissolution.ipynb
-    - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
-    - Tracer test of a field model: notebooks/ex4-field_tracer_test.ipynb
-    - Tracer test with three well layouts: notebooks/ex5-field_tracer_sweep.ipynb
-    - Tracer test in a layered aquifer: notebooks/ex6-field_tracer_layered.ipynb
-    - Validation against mibitrans: notebooks/ex7-validation-vs-mibitrans.ipynb
-    - Laboratory column test: notebooks/ex8-column_test.ipynb
-    - Column validation against mibitrans: notebooks/ex9-column_validation-vs-mibitrans.ipynb
+    - PhreeqcRM models:
+      - Titration: notebooks/phreeqcrm_calcite_titration.ipynb
+      - BTEX dissolution: notebooks/phreeqcrm_BTEX_dissolution.ipynb
+      - BTEX dissolution and transport coupling: notebooks/phreeqcrm_BTEX_transport_coupling.ipynb
+    - Field model:
+      - Tracer test: notebooks/field_tracer_test.ipynb
+      - Injection-extraction distance: notebooks/field_injection_extraction_distance.ipynb
+      - Layered aquifer: notebooks/field_layered_model.ipynb
+    - Column model:
+      - Laboratory column test: notebooks/column_reactive_transport_test.ipynb
+    - Numerical validation:
+      - Column model vs mibitrans: notebooks/validation_column_vs_mibitrans.ipynb
+      - Field model vs mibitrans: notebooks/validation_field_vs_mibitrans.ipynb
 
   - API Reference: reference.md
 
