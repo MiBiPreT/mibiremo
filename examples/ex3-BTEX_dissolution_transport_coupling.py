@@ -32,9 +32,8 @@ n_cells = 1000  # Number of model cells
 dt = 0.1  # Coupling time step (days)
 domain_length = 100.0  # Length of domain (m)
 n_threads = 6  # Threads for calculation (-1 for all CPUs)
-dispersivity = 0.05  # Dispersivity (m2)
+dispersivity = 0.05  # Longitudinal dispersivity (m)
 velocity = 1.0  # Groundwater velocity (m/d)
-diffusion_coeff = 0.0  # Molecular diffusion (m2/s)
 sim_duration = 100.0  # Simulation duration (days)
 
 # Physical properties
@@ -60,7 +59,7 @@ def run_simulation(pqi_file, kinetic=False):
         kinetic: Whether to run kinetic dissolution (default: equilibrium)
 
     Returns:
-        Tuple of (time vector, concentration results at probe location)
+        Tuple of (time vector, concentration results at probe location, molar masses)
     """
     # Initialize PhreeqcRM
     phr = mibiremo.PhreeqcRM()
@@ -97,6 +96,7 @@ def run_simulation(pqi_file, kinetic=False):
     species_map = np.zeros(len(monitored_species), dtype=np.int32)
     for i, species in enumerate(monitored_species):
         species_map[i] = np.where(components == species)[0][0]
+    molar_mass = np.array(phr.rm.GetGfw())[species_map]  # g/mol, from the database
 
     # Initialize results storage
     time_vector = np.zeros(n_steps)
@@ -148,10 +148,10 @@ def run_simulation(pqi_file, kinetic=False):
     elapsed = time.time() - start_time
     print(f"Simulation completed in {elapsed:.2f} seconds")
 
-    return time_vector, concentration_results
+    return time_vector, concentration_results, molar_mass
 
 
-def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
+def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results, molar_mass):
     """Plot and compare simulation results."""
     # Process PHREEQC results
     phreeqc_results.columns = phreeqc_results.columns.str.replace(" ", "")
@@ -163,7 +163,7 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
     # Plot PHREEQC results
     plt.plot(
         transport_data["time"] / 3600 / 24,
-        transport_data["Benz"] * 1e3 * 78.114,
+        transport_data["Benz"] * 1e3 * molar_mass[0],
         label="Benzene - PHREEQC - equilibrium",
         linestyle="None",
         marker="o",
@@ -172,7 +172,7 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
     )
     plt.plot(
         transport_data["time"] / 3600 / 24,
-        transport_data["Ethyl"] * 1e3 * 106.17,
+        transport_data["Ethyl"] * 1e3 * molar_mass[1],
         label="Ethylbenzene - PHREEQC - equil.",
         linestyle="None",
         marker="^",
@@ -183,25 +183,25 @@ def plot_results(time_eq, conc_eq, time_kin, conc_kin, phreeqc_results):
     # Plot equilibrium dissolution results
     plt.plot(
         time_eq,
-        conc_eq[:, 0] * 78.114 * 1000,
+        conc_eq[:, 0] * molar_mass[0] * 1000,
         label="Benzene - MIBIREMO - equilibrium",
     )
     plt.plot(
         time_eq,
-        conc_eq[:, 1] * 106.17 * 1000,
+        conc_eq[:, 1] * molar_mass[1] * 1000,
         label="Ethylbenzene - MIBIREMO - equil.",
     )
 
     # Plot kinetic dissolution results
     plt.plot(
         time_kin,
-        conc_kin[:, 0] * 78.114 * 1000,
+        conc_kin[:, 0] * molar_mass[0] * 1000,
         label="Benzene - MIBIREMO - kinetics",
         linestyle="--",
     )
     plt.plot(
         time_kin,
-        conc_kin[:, 1] * 106.17 * 1000,
+        conc_kin[:, 1] * molar_mass[1] * 1000,
         label="Ethylbenzene - MIBIREMO - kinetics",
         linestyle="--",
     )
@@ -222,11 +222,11 @@ def main():
     """Main execution function."""
     # Run equilibrium simulation
     print("Running equilibrium dissolution simulation...")
-    time_eq, conc_eq = run_simulation(pqi_eq)
+    time_eq, conc_eq, molar_mass = run_simulation(pqi_eq)
 
     # Run kinetic simulation
     print("\nRunning kinetic dissolution simulation...")
-    time_kin, conc_kin = run_simulation(pqi_kin, kinetic=True)
+    time_kin, conc_kin, _ = run_simulation(pqi_kin, kinetic=True)
 
     # Load PHREEQC results for comparison
     phreeqc_results = pd.read_csv(sel_file, sep="\t")
@@ -238,6 +238,7 @@ def main():
         time_kin,
         conc_kin,
         phreeqc_results,
+        molar_mass,
     )
 
 

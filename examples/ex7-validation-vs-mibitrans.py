@@ -1,5 +1,5 @@
 """
-MiBiReMo Example 6: validation against mibitrans.
+MiBiReMo Example 7: validation against mibitrans.
 
 With phreeqc_coupling=True, FieldModel builds a reactive transport model by coupling MODFLOW 6 with PHREEQC.
 MODFLOW 6 simulates the flow and transports of the components of the PHREEQC solutions (one GWT model per component),
@@ -90,7 +90,7 @@ uniform_flow = {
     "simulation_time": 30 * DAY,
     "time_step": 0.5 * DAY,
 }
-plume = mb.FieldModel(workspace=OUTPUT / "ex6_validation_vs_mibitrans", **uniform_flow)
+plume = mb.FieldModel(workspace=OUTPUT / "ex7_validation_vs_mibitrans", **uniform_flow)
 source = list(zip(*np.nonzero(plume.zone(shapely.box(-0.1, -2.6, 0.1, 2.6)))))  # 11 cells of 0.5 m
 
 # Model setup
@@ -133,7 +133,7 @@ observations = {"tracer": {name: plume.well_concentration(name) for name in ["X_
 # The pH of the solutions is below 7: pure water at pH 7 and 25 °C has a slightly negative charge balance, which
 # MODFLOW 6 rejects as a constant concentration.
 decay = mb.FieldModel(
-    workspace=OUTPUT / "ex6_validation_vs_mibitrans",
+    workspace=OUTPUT / "ex7_validation_vs_mibitrans",
     **uniform_flow,
     phreeqc_coupling=True,
     database=database,
