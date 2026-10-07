@@ -1,4 +1,4 @@
-"""Creates a field installation model for simulating groundwater flow, transport and reactions.
+"""Creates a field model for simulating groundwater flow, transport and reactions.
 
 Contents:
 - `FieldModel`: wells in a homogeneous aquifer with constant gradient groundwater flow, tracer transport, and
@@ -18,6 +18,7 @@ import warnings
 from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
+from typing import Any
 import flopy
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ MAX_GROWTH_FACTOR = 1.5  # largest ratio between the widths of neighbouring cell
 
 @dataclass(kw_only=True)  # Allow keyword-only arguments, with any order of fields
 class FieldModel:
-    """MODFLOW 6 model of wells in a homogeneous confined aquifer with uniform regional groundwater flow and reactive transport.
+    """MODFLOW 6 model of wells in a homogeneous confined aquifer with regional groundwater flow and reactive transport.
 
     Time-dependent inputs are defined as [(t, value), ...]: t [s] from the simulation start,
     first t = 0, each value constant until the next t.
@@ -165,7 +166,7 @@ class FieldModel:
             table["injected_solution"] = table["injected_solution"].astype(int)
         return table
 
-    def head_from_gradient(self, x, y):
+    def head_from_gradient(self, x: float | np.ndarray, y: float | np.ndarray) -> np.ndarray:
         """Hydraulic head of the regional flow without pumping, h = h_ref - i d.
 
         d is the distance from the domain centre (centre of the pumped wells) along the regional flow direction.
@@ -301,7 +302,7 @@ class FieldModel:
         self.grid, self.simulation = grid, simulation
         self.mup3d = self._mup3d() if self.phreeqc_coupling else None
 
-    def zone(self, polygon, z_top=None, z_bottom=None):
+    def zone(self, polygon: Any, z_top: float | None = None, z_bottom: float | None = None) -> np.ndarray:
         """Cells whose centres lie inside a polygon and between two elevations (e.g., a contaminated zone).
 
         The model is not built, so the zone can set `initial_kinetics` or `initial_solution` before `run`.
@@ -386,7 +387,7 @@ class FieldModel:
             mup3d.set_chem_stress(chd)
         return mup3d
 
-    def run(self, n_threads=1):
+    def run(self, n_threads: int = 1) -> None:
         """Write the files and run MODFLOW 6, or mf6rtm with `phreeqc_coupling`; build first if needed.
 
         Args:
@@ -414,7 +415,7 @@ class FieldModel:
         if result.returncode != 0:
             raise RuntimeError(f"mf6rtm failed; see {workspace / 'mf6rtm.log'} and {workspace / 'mfsim.lst'}.")
 
-    def head(self, time=None):
+    def head(self, time: float | None = None) -> np.ndarray:
         """Hydraulic head h [m] at the end of the time step containing time t (default: end of the simulation).
 
         Args:
@@ -425,7 +426,7 @@ class FieldModel:
         """
         return _saved_array(self.simulation.get_model("gwf").output.head(), time)
 
-    def concentration(self, time=None, component=None):
+    def concentration(self, time: float | None = None, component: str | None = None) -> np.ndarray:
         """Concentration C at the end of the time step containing time t (default: end of the simulation).
 
         Args:
@@ -437,7 +438,7 @@ class FieldModel:
         """
         return _saved_array(self._transport_model(component).output.concentration(), time)
 
-    def well_concentration(self, name, component=None):
+    def well_concentration(self, name: str, component: str | None = None) -> pd.DataFrame:
         """Concentration of a well at the end of every time step, C_w = Σ w_k C_k with w_k = b_k / Σ b.
 
         b_k is the screened thickness in cell k, so C_w is the flow-weighted mean of a pumped well.
@@ -460,7 +461,7 @@ class FieldModel:
             raise ValueError("Give a PHREEQC component with phreeqc_coupling, and none without.")
         return self.simulation.get_model(component or "gwt")
 
-    def mass_balance(self):
+    def mass_balance(self) -> pd.DataFrame:
         """Cumulative tracer mass at the end of every time step, from the MODFLOW 6 budget.
 
         Returns:
@@ -483,7 +484,9 @@ class FieldModel:
         )
 
 
-def intermittent_pumping(value, on_duration, off_duration, end_time, start_time=0.0):
+def intermittent_pumping(
+    value: float, on_duration: float, off_duration: float, end_time: float, start_time: float = 0.0
+) -> list[tuple[float, float]]:
     """Schedule switching between value (on) and 0 (off), from start_time to end_time; 0 before and after.
 
     Args:
@@ -507,8 +510,15 @@ def intermittent_pumping(value, on_duration, off_duration, end_time, start_time=
 
 
 def structured_grid(
-    wells, domain_size, top, bottom, n_layers, grid_spacing, grid_spacing_at_wells, refinement_margin=5.0
-):
+    wells: list,
+    domain_size: tuple,
+    top: float,
+    bottom: float,
+    n_layers: int,
+    grid_spacing: float,
+    grid_spacing_at_wells: float,
+    refinement_margin: float = 5.0,
+) -> StructuredGrid:
     """Structured grid centred on the wells and refined around them.
 
     Args:
