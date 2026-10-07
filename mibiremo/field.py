@@ -1,10 +1,10 @@
 """Creates a field model for simulating groundwater flow, transport and reactions.
 
 Contents:
-- `FieldModel`: wells in a homogeneous aquifer with constant gradient groundwater flow, tracer transport, and
-  reactive transport (MODFLOW 6 coupled with PHREEQC by mf6rtm)
+- `FieldModel`: wells in a homogeneous or layered aquifer with constant gradient groundwater flow, tracer transport,
+  and reactive transport (MODFLOW 6 coupled with PHREEQC by mf6rtm)
 - `intermittent_pumping`: on/off schedule (e.g., of a flow rate)
-- `structured_grid`: structured (DIS) grid centred on the wells
+- `structured_grid`: structured (DIS) grid refined around the wells
 """
 
 import contextlib
@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
@@ -34,13 +35,19 @@ MAX_GROWTH_FACTOR = 1.5  # largest ratio between the widths of neighbouring cell
 
 @dataclass(kw_only=True)  # Allow keyword-only arguments, with any order of fields
 class FieldModel:
-    """MODFLOW 6 model of wells in a homogeneous confined aquifer with regional groundwater flow and reactive transport.
+    """MODFLOW 6 model of wells in a confined aquifer with regional groundwater flow and reactive transport.
 
     Time-dependent inputs are defined as [(t, value), ...]: t [s] from the simulation start,
     first t = 0, each value constant until the next t.
 
     Stress periods are then defined based on the times of the vector, flow is steady state
     within each stress period.
+
+    The aquifer can consist of a single homogeneous layer, or be made of hydrostratigraphic units.
+    In the latter case, the parameter `bottom` must be a list (one bottom per unit, from top to bottom.
+    `n_layers`, `hydraulic_conductivity`, `vertical_anisotropy`, and `porosity` can be set to a single value for
+    all units or a list with one value per unit. Elevations can be constant or passed as a function z(x, y) of
+    the coordinates (e.g., a scipy interpolator of measured elevations).
 
     By default, the model simulates the transport of a single tracer without reactions.
 
@@ -52,17 +59,23 @@ class FieldModel:
         workspace: Folder of the MODFLOW 6 files.
         wells: Wells, with unique names.
         flow_rates: Flow rate Q [m³ s⁻¹] by well name, constant or schedule; positive for injection, negative for
-            extraction. Wells not listed are monitoring wells (Q = 0).
-        domain_size: Size of the domain along x and y [m], centred on the pumped wells.
-        top: Elevation of the top of the aquifer [m].
-        bottom: Elevation of the bottom of the aquifer [m].
-        n_layers: Number of layers; one is enough when all pumped wells are screened over the whole aquifer.
+            extraction. Wells not listed are monitoring wells (Q = 0). The Q of a well is split among its screened
+            cells in proportion to K b (screened transmissivity).
+        domain_size: Size of the domain along x and y [m].
+        domain_centre: Coordinates (x, y) of the domain centre [m]; default: centre of the pumped wells.
+        top: Elevation of the top of the aquifer [m], constant or function z(x, y).
+        bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the bottom of
+            each hydrostratigraphic unit.
+        n_layers: Number of layers of equal thickness (per unit); one is enough when all pumped wells are screened
+            over the whole aquifer.
         hydraulic_conductivity: Horizontal hydraulic conductivity K [m s⁻¹].
         vertical_anisotropy: Ratio of vertical to horizontal hydraulic conductivity Kz/K [-].
         porosity: Effective porosity n [-].
         reference_head: Hydraulic head h at the domain centre without pumping [m].
         regional_hydraulic_gradient: Regional hydraulic gradient i [m/m].
         regional_flow_azimuth: Direction of the regional flow, clockwise from north [°].
+        boundary_conductance: Conductance C [m² s⁻¹] of each lateral boundary cell for a general-head boundary (GHB)
+            with the head of the regional flow; when it is set to None (default), constant heads (CHD) are applied instead.
         tracer_concentration: Tracer concentration of the injected water, constant or schedule, for all
             injection wells. The concentration is 0 in the aquifer at the start and in the inflow across the
             boundary. Default is 1.0.
@@ -95,15 +108,17 @@ class FieldModel:
     wells: list
     flow_rates: dict
     domain_size: tuple
-    top: float
-    bottom: float
-    n_layers: int = 1
-    hydraulic_conductivity: float
-    vertical_anisotropy: float = 1.0
-    porosity: float
+    domain_centre: tuple | None = None
+    top: float | Callable
+    bottom: float | Callable | list
+    n_layers: int | list = 1
+    hydraulic_conductivity: float | list
+    vertical_anisotropy: float | list = 1.0
+    porosity: float | list
     reference_head: float
     regional_hydraulic_gradient: float = 0.0
     regional_flow_azimuth: float = 0.0
+    boundary_conductance: float | None = None
     tracer_concentration: float | list = 1.0
     advection_scheme: str = "upstream"
     dispersion: bool = False
@@ -134,6 +149,8 @@ class FieldModel:
         unknown = sorted(set(self.flow_rates) - set(names))
         if unknown:
             raise ValueError(f"flow_rates given for unknown wells: {', '.join(unknown)}.")
+        for value in [self.hydraulic_conductivity, self.vertical_anisotropy, self.porosity]:
+            self._layer_values(value)  # one value per hydrostratigraphic unit
         if self.phreeqc_coupling:
             if self.database is None or self.solutions is None:
                 raise ValueError("phreeqc_coupling needs a database and solutions.")
@@ -147,21 +164,37 @@ class FieldModel:
         return [w for w in self.wells if w.name in self.flow_rates]
 
     @property
+    def _centre(self):
+        """Domain centre (x, y) [m]: `domain_centre` or the centre of the pumped wells."""
+        return self.domain_centre or _centre(self._pumped_wells)
+
+    @property
+    def _boundary(self):
+        """Name of the lateral boundary package: "chd" (constant heads) or "ghb" (general-head boundary)."""
+        return "chd" if self.boundary_conductance is None else "ghb"
+
+    def _layer_values(self, value):
+        """Value of every model layer from a value for all hydrostratigraphic units or a list with one per unit."""
+        n_units = len(_as_list(self.bottom))
+        return np.repeat(_per_unit(value, n_units), _per_unit(self.n_layers, n_units))
+
+    def _layer_array(self, value, grid):
+        """Array (layer, row, column) from a value for all hydrostratigraphic units or a list with one per unit."""
+        return self._layer_values(value)[:, None, None] * np.ones(grid.shape)
+
+    def _well_cells(self, name, grid):
+        """Screened cells of a well, with weights w_k = K_k b_k / Σ K b."""
+        well = {w.name: w for w in self.wells}[name]
+        return _screened_cells(well, grid, self._layer_values(self.hydraulic_conductivity))
+
+    @property
     def stress_periods(self):
         """Stress periods: start [s], duration [s], number of time steps, Q [m³ s⁻¹] of each pumped well, C_in, and
         the injected solution (with `phreeqc_coupling`)."""
-        time_step = _schedule(self.time_step)
-        schedules = {name: _schedule(q) for name, q in self.flow_rates.items()}
-        schedules["tracer_concentration"] = _schedule(self.tracer_concentration)
+        schedules = self.flow_rates | {"tracer_concentration": self.tracer_concentration}
         if self.phreeqc_coupling:
-            schedules["injected_solution"] = _schedule(self.injected_solution)
-        times = {t for schedule in [time_step, *schedules.values()] for t, _ in schedule}
-        start = np.array(sorted(t for t in times if t < self.simulation_time))
-        duration = np.diff([*start, self.simulation_time])
-        n_time_steps = np.ceil(duration / _values_at(time_step, start) - 1e-9).astype(int)
-        table = pd.DataFrame({"start": start, "duration": duration, "n_time_steps": n_time_steps})
-        for name, schedule in schedules.items():
-            table[name] = _values_at(schedule, start)
+            schedules["injected_solution"] = self.injected_solution
+        table = _stress_periods(schedules, self.time_step, self.simulation_time)
         if self.phreeqc_coupling:
             table["injected_solution"] = table["injected_solution"].astype(int)
         return table
@@ -169,7 +202,7 @@ class FieldModel:
     def head_from_gradient(self, x: float | np.ndarray, y: float | np.ndarray) -> np.ndarray:
         """Hydraulic head of the regional flow without pumping, h = h_ref - i d.
 
-        d is the distance from the domain centre (centre of the pumped wells) along the regional flow direction.
+        d is the distance from the domain centre along the regional flow direction.
 
         Args:
             x: x coordinates [m].
@@ -178,11 +211,9 @@ class FieldModel:
         Returns:
             Hydraulic head h [m], with the shape of x and y.
         """
-        x_wells = [w.x for w in self._pumped_wells]
-        y_wells = [w.y for w in self._pumped_wells]
+        x_centre, y_centre = self._centre
         azimuth = math.radians(self.regional_flow_azimuth)
-        distance = (np.asarray(x) - (min(x_wells) + max(x_wells)) / 2) * math.sin(azimuth)
-        distance += (np.asarray(y) - (min(y_wells) + max(y_wells)) / 2) * math.cos(azimuth)
+        distance = (np.asarray(x) - x_centre) * math.sin(azimuth) + (np.asarray(y) - y_centre) * math.cos(azimuth)
         return self.reference_head - self.regional_hydraulic_gradient * distance
 
     def build(self):
@@ -225,11 +256,12 @@ class FieldModel:
         flopy.mf6.ModflowGwfdis(gwf, **dis)
 
         # Create the node property flow (NPF) package for the groundwater flow model
+        conductivity = self._layer_array(self.hydraulic_conductivity, grid)
         flopy.mf6.ModflowGwfnpf(
             gwf,
             icelltype=0,  # confined: constant saturated thickness
-            k=self.hydraulic_conductivity,
-            k33=self.hydraulic_conductivity * self.vertical_anisotropy,
+            k=conductivity,
+            k33=conductivity * self._layer_array(self.vertical_anisotropy, grid),
             save_specific_discharge=True,
         )
 
@@ -239,15 +271,20 @@ class FieldModel:
         # Create the initial conditions (IC) package for the groundwater flow model
         flopy.mf6.ModflowGwfic(gwf, strt=np.broadcast_to(head, grid.shape))
 
-        # Create the constant head (CHD) package for the groundwater flow model; tracer-free inflow (C = 0)
+        # Lateral boundary: constant heads (CHD) or general-head boundary (GHB); tracer-free inflow (C = 0)
         rows, columns = np.indices((grid.nrow, grid.ncol))
-        boundary = (rows == 0) | (rows == grid.nrow - 1) | (columns == 0) | (columns == grid.ncol - 1)
-        chd = [((k, i, j), head[i, j], 0.0) for k in range(grid.nlay) for i, j in zip(*np.nonzero(boundary))]
-        flopy.mf6.ModflowGwfchd(gwf, pname="chd", auxiliary="concentration", stress_period_data={0: chd})
+        perimeter = (rows == 0) | (rows == grid.nrow - 1) | (columns == 0) | (columns == grid.ncol - 1)
+        boundary = [((k, i, j), head[i, j]) for k in range(grid.nlay) for i, j in zip(*np.nonzero(perimeter))]
+        if self.boundary_conductance is None:
+            chd = [(cell, h, 0.0) for cell, h in boundary]
+            flopy.mf6.ModflowGwfchd(gwf, pname="chd", auxiliary="concentration", stress_period_data={0: chd})
+        else:
+            ghb = [(cell, h, self.boundary_conductance, 0.0) for cell, h in boundary]
+            flopy.mf6.ModflowGwfghb(gwf, pname="ghb", auxiliary="concentration", stress_period_data={0: ghb})
 
         # Create the well (WEL) package for the groundwater flow model, with C_in (used only where Q > 0)
         # All screened cells of all pumped wells in every stress period, in the same order (Q = 0 when off)
-        cells = {w.name: _screened_cells(w, grid) for w in pumped}
+        cells = {w.name: self._well_cells(w.name, grid) for w in pumped}
         wel = {
             kper: [
                 (cell, weight * period[name], period["tracer_concentration"], name)
@@ -280,7 +317,7 @@ class FieldModel:
         simulation.register_ims_package(ims, [gwt.name])
         flopy.mf6.ModflowGwtdis(gwt, **dis)
         flopy.mf6.ModflowGwtic(gwt, strt=0.0)
-        flopy.mf6.ModflowGwtmst(gwt, porosity=self.porosity)
+        flopy.mf6.ModflowGwtmst(gwt, porosity=self._layer_array(self.porosity, grid))
         flopy.mf6.ModflowGwtadv(gwt, scheme=self.advection_scheme)
         if self.dispersion:
             flopy.mf6.ModflowGwtdsp(
@@ -290,11 +327,14 @@ class FieldModel:
                 ath2=self.vertical_dispersivity,  # vertical transverse spreading for horizontal flow
                 diffc=self.diffusion_coefficient,
             )
-        # Source and sink mixing (SSM): concentration of the water entering through WEL and CHD
-        flopy.mf6.ModflowGwtssm(gwt, sources=[("wel", "AUX", "concentration"), ("chd", "AUX", "concentration")])
+        # Source and sink mixing (SSM): concentration of the water entering through WEL and the lateral boundary
+        flopy.mf6.ModflowGwtssm(
+            gwt, sources=[("wel", "AUX", "concentration"), (self._boundary, "AUX", "concentration")]
+        )
         flopy.mf6.ModflowGwtoc(
             gwt,
             concentration_filerecord="gwt.ucn",
+            budgetcsv_filerecord="gwt.budget.csv",
             saverecord=[("CONCENTRATION", "ALL")],
             printrecord=[("BUDGET", "ALL")],
         )
@@ -324,12 +364,12 @@ class FieldModel:
         if isinstance(polygon, geopandas.GeoDataFrame):
             polygon = polygon.union_all()
         inside = shapely.contains_xy(polygon, grid.xcellcenters, grid.ycellcenters)
-        z_top = self.top if z_top is None else z_top
-        z_bottom = self.bottom if z_bottom is None else z_bottom
+        z_top = np.inf if z_top is None else z_top
+        z_bottom = -np.inf if z_bottom is None else z_bottom
         return inside & (grid.zcellcenters <= z_top) & (grid.zcellcenters >= z_bottom)
 
     def _structured_grid(self):
-        """Grid of the model, centred on the pumped wells."""
+        """Grid of the model, refined around the pumped wells."""
         return structured_grid(
             self._pumped_wells,
             self.domain_size,
@@ -339,6 +379,7 @@ class FieldModel:
             self.grid_spacing,
             self.grid_spacing_at_wells,
             self.refinement_margin,
+            self._centre,
         )
 
     def _mup3d(self):
@@ -382,9 +423,10 @@ class FieldModel:
             wel = ChemStress("wel")
             wel.set_spd({kper: [int(n)] * n_records for kper, n in enumerate(self.stress_periods["injected_solution"])})
             mup3d.set_chem_stress(wel)
-            chd = ChemStress("chd")
-            chd.set_spd([int(solutions.ic[tuple(cell)]) for cell in gwf.chd.stress_period_data.get_data(0)["cellid"]])
-            mup3d.set_chem_stress(chd)
+            boundary = ChemStress(self._boundary)
+            cells = gwf.get_package(self._boundary).stress_period_data.get_data(0)["cellid"]
+            boundary.set_spd([int(solutions.ic[tuple(cell)]) for cell in cells])
+            mup3d.set_chem_stress(boundary)
         return mup3d
 
     def run(self, n_threads: int = 1) -> None:
@@ -438,10 +480,25 @@ class FieldModel:
         """
         return _saved_array(self._transport_model(component).output.concentration(), time)
 
-    def well_concentration(self, name: str, component: str | None = None) -> pd.DataFrame:
-        """Concentration of a well at the end of every time step, C_w = Σ w_k C_k with w_k = b_k / Σ b.
+    def well_head(self, name: str) -> pd.DataFrame:
+        """Hydraulic head of a well at the end of every stress period, h_w = Σ w_k h_k with w_k = K_k b_k / Σ K b.
 
-        b_k is the screened thickness in cell k, so C_w is the flow-weighted mean of a pumped well.
+        b_k is the screened thickness in cell k and K_k the hydraulic conductivity of its layer.
+
+        Args:
+            name: Well name.
+
+        Returns:
+            DataFrame with time [s] and head [m].
+        """
+        output = self.simulation.get_model("gwf").output.head()
+        return _weighted_series(output, self._well_cells(name, self.grid), "head")
+
+    def well_concentration(self, name: str, component: str | None = None) -> pd.DataFrame:
+        """Concentration of a well at the end of every time step, C_w = Σ w_k C_k with w_k = K_k b_k / Σ K b.
+
+        b_k is the screened thickness in cell k and K_k the hydraulic conductivity of its layer, so C_w is the
+        flow-weighted mean of a pumped well.
 
         Args:
             name: Well name.
@@ -450,10 +507,8 @@ class FieldModel:
         Returns:
             DataFrame with time [s] and concentration.
         """
-        well = {w.name: w for w in self.wells}[name]
-        cells = _screened_cells(well, self.grid)
-        series = self._transport_model(component).output.concentration().get_ts([cell for cell, _ in cells])
-        return pd.DataFrame({"time": series[:, 0], "concentration": series[:, 1:] @ [w for _, w in cells]})
+        output = self._transport_model(component).output.concentration()
+        return _weighted_series(output, self._well_cells(name, self.grid), "concentration")
 
     def _transport_model(self, component):
         """Transport model of the tracer (component None) or of a PHREEQC component."""
@@ -468,18 +523,21 @@ class FieldModel:
             DataFrame with time [s] and the mass (concentration x m³) injected, extracted, entering and leaving
             across the lateral boundary, and dissolved in the aquifer.
         """
-        _, budget = self._transport_model(None).output.list().get_dataframes(start_datetime=None)
-        periods = self.stress_periods
-        time_steps = (periods["duration"] / periods["n_time_steps"]).to_numpy()
-        time = np.cumsum(np.repeat(time_steps, periods["n_time_steps"]))
+        self._transport_model(None)  # tracer only
+        rates = pd.read_csv(Path(self.workspace) / "gwt.budget.csv")  # mass rate of each budget term, every time step
+        duration = np.diff(rates["time"], prepend=0.0)
+        cumulative = {}
+        for column in rates.columns[1:]:  # e.g. "WEL(SSM_WEL)_IN" -> "WEL_IN"
+            cumulative[column.split("(")[0] + "_" + column.split("_")[-1]] = np.cumsum(rates[column] * duration)
+        boundary = self._boundary.upper()
         return pd.DataFrame(
             {
-                "time": time,
-                "injected": budget["WEL_IN"].to_numpy(),
-                "extracted": budget["WEL_OUT"].to_numpy(),
-                "boundary_inflow": budget["CHD_IN"].to_numpy(),
-                "boundary_outflow": budget["CHD_OUT"].to_numpy(),
-                "in_aquifer": (budget["STORAGE-AQUEOUS_OUT"] - budget["STORAGE-AQUEOUS_IN"]).to_numpy(),
+                "time": rates["time"],
+                "injected": cumulative["WEL_IN"],
+                "extracted": cumulative["WEL_OUT"],
+                "boundary_inflow": cumulative[f"{boundary}_IN"],
+                "boundary_outflow": cumulative[f"{boundary}_OUT"],
+                "in_aquifer": cumulative["STORAGE-AQUEOUS_OUT"] - cumulative["STORAGE-AQUEOUS_IN"],
             }
         )
 
@@ -512,24 +570,27 @@ def intermittent_pumping(
 def structured_grid(
     wells: list,
     domain_size: tuple,
-    top: float,
-    bottom: float,
-    n_layers: int,
+    top: float | Callable,
+    bottom: float | Callable | list,
+    n_layers: int | list,
     grid_spacing: float,
     grid_spacing_at_wells: float,
     refinement_margin: float = 5.0,
+    domain_centre: tuple | None = None,
 ) -> StructuredGrid:
-    """Structured grid centred on the wells and refined around them.
+    """Structured grid refined around the wells, with layers of equal thickness in each hydrostratigraphic unit.
 
     Args:
         wells: Wells used to refine the grid (e.g., pumped wells).
         domain_size: Size of the domain along x and y [m].
-        top: Elevation of the top of the aquifer [m].
-        bottom: Elevation of the bottom of the aquifer [m].
-        n_layers: Number of layers.
+        top: Elevation of the top of the aquifer [m], constant or function z(x, y).
+        bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the bottom of
+            each hydrostratigraphic unit.
+        n_layers: Number of layers (per unit).
         grid_spacing: Largest cell width Δx [m].
         grid_spacing_at_wells: Cell width Δx around the wells [m].
         refinement_margin: Distance from the outermost wells to the edge of the fine cells [m].
+        domain_centre: Coordinates (x, y) of the domain centre [m]; default: centre of the wells.
 
     Returns:
         flopy StructuredGrid in the coordinates of the wells; row 1 is the northernmost.
@@ -538,23 +599,71 @@ def structured_grid(
         raise ValueError("At least one well is needed.")
     if grid_spacing_at_wells > grid_spacing:
         raise ValueError("grid_spacing_at_wells must not exceed grid_spacing.")
-    x = [w.x for w in wells]
-    y = [w.y for w in wells]
-    xorigin = (min(x) + max(x) - domain_size[0]) / 2
-    yorigin = (min(y) + max(y) - domain_size[1]) / 2
+    x_centre, y_centre = domain_centre or _centre(wells)
+    xorigin, yorigin = x_centre - domain_size[0] / 2, y_centre - domain_size[1] / 2
     spacing = {"coarse": grid_spacing, "fine": grid_spacing_at_wells, "margin": refinement_margin}
-    delr = _cell_widths(x, xorigin, xorigin + domain_size[0], **spacing)
-    delc = _cell_widths(y, yorigin, yorigin + domain_size[1], **spacing)[::-1]  # MODFLOW rows run north to south
-    n_rows, n_columns = len(delc), len(delr)
-    botm = np.linspace(top, bottom, n_layers + 1)[1:]
+    delr = _cell_widths([w.x for w in wells], xorigin, xorigin + domain_size[0], **spacing)
+    delc = _cell_widths([w.y for w in wells], yorigin, yorigin + domain_size[1], **spacing)[::-1]  # rows: north first
+
+    # Layers: each hydrostratigraphic unit is divided into layers of equal thickness
+    x, y = np.meshgrid(xorigin + np.cumsum(delr) - delr / 2, yorigin + domain_size[1] - np.cumsum(delc) + delc / 2)
+    bottoms = _as_list(bottom)
+    upper = _elevation(top, x, y)
+    botm = []
+    for unit, (unit_bottom, n) in enumerate(zip(bottoms, _per_unit(n_layers, len(bottoms))), start=1):
+        lower = _elevation(unit_bottom, x, y)
+        if np.any(lower >= upper):
+            raise ValueError(f"Hydrostratigraphic unit {unit}: the bottom must lie below the top everywhere.")
+        botm += [upper + (lower - upper) * (i + 1) / n for i in range(n)]
+        upper = lower
     return StructuredGrid(
-        delc=delc,
-        delr=delr,
-        top=np.full((n_rows, n_columns), float(top)),
-        botm=np.repeat(botm, n_rows * n_columns).reshape(n_layers, n_rows, n_columns),
-        xoff=xorigin,
-        yoff=yorigin,
+        delc=delc, delr=delr, top=_elevation(top, x, y), botm=np.array(botm), xoff=xorigin, yoff=yorigin
     )
+
+
+def _centre(wells):
+    """Centre (x, y) of the bounding box of the wells [m]."""
+    x, y = [w.x for w in wells], [w.y for w in wells]
+    return (min(x) + max(x)) / 2, (min(y) + max(y)) / 2
+
+
+def _as_list(value):
+    """A list as it is, any other value as a list of one."""
+    return list(value) if isinstance(value, (list, tuple)) else [value]
+
+
+def _per_unit(value, n_units):
+    """Values of the hydrostratigraphic units from a value for all units or a list with one per unit."""
+    values = list(value) if isinstance(value, (list, tuple)) else [value] * n_units
+    if len(values) != n_units:
+        raise ValueError(f"Give one value per hydrostratigraphic unit ({n_units}), not {value}.")
+    return values
+
+
+def _elevation(value, x, y):
+    """Elevation [m] at the coordinates x, y [m] from a constant or a function z(x, y)."""
+    z = np.broadcast_to(value(x, y) if callable(value) else value, x.shape).astype(float)
+    if np.isnan(z).any():
+        raise ValueError("An elevation function returned NaN (e.g., outside the points it interpolates).")
+    return z
+
+
+def _stress_periods(schedules: dict, time_step: float | list, simulation_time: float) -> pd.DataFrame:
+    """Stress periods starting at every change time of the schedules (constants or [(t, value), ...]).
+
+    Returns:
+        DataFrame with start [s], duration [s], number of time steps (Δt ≤ time_step), and the value of each schedule.
+    """
+    time_step = _schedule(time_step)
+    schedules = {name: _schedule(value) for name, value in schedules.items()}
+    times = {t for schedule in [time_step, *schedules.values()] for t, _ in schedule}
+    start = np.array(sorted(t for t in times if t < simulation_time))
+    duration = np.diff([*start, simulation_time])
+    n_time_steps = np.ceil(duration / _values_at(time_step, start) - 1e-9).astype(int)
+    table = pd.DataFrame({"start": start, "duration": duration, "n_time_steps": n_time_steps})
+    for name, schedule in schedules.items():
+        table[name] = _values_at(schedule, start)
+    return table
 
 
 def _schedule(value):
@@ -589,18 +698,28 @@ def _saved_array(output, time):
     return output.get_data(totim=saved)
 
 
-def _screened_cells(well, grid):
-    """Cells (layer, row, column) crossed by a well screen, with weights proportional to the screened thickness."""
+def _weighted_series(output, cells, column):
+    """Time series of the weighted mean Σ w_k x_k over cells [(cell, w_k), ...] from a flopy output file."""
+    series = output.get_ts([cell for cell, _ in cells])
+    return pd.DataFrame({"time": series[:, 0], column: series[:, 1:] @ [w for _, w in cells]})
+
+
+def _screened_cells(well, grid, hydraulic_conductivity):
+    """Cells (layer, row, column) crossed by a well screen, with weights w_k = K_k b_k / Σ K b.
+
+    b_k is the screened thickness in cell k and K_k [m s⁻¹] the hydraulic conductivity of layer k.
+    """
     row, column = grid.intersect(well.x, well.y, forgive=True)
     if np.isnan(row):
         raise ValueError(f"Well {well.name} lies outside the domain.")
     row, column = int(row), int(column)
     tops, bottoms = grid.top_botm[:-1, row, column], grid.top_botm[1:, row, column]
-    thickness = np.minimum(tops, well.screen_top) - np.maximum(bottoms, well.screen_bottom)
+    thickness = np.maximum(np.minimum(tops, well.screen_top) - np.maximum(bottoms, well.screen_bottom), 0.0)
+    transmissivity = hydraulic_conductivity * thickness
     screened = np.flatnonzero(thickness > 0)
     if screened.size == 0:
         raise ValueError(f"Well {well.name}: the screen does not cross the aquifer.")
-    return [((k, row, column), thickness[k] / thickness[screened].sum()) for k in screened]
+    return [((int(k), row, column), transmissivity[k] / transmissivity.sum()) for k in screened]
 
 
 def _cell_widths(coordinates, start, end, coarse, fine, margin):
