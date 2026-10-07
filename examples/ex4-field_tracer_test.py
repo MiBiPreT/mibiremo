@@ -1,5 +1,5 @@
 """
-MiBiReMo Example 4: Field installation tracer test.
+MiBiReMo Example 4: Field model tracer test.
 
 An in situ biological flushing installation is modelled with one extraction well (EXT_1) and four injection wells
 (INJ_1–4) at the corners of a square at a distance of 4 m from the extraction well. The model consists of a
