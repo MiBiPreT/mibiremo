@@ -1,6 +1,6 @@
 # MiBiReMo - Examples
 
-Eight examples are available as both Python scripts and Jupyter notebooks.
+Nine examples are available as both Python scripts and Jupyter notebooks.
 To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
@@ -57,6 +57,9 @@ The example `ex7-validation-vs-mibitrans.py` validates the transport and the PHR
 
 ## Example 8 - Laboratory column test
 The example `ex8-column_test.py` simulates a laboratory column with `ColumnModel`: a soil column flushed with a solution containing a conservative tracer and a solute degraded with first-order kinetics, with a flow interruption (stop-flow test). The example shows the breakthrough curves in time and in pore volumes flushed, and the concentration profiles in the column. See [Column model](column_model.md) for the conventions of the model.
+
+## Example 9 - Column validation against mibitrans
+The example `ex9-column_validation-vs-mibitrans.py` validates `ColumnModel` against the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2) in its one-dimensional limit: the column of Example 8, flushed with a constant influent concentration, for a conservative tracer and for a solute with first-order decay (a PHREEQC KINETICS reactant). The example compares the concentration profiles in the column and the breakthrough curves at the outlet.
 
 The examples 4 to 7 need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
 
