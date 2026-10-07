@@ -1,5 +1,5 @@
 """
-MiBiReMo Example 5: Field installation tracer test with three well layouts.
+MiBiReMo Example 5: Field model tracer test with three well layouts.
 
 The tracer test of Example 4 is repeated with the four injection wells (INJ_1–4) at three distances from the
 extraction well (EXT_1): 4 m, 6 m, and 10 m. The aquifer, the flow rates, and the tracer injection (1.0 g m⁻³
