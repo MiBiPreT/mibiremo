@@ -7,8 +7,9 @@ built with [flopy](https://github.com/modflowpy/flopy), and the flopy simulation
 `model.simulation`.
 
 Examples: [tracer test](notebooks/ex4-field_tracer_test.ipynb),
-[tracer test with three well layouts](notebooks/ex5-field_tracer_sweep.ipynb), and
-[validation against mibitrans](notebooks/ex6-validation-vs-mibitrans.ipynb).
+[tracer test with three well layouts](notebooks/ex5-field_tracer_sweep.ipynb),
+[tracer test in a layered aquifer](notebooks/ex6-field_tracer_layered.ipynb), and
+[validation against mibitrans](notebooks/ex7-validation-vs-mibitrans.ipynb).
 
 ## Requirements
 
@@ -60,6 +61,8 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
 - **Units**: SI throughout: m, s, m³ s⁻¹, m s⁻¹. Times are counted from the start of the simulation.
 - **Coordinates**: projected coordinates in metres, as in the well files; the grid is placed in the same coordinates.
   Azimuths are in degrees clockwise from north.
+- **Elevations**: the top of the aquifer and the bottoms of the hydrostratigraphic units are constant or a function
+  `z(x, y)` of the coordinates, e.g. `scipy.interpolate.NearestNDInterpolator(points, z)` for measured elevations.
 - **Flow rates**: Q by well name, positive for injection and negative for extraction. Wells not listed in
   `flow_rates` are monitoring wells (Q = 0); their concentrations are available as for the pumped wells.
 - **Schedules**: every time-dependent input is a list `[(t, value), ...]` starting at t = 0, each value holding until
@@ -72,11 +75,29 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
 
 ## Model
 
-- Homogeneous confined aquifer with horizontal hydraulic conductivity K, optional vertical anisotropy, and layers of
-  equal thickness. One layer (the default) is enough when all pumped wells are screened over the whole aquifer.
-- Regional groundwater flow with a uniform hydraulic gradient, imposed as fixed heads on the lateral boundary.
-- The flow rate of a well is split among its screened cells in proportion to the screened thickness.
-- Structured grid centred on the pumped wells, with fine cells around them that grow to `grid_spacing`.
+- Confined aquifer with horizontal hydraulic conductivity K, optional vertical anisotropy, and layers of equal
+  thickness. One layer (the default) is enough when all pumped wells are screened over the whole aquifer.
+- Layered aquifer: with `bottom` as a list (one bottom per hydrostratigraphic unit, from top to bottom), each unit is
+  divided into `n_layers` layers of equal thickness, and `n_layers`, `hydraulic_conductivity`, `vertical_anisotropy`,
+  and `porosity` are one value for all units or a list with one value per unit:
+
+    ```python
+    model = mb.FieldModel(
+        ...,
+        top=96.0,
+        bottom=[93.5, 90.5, 87.0],                    # upper, middle, and lower unit [m]
+        n_layers=[4, 3, 1],
+        hydraulic_conductivity=[5e-5, 5e-6, 1e-7],    # K [m s-1]
+        vertical_anisotropy=0.1,                      # Kz/K, all units
+        porosity=0.25,
+    )
+    ```
+
+- Regional groundwater flow with a uniform hydraulic gradient, imposed on the lateral boundary as fixed heads (CHD,
+  the default) or as a general-head boundary (GHB) with `boundary_conductance` C [m² s⁻¹] in each boundary cell.
+- The flow rate of a well is split among its screened cells in proportion to the screened transmissivity K b.
+- Structured grid centred on the pumped wells (or on `domain_centre`), with fine cells around the pumped wells that grow
+  to `grid_spacing`.
 - Transport schemes: advection (upstream, central, or TVD scheme) and optional dispersion (longitudinal, transverse, and
   vertical dispersivities, molecular diffusion).
 - By default a single tracer without reactions is simulated.
@@ -86,6 +107,8 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
 
 - `head(time)` and `concentration(time)`: arrays (layer, row, column) at the end of the time step containing `time`.
 - `well_concentration(name)`: flow-weighted mean concentration of the screened cells at every time step.
+- `well_head(name)`: head of a well at the end of every stress period, the mean head of the screened cells weighted by
+  K b.
 - `mass_balance()`: cumulative tracer mass injected, extracted, crossing the boundary, and in the aquifer.
 - `mibiremo.plotting`: `map_view`, `cross_section`, `wells`, and `flow_arrow`, e.g.
   `mb.plotting.map_view(model, model.concentration(2 * day), label="C")`.
@@ -124,4 +147,4 @@ model.well_concentration("EXT_1", component="Tr")
 
 The tracer and the reactive transport are verified against the exact analytical solution of
 [mibitrans](https://github.com/MiBiPreT/mibitrans) for a plume from a constant-concentration source in uniform flow,
-conservative and with first-order decay ([Example 6](notebooks/ex6-validation-vs-mibitrans.ipynb)).
+conservative and with first-order decay ([Example 7](notebooks/ex7-validation-vs-mibitrans.ipynb)).
