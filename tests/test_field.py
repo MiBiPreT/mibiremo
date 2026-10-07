@@ -67,24 +67,43 @@ def dissolved_mass(model, time=None, component=None):
 
 
 @pytest.mark.parametrize(
-    ("wells", "tolerance"),
+    ("wells", "tolerance", "centre"),
     [
-        (DESIGN, 1e-6),
-        ([EXTRACTION, replace(EXTRACTION, name="INJ_1", x=EXTRACTION.x + 0.6)], FINE / 4),  # cells share the 0.1 m gap
+        (DESIGN, 1e-6, None),
+        ([EXTRACTION, replace(EXTRACTION, name="INJ_1", x=EXTRACTION.x + 0.6)], FINE / 4, None),  # cells share the gap
+        (DESIGN, 1e-6, (EXTRACTION.x - 7.7, EXTRACTION.y - 7.2)),  # domain centred upgradient of the wells
     ],
 )
-def test_wells_at_cell_centres(wells, tolerance):
-    """Wells are at cell centres of a domain centred on them, with layers of equal thickness."""
-    grid = structured_grid(wells, grid_spacing_at_wells=FINE, **GRID)
+def test_wells_at_cell_centres(wells, tolerance, centre):
+    """Wells are at cell centres of a domain centred on them (or on a given centre), with layers of equal thickness."""
+    grid = structured_grid(wells, grid_spacing_at_wells=FINE, domain_centre=centre, **GRID)
     for w in wells:
         row, column = grid.intersect(w.x, w.y)
         assert grid.xcellcenters[row, column] == pytest.approx(w.x, abs=tolerance)
         assert grid.ycellcenters[row, column] == pytest.approx(w.y, abs=tolerance)
     x_min, x_max, y_min, y_max = grid.extent
     x, y = [w.x for w in wells], [w.y for w in wells]
+    centre = centre or ((min(x) + max(x)) / 2, (min(y) + max(y)) / 2)
     assert (x_max - x_min, y_max - y_min) == pytest.approx(GRID["domain_size"])
-    assert ((x_min + x_max) / 2, (y_min + y_max) / 2) == pytest.approx(((min(x) + max(x)) / 2, (min(y) + max(y)) / 2))
+    assert ((x_min + x_max) / 2, (y_min + y_max) / 2) == pytest.approx(centre)
     assert np.diff(grid.botm[:, 0, 0]) == pytest.approx([-5.0 / 7] * 6)  # layers of equal thickness
+
+
+def test_hydrostratigraphic_units():
+    """Each unit is divided into layers of equal thickness, between a sloping top and the unit bottoms."""
+    x0 = EXTRACTION.x
+    grid = structured_grid(
+        DESIGN,
+        domain_size=(40.0, 40.0),
+        top=lambda x, y: 95.5 + 0.01 * (x - x0),  # top of the aquifer rising towards the east
+        bottom=[93.5, lambda x, y: 90.5 - 0.01 * (x - x0)],  # bottom of each unit
+        n_layers=[2, 3],
+        grid_spacing=4.0,
+        grid_spacing_at_wells=FINE,
+    )
+    upper = (grid.top - 93.5) / 2
+    lower = (93.5 - (90.5 - 0.01 * (grid.xcellcenters - x0))) / 3
+    assert grid.cell_thickness == pytest.approx(np.array([upper] * 2 + [lower] * 3))
 
 
 def test_cell_widths():
@@ -122,10 +141,10 @@ def test_stress_periods(tmp_path):
 
 
 def test_well_rates(tmp_path):
-    """In every stress period, Q of a well is split among the layers in proportion to the screened thickness."""
+    """In every stress period, Q of a well is split among the layers in proportion to the screened transmissivity."""
     partial = replace(EXTRACTION, screen_top=94.75, screen_bottom=92.0)  # 0.25, 1, 1, and 0.5 m in layers 1-4
     model = FieldModel(
-        **MODEL,
+        **(MODEL | {"bottom": [93.5, 90.5], "n_layers": [2, 3], "hydraulic_conductivity": [1e-5, 1e-6]}),
         workspace=tmp_path,
         wells=[partial, *DESIGN[1:]],
         flow_rates={"EXT_1": -Q, "INJ_1": [(0.0, Q), (DAY, 0.0)]},
@@ -134,19 +153,20 @@ def test_well_rates(tmp_path):
     )
     model.build()
     wel = model.simulation.get_model("gwf").wel.stress_period_data
+    transmissivity = np.array([0.25e-5, 1e-5, 1e-6, 0.5e-6])  # K b [m2 s-1] in layers 1-4
     for period, injection in enumerate([Q, 0.0]):
         records = wel.get_data(period)
         assert len(records) == 4 + 5  # all records in every stress period, with Q = 0 when off
         extraction = records[records["boundname"] == "EXT_1"]
         assert [layer for layer, _, _ in extraction["cellid"]] == [0, 1, 2, 3]
-        assert extraction["q"] == pytest.approx(-Q * np.array([0.25, 1.0, 1.0, 0.5]) / 2.75)
+        assert extraction["q"] == pytest.approx(-Q * transmissivity / transmissivity.sum())
         assert records[records["boundname"] == "INJ_1"]["q"].sum() == pytest.approx(injection)
 
 
 @requires_mf6
 def test_regional_flow(tmp_path):
-    """Without pumping, the hydraulic head is planar and the specific discharge is K i towards the regional flow azimuth
-    (Darcy's law)."""
+    """Without pumping, the hydraulic head is planar (also in the monitoring wells) and the specific discharge is K i
+    towards the regional flow azimuth (Darcy's law)."""
     gradient, azimuth = 0.008, math.radians(22.0)
     model = FieldModel(
         **(MODEL | {"n_layers": 2}),
@@ -161,11 +181,34 @@ def test_regional_flow(tmp_path):
     model.run()
     planar = model.head_from_gradient(model.grid.xcellcenters, model.grid.ycellcenters)
     assert model.head() == pytest.approx(np.broadcast_to(planar, model.grid.shape))
+    well = DESIGN[1]  # monitoring well, at a cell centre
+    assert model.well_head(well.name)["head"].iloc[-1] == pytest.approx(model.head_from_gradient(well.x, well.y))
     discharge = model.simulation.get_model("gwf").output.budget().get_data(text="DATA-SPDIS")[0]
     darcy = MODEL["hydraulic_conductivity"] * gradient
     assert discharge["qx"] == pytest.approx(darcy * math.sin(azimuth))
     assert discharge["qy"] == pytest.approx(darcy * math.cos(azimuth))
     assert discharge["qz"] == pytest.approx(0.0, abs=1e-15)
+
+
+@requires_mf6
+def test_general_head_boundary(tmp_path):
+    """Without regional flow, the water extracted by a well enters across the general-head boundary,
+    Q = Σ C (h_b - h)."""
+    conductance = 1e-4  # [m2 s-1]
+    model = FieldModel(
+        **(MODEL | {"n_layers": 1}),
+        workspace=tmp_path,
+        wells=DESIGN,
+        flow_rates={"EXT_1": -Q},
+        boundary_conductance=conductance,
+        simulation_time=1.0,
+        time_step=1.0,
+    )
+    model.run()
+    flows = model.simulation.get_model("gwf").output.budget().get_data(text="GHB")[0]
+    head = model.head().ravel()[flows["node"] - 1]
+    assert flows["q"] == pytest.approx(conductance * (MODEL["reference_head"] - head))
+    assert flows["q"].sum() == pytest.approx(Q, rel=1e-6)
 
 
 @requires_mf6
@@ -229,6 +272,7 @@ def test_injected_solution(tmp_path):
         "refinement_margin": 2.0,
         "wells": DESIGN,
         "flow_rates": {"EXT_1": -3 * Q, "INJ_1": Q},
+        "boundary_conductance": 1e-4,  # inflow of the initial solution across a general-head boundary
         "simulation_time": DAY,
         "time_step": HOUR,
     }
