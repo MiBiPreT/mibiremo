@@ -47,7 +47,7 @@ _FIELDS = [f.name for f in fields(Well)]
 _FULL_NAMES = {name[:10]: name for name in _FIELDS}
 
 
-def array_radial(well, n_wells, radius, start_azimuth=0.0):
+def array_radial(well: Well, n_wells: int, radius: float, start_azimuth: float = 0.0) -> list[Well]:
     """Copies of a well evenly spaced on a circle centred on the well location, numbered clockwise.
 
     Args:
@@ -70,7 +70,7 @@ def array_radial(well, n_wells, radius, start_azimuth=0.0):
     return wells
 
 
-def array_linear(well, n_wells, spacing, azimuth=90.0):
+def array_linear(well: Well, n_wells: int, spacing: float, azimuth: float = 90.0) -> list[Well]:
     """Copies of a well evenly spaced along a straight line centred on the well location.
 
     Args:
@@ -94,7 +94,7 @@ def array_linear(well, n_wells, spacing, azimuth=90.0):
     return wells
 
 
-def read_wells(path, well=None):
+def read_wells(path: str | Path, well: Well | None = None) -> list[Well]:
     """Read wells from a point file (shapefile, GeoPackage, GeoJSON) or a CSV file.
 
     Each `Well` field is read from the attribute column of the same name and other columns are ignored;
@@ -136,7 +136,7 @@ def read_wells(path, well=None):
     ]
 
 
-def write_wells(wells, path, crs=None):
+def write_wells(wells: list[Well], path: str | Path, crs: str | None = None) -> None:
     """Write wells with all their properties to a point file (shapefile, GeoPackage, GeoJSON) or a CSV file.
 
     Shapefile attribute names are truncated to 10 characters (e.g. ``screen_bot``); `read_wells` accepts them.
