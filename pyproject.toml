@@ -65,8 +65,8 @@ publishing = [
 ]
 
 [project.urls]
-Repository = "https://github.com/MiBiPret/mibiremo"
-Issues = "https://github.com/MiBiPret/mibiremo/issues"
+Repository = "https://github.com/MiBiPreT/mibiremo"
+Issues = "https://github.com/MiBiPreT/mibiremo/issues"
 ReadTheDocs = "https://mibiremo.readthedocs.io"
 
 [tool.setuptools]
@@ -87,7 +87,7 @@ omit = ["examples/*"]
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py38,py39,py310,py311,py312
+envlist = py310,py311,py312
 skip_missing_interpreters = true
 [testenv]
 commands = pytest
