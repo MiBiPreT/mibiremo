@@ -1,6 +1,6 @@
 # MiBiReMo - Examples
 
-Six examples are available as both Python scripts and Jupyter notebooks.
+Eight examples are available as both Python scripts and Jupyter notebooks.
 To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
@@ -21,9 +21,9 @@ The problem is described in the following scheme:
 
 ![Model diagram](img/ex3-BTEX_dissolution_transport.png)
 
-The model consists of a 1D domain with a length of 50 m. The domain is initially filled with clean groundwater with a spot of benzene and ethylbenzene pure phases present at the left side of the domain extending for 0.5 m. We assumed that the contaminant pure phase in the source zone is immobile (it only dissolves).
+The model consists of a 1D domain with a length of 100 m. The domain is initially filled with clean groundwater with a spot of benzene and ethylbenzene pure phases present at the left side of the domain extending for 0.5 m. We assumed that the contaminant pure phase in the source zone is immobile (it only dissolves).
 The groundwater flows from left to right with a velocity of 1 m/d, and dissolved benzene and ethylbenzene are transported towards the right end of the domain. The dissolution process is modelled both kinetically and equilibrium-based. 
-The model is run for 100 days, and the concentration of benzene and ethylbenzene is monitored at the right side of the domain.
+The model is run for 100 days, and the concentration of benzene and ethylbenzene is monitored at 50 m from the inlet.
 
 Three simulation runs are performed:
 1. Equilibrium dissolution of benzene and ethylbenzene simulated with PHREEQC (standalone).
@@ -49,10 +49,16 @@ The fourth example `ex4-field_tracer_test.py` builds a MODFLOW 6 model of an in 
 ## Example 5 - Tracer test with three well layouts
 The fifth example `ex5-field_tracer_sweep.py` repeats the tracer test of Example 4 with the injection wells at 4 m, 6 m, and 10 m from the extraction well, and compares the breakthrough curves and the tracer mass recovery at the extraction well.
 
-## Example 6 - Validation against mibitrans
-The sixth example `ex6-validation-vs-mibitrans.py` validates the transport and the PHREEQC coupling of `FieldModel(phreeqc_coupling=True)`, which couples MODFLOW 6 and PHREEQC through mf6rtm. The plume from a constant-concentration source in uniform flow is compared with the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2), for a conservative tracer and for a pseudo-component with first-order decay (a PHREEQC KINETICS reactant).
+## Example 6 - Tracer test in a layered aquifer
+The example `ex6-field_tracer_layered.py` repeats the tracer test of Example 4 in a layered aquifer made of three hydrostratigraphic units, with a sloping top and a general-head boundary, and compares it with a homogeneous single-layer aquifer of the same transmissivity. The example shows the hydrostratigraphic units and the tracer in cross sections, and the breakthrough at the extraction well and at a monitoring well with two sampling levels.
 
-The examples need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
+## Example 7 - Validation against mibitrans
+The example `ex7-validation-vs-mibitrans.py` validates the transport and the PHREEQC coupling of `FieldModel(phreeqc_coupling=True)`, which couples MODFLOW 6 and PHREEQC through mf6rtm. The plume from a constant-concentration source in uniform flow is compared with the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2), for a conservative tracer and for a pseudo-component with first-order decay (a PHREEQC KINETICS reactant).
+
+## Example 8 - Laboratory column test
+The example `ex8-column_test.py` simulates a laboratory column with `ColumnModel`: a soil column flushed with a solution containing a conservative tracer and a solute degraded with first-order kinetics, with a flow interruption (stop-flow test). The example shows the breakthrough curves in time and in pore volumes flushed, and the concentration profiles in the column. See [Column model](column_model.md) for the conventions of the model.
+
+The examples 4 to 7 need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
 
 
 ## References
