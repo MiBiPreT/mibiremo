@@ -1,6 +1,6 @@
 # MiBiReMo - Examples
 
-Currently, three examples are available as both Python scripts and Jupyter notebooks.
+Six examples are available as both Python scripts and Jupyter notebooks.
 To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
@@ -43,7 +43,20 @@ The following figure shows the experimental results obtained by Geller and Hunt 
 ![Geller and Hunt (1993) results](img/Geller_Hunt_1993.png)
 
 
+## Example 4 - Tracer test of a field model
+The fourth example `ex4-field_tracer_test.py` builds a MODFLOW 6 model of an in situ biological flushing installation with `FieldModel`: one extraction well and four injection wells around it in a confined aquifer with groundwater flow. A tracer is injected during the first day. The example shows the hydraulic head and drawdown, the tracer plume, and the breakthrough and recovery at the extraction well. See [Field model](field_model.md) for the conventions of the model.
+
+## Example 5 - Tracer test with three well layouts
+The fifth example `ex5-field_tracer_sweep.py` repeats the tracer test of Example 4 with the injection wells at 4 m, 6 m, and 10 m from the extraction well, and compares the breakthrough curves and the tracer mass recovery at the extraction well.
+
+## Example 6 - Validation against mibitrans
+The sixth example `ex6-validation-vs-mibitrans.py` validates the transport and the PHREEQC coupling of `FieldModel(phreeqc_coupling=True)`, which couples MODFLOW 6 and PHREEQC through mf6rtm. The plume from a constant-concentration source in uniform flow is compared with the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2), for a conservative tracer and for a pseudo-component with first-order decay (a PHREEQC KINETICS reactant).
+
+The examples need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
+
 
 ## References
 
-<a id="1">[1]</a> Geller, J. T., and J. R. Hunt (1993), Mass transfer from nonaqueous phase organic liquids in water-saturated porous media, Water Resour. Res., 29(4), 833–845, doi:[10.1029/92WR02581](https://doi.org/10.1029/92WR02581). 
+<a id="1">[1]</a> Geller, J. T., and J. R. Hunt (1993), Mass transfer from nonaqueous phase organic liquids in water-saturated porous media, Water Resour. Res., 29(4), 833–845, doi:[10.1029/92WR02581](https://doi.org/10.1029/92WR02581).
+
+<a id="2">[2]</a> Wexler, E. J. (1992), Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow, U.S. Geological Survey Techniques of Water-Resources Investigations, Book 3, Chapter B7, doi:[10.3133/twri03B7](https://doi.org/10.3133/twri03B7).
