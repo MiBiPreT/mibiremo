@@ -1,3 +1,4 @@
+from .column import ColumnModel as ColumnModel
 from .field import FieldModel as FieldModel
 from .field import intermittent_pumping as intermittent_pumping
 from . import plotting as plotting
