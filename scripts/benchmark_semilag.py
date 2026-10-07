@@ -15,22 +15,22 @@ class _PurePythonSolver(SemiLagSolver):
     """pure-Python Saulyev implementation for benchmarking purposes"""
 
     def saulyev_solver_alt(self, c_bound):
-        theta = self.d * self.dt / (self.dx**2)
+        diffusion_number = self.d * self.dt / (self.dx**2)
         c_init = self.C.copy()
         clr = self.C.copy()
         crl = self.C.copy()
-        inv = 1.0 / (1.0 + theta)
+        inv = 1.0 / (1.0 + diffusion_number)
 
         for i in range(len(clr)):
-            sola = theta * c_bound if i == 0 else theta * clr[i - 1]
-            solb = (1 - theta) * c_init[i]
-            solc = theta * c_init[i + 1] if i < len(clr) - 1 else theta * c_init[i]
+            sola = diffusion_number * c_bound if i == 0 else diffusion_number * clr[i - 1]
+            solb = (1 - diffusion_number) * c_init[i]
+            solc = diffusion_number * c_init[i + 1] if i < len(clr) - 1 else diffusion_number * c_init[i]
             clr[i] = (sola + solb + solc) * inv
 
         for i in range(len(crl) - 1, -1, -1):
-            sola = theta * clr[-1] if i == len(crl) - 1 else theta * crl[i + 1]
-            solb = (1 - theta) * c_init[i]
-            solc = theta * c_init[i - 1] if i > 0 else theta * c_init[i]
+            sola = diffusion_number * clr[-1] if i == len(crl) - 1 else diffusion_number * crl[i + 1]
+            solb = (1 - diffusion_number) * c_init[i]
+            solc = diffusion_number * c_init[i - 1] if i > 0 else diffusion_number * c_bound
             crl[i] = (sola + solb + solc) * inv
 
         self.C = (clr + crl) / 2
