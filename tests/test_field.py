@@ -19,14 +19,14 @@ from mibiremo.wells import array_radial
 GEOMETRY = {"well_top": 96.3, "well_bottom": 90.5, "diameter": 0.1, "screen_top": 95.5, "screen_bottom": 90.5}
 EXTRACTION = Well("EXT_1", x=222049.7016, y=2401808.1922, **GEOMETRY)
 DESIGN = [EXTRACTION, *array_radial(replace(EXTRACTION, name="INJ"), n_wells=3, radius=4.0)]
-GRID = {"domain_size": (148.0, 116.0), "top": 95.5, "bottom": 90.5, "n_layers": 7, "grid_spacing": 4.0}
+GRID = {"domain_size": (148.0, 116.0), "top": 95.5, "layer_bottom": 90.5, "n_layers": 7, "grid_spacing": 4.0}
 FINE = 0.5  # grid spacing at the wells [m]
 HOUR, DAY = 3600.0, 86400.0
 Q = 2.75e-5  # flow rate [m3 s-1]
 MODEL = {  # 5 layers of 1 m
     "domain_size": (40.0, 40.0),
     "top": 95.5,
-    "bottom": 90.5,
+    "layer_bottom": 90.5,
     "n_layers": 5,
     "hydraulic_conductivity": 5e-6,
     "porosity": 0.25,
@@ -96,7 +96,7 @@ def test_hydrostratigraphic_units():
         DESIGN,
         domain_size=(40.0, 40.0),
         top=lambda x, y: 95.5 + 0.01 * (x - x0),  # top of the aquifer rising towards the east
-        bottom=[93.5, lambda x, y: 90.5 - 0.01 * (x - x0)],  # bottom of each unit
+        layer_bottom=[93.5, lambda x, y: 90.5 - 0.01 * (x - x0)],  # bottom of each unit
         n_layers=[2, 3],
         grid_spacing=4.0,
         grid_spacing_at_wells=FINE,
@@ -144,7 +144,7 @@ def test_well_rates(tmp_path):
     """In every stress period, Q of a well is split among the layers in proportion to the screened transmissivity."""
     partial = replace(EXTRACTION, screen_top=94.75, screen_bottom=92.0)  # 0.25, 1, 1, and 0.5 m in layers 1-4
     model = FieldModel(
-        **(MODEL | {"bottom": [93.5, 90.5], "n_layers": [2, 3], "hydraulic_conductivity": [1e-5, 1e-6]}),
+        **(MODEL | {"layer_bottom": [93.5, 90.5], "n_layers": [2, 3], "hydraulic_conductivity": [1e-5, 1e-6]}),
         workspace=tmp_path,
         wells=[partial, *DESIGN[1:]],
         flow_rates={"EXT_1": -Q, "INJ_1": [(0.0, Q), (DAY, 0.0)]},
@@ -314,7 +314,7 @@ def test_mibitrans_plume(tmp_path):
         workspace=tmp_path,
         domain_size=(17.0, 11.0),
         top=10.0,
-        bottom=0.0,
+        layer_bottom=0.0,
         hydraulic_conductivity=conductivity,
         porosity=porosity,
         reference_head=10.0,

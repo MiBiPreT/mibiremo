@@ -53,7 +53,7 @@ for distance, wells in layouts.items():
         flow_rates=flow_rates,
         domain_size=(100.0, 100.0),
         top=95.5,
-        bottom=90.5,
+        layer_bottom=90.5,
         hydraulic_conductivity=5e-6,
         porosity=0.25,
         reference_head=93.7,
