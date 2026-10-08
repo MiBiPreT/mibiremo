@@ -75,7 +75,7 @@ uniform_flow = {
     "flow_rates": {name: 0.0 for name in positions},
     "domain_size": (50.5, 24.5),  # cell faces on the boundary: uniform cells
     "top": 10.0,
-    "bottom": 0.0,
+    "layer_bottom": 0.0,
     "hydraulic_conductivity": conductivity,
     "porosity": porosity,
     "reference_head": 10.0,
