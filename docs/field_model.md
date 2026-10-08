@@ -110,8 +110,8 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
 - `well_head(name)`: head of a well at the end of every stress period, the mean head of the screened cells weighted by
   K b.
 - `mass_balance()`: cumulative tracer mass injected, extracted, crossing the boundary, and in the aquifer.
-- `mibiremo.plotting`: `map_view`, `cross_section`, `wells`, and `flow_arrow`, e.g.
-  `mb.plotting.map_view(model, model.concentration(2 * day), label="C")`.
+- `mibiremo.plotting`: `map_view`, `grid`, `cross_section`, `wells`, and `flow_arrow`, e.g.
+  `mb.plotting.map_view(model, model.concentration(2 * day), label="C")` or `mb.plotting.grid(model)`.
 
 ## Reactive transport: PHREEQC coupling
 
