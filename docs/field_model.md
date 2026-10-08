@@ -39,7 +39,7 @@ model = mb.FieldModel(
     flow_rates={"EXT_1": -8.25e-5, "INJ_1": pulsed, "INJ_2": pulsed, "INJ_3": pulsed},  # Q [m3 s-1]
     domain_size=(100.0, 100.0),
     top=95.5,
-    bottom=90.5,
+    layer_bottom=90.5,
     hydraulic_conductivity=5e-6,
     porosity=0.25,
     reference_head=93.7,
@@ -77,7 +77,7 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
 
 - Confined aquifer with horizontal hydraulic conductivity K, optional vertical anisotropy, and layers of equal
   thickness. One layer (the default) is enough when all pumped wells are screened over the whole aquifer.
-- Layered aquifer: with `bottom` as a list (one bottom per hydrostratigraphic unit, from top to bottom), each unit is
+- Layered aquifer: with `layer_bottom` as a list (one bottom per hydrostratigraphic unit, from top to bottom), each unit is
   divided into `n_layers` layers of equal thickness, and `n_layers`, `hydraulic_conductivity`, `vertical_anisotropy`,
   and `porosity` are one value for all units or a list with one value per unit:
 
@@ -85,7 +85,7 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
     model = mb.FieldModel(
         ...,
         top=96.0,
-        bottom=[93.5, 90.5, 87.0],                    # upper, middle, and lower unit [m]
+        layer_bottom=[93.5, 90.5, 87.0],                    # upper, middle, and lower unit [m]
         n_layers=[4, 3, 1],
         hydraulic_conductivity=[5e-5, 5e-6, 1e-7],    # K [m s-1]
         vertical_anisotropy=0.1,                      # Kz/K, all units
