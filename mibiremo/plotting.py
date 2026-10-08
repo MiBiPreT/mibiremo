@@ -5,6 +5,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.patches import Patch
 from flopy.plot import PlotCrossSection
 from flopy.plot import PlotMapView
 from .field import FieldModel
@@ -35,6 +36,40 @@ def map_view(
     mesh = PlotMapView(modelgrid=model.grid, ax=ax, layer=layer).plot_array(np.asarray(values, dtype=float), **kwargs)
     plt.colorbar(mesh, ax=ax, label=label)
     wells(ax, model.wells, model.flow_rates, ms=7)
+    ax.set(xlabel="x [m]", ylabel="y [m]")
+    ax.ticklabel_format(useOffset=False, style="plain")
+    return ax
+
+
+def grid(
+    model: FieldModel,
+    layer: int = 0,
+    boundary: bool = True,
+    labels: bool = True,
+    ax: Axes | None = None,
+    **kwargs: Any,
+) -> Axes:
+    """Plots the grid of `FieldModel`, the wells, and the cells of the lateral boundary.
+
+    Args:
+        model: `FieldModel` after `build` or `run`.
+        layer: Layer, 0 at the top.
+        boundary: If True, colours the lateral boundary cells (CHD or GHB) and adds a legend.
+        labels: If True, write the well names.
+        ax: matplotlib axes; default: a new figure.
+        **kwargs: Arguments of flopy `plot_grid`, e.g. `lw`, `color`.
+
+    Returns:
+        matplotlib axes.
+    """
+    ax = ax or plt.subplots()[1]
+    view = PlotMapView(model=model.simulation.get_model("gwf"), ax=ax, layer=layer)
+    view.plot_grid(**({"lw": 0.3, "color": "0.6"} | kwargs))
+    if boundary:
+        view.plot_bc(model._boundary.upper(), color="tab:cyan")
+        label = {"chd": "constant head (CHD)", "ghb": "general-head boundary (GHB)"}[model._boundary]
+        ax.legend(handles=[Patch(color="tab:cyan", label=label)], loc="upper right", fontsize=8)
+    wells(ax, model.wells, model.flow_rates, labels=labels, ms=7)
     ax.set(xlabel="x [m]", ylabel="y [m]")
     ax.ticklabel_format(useOffset=False, style="plain")
     return ax
