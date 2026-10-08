@@ -3,7 +3,7 @@ MiBiReMo Example: Field model tracer test in a layered aquifer.
 
 The tracer test of the example field_tracer_test (one extraction well EXT_1 and four injection wells INJ_1–4 at the
 corners of a square, 4 m from EXT_1) is repeated in a layered aquifer made of three hydrostratigraphic units: an upper
-sandy unit, a middle silty unit, and a lower unit of low permeability. The top of the aquifer dips towards the east.
+sandy unit, a middle silty unit, and a lower unit of low permeability. The units are horizontal.
 The wells are screened over the upper and middle units, from 95.5 to 90.5 m a.s.l. A monitoring well with two sampling
 levels (MON_1 in the upper unit, MON_2 in the middle unit) lies between INJ_4 and EXT_1.
 
@@ -66,18 +66,18 @@ common = dict(
     time_step=[(0.0, HOUR), (DAY, 4 * HOUR)],
 )
 
-# The layered aquifer is made of hydrostratigraphic units: bottom is a list with the bottom elevation of each unit,
-# from top to bottom. The number of layers, the hydraulic conductivity, the vertical anisotropy, and the porosity are
-# either one value for all units or a list with one value per unit. Each unit is divided into layers of equal
+# The layered aquifer is made of hydrostratigraphic units: layer_bottom is a list with the bottom elevation of each
+# unit, from top to bottom. The number of layers, the hydraulic conductivity, the vertical anisotropy, and the porosity
+# are either one value for all units or a list with one value per unit. Each unit is divided into layers of equal
 # thickness.
 #
-# Elevations are constant or a function z(x, y) of the coordinates. Here the top of the aquifer dips towards the east,
-# by 1 cm per metre, and is 95.5 m a.s.l. at the wells. Elevations measured at a few points can be interpolated with
-# scipy, e.g. scipy.interpolate.NearestNDInterpolator(points, z).
+# Elevations are constant, as here (horizontal units), or a function z(x, y) of the coordinates, e.g. for dipping units.
+# Elevations measured at a few points can be interpolated with scipy, e.g.
+# scipy.interpolate.NearestNDInterpolator(points, z).
 layered = mb.FieldModel(
     workspace=OUTPUT / "field_layered_model" / "layered",
-    top=lambda x, y: 95.5 - 0.01 * x,
-    bottom=[93.5, 90.5, 87.0],  # upper, middle, and lower unit
+    top=95.5,
+    layer_bottom=[93.5, 90.5, 87.0],  # upper, middle, and lower unit
     n_layers=[4, 3, 1],
     hydraulic_conductivity=[5e-5, 5e-6, 1e-7],  # K [m s-1]
     vertical_anisotropy=0.1,  # Kz/K, all units
@@ -90,7 +90,7 @@ conductivity = (5e-5 * 2.0 + 5e-6 * 3.0) / 5.0
 homogeneous = mb.FieldModel(
     workspace=OUTPUT / "field_layered_model" / "homogeneous",
     top=95.5,
-    bottom=90.5,
+    layer_bottom=90.5,
     hydraulic_conductivity=conductivity,
     **common,
 )
