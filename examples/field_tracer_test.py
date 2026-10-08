@@ -76,6 +76,17 @@ print(model.stress_periods)
 model.run()
 print(f"Grid: {model.grid.nrow} rows x {model.grid.ncol} columns x {model.grid.nlay} layer")
 
+# Grid
+# The grid (a flopy StructuredGrid) is available in model.grid. The cells are 0.5 m around the wells and grow towards
+# the boundary up to 4 m. Constant-head (CHD) cells on the lateral boundary impose the hydraulic gradient.
+fig, axes = plt.subplots(1, 2, figsize=(12, 5.5), layout="constrained")
+mb.plotting.grid(model, labels=False, ax=axes[0])
+mb.plotting.flow_arrow(axes[0], 90.0)
+axes[0].set_title("Model grid")
+mb.plotting.grid(model, boundary=False, ax=axes[1])
+axes[1].set(xlim=(-20, 20), ylim=(-20, 20), title="Grid around the wells")
+plt.show()
+
 # Hydraulic head
 # The flopy simulation is available in model.simulation; results are read with head, concentration,
 # well_concentration, and mass_balance (times in seconds). The drawdown is calculated as the difference from the head
