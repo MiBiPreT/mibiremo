@@ -44,7 +44,7 @@ class FieldModel:
     within each stress period.
 
     The aquifer can consist of a single homogeneous layer, or be made of hydrostratigraphic units.
-    In the latter case, the parameter `bottom` must be a list (one bottom per unit, from top to bottom.
+    In the latter case, the parameter `layer_bottom` must be a list (one bottom per unit, from top to bottom).
     `n_layers`, `hydraulic_conductivity`, `vertical_anisotropy`, and `porosity` can be set to a single value for
     all units or a list with one value per unit. Elevations can be constant or passed as a function z(x, y) of
     the coordinates (e.g., a scipy interpolator of measured elevations).
@@ -64,8 +64,8 @@ class FieldModel:
         domain_size: Size of the domain along x and y [m].
         domain_centre: Coordinates (x, y) of the domain centre [m]; default: centre of the pumped wells.
         top: Elevation of the top of the aquifer [m], constant or function z(x, y).
-        bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the bottom of
-            each hydrostratigraphic unit.
+        layer_bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the
+            bottom of each hydrostratigraphic unit.
         n_layers: Number of layers of equal thickness (per unit); one is enough when all pumped wells are screened
             over the whole aquifer.
         hydraulic_conductivity: Horizontal hydraulic conductivity K [m s⁻¹].
@@ -110,7 +110,7 @@ class FieldModel:
     domain_size: tuple
     domain_centre: tuple | None = None
     top: float | Callable
-    bottom: float | Callable | list
+    layer_bottom: float | Callable | list
     n_layers: int | list = 1
     hydraulic_conductivity: float | list
     vertical_anisotropy: float | list = 1.0
@@ -175,7 +175,7 @@ class FieldModel:
 
     def _layer_values(self, value):
         """Value of every model layer from a value for all hydrostratigraphic units or a list with one per unit."""
-        n_units = len(_as_list(self.bottom))
+        n_units = len(_as_list(self.layer_bottom))
         return np.repeat(_per_unit(value, n_units), _per_unit(self.n_layers, n_units))
 
     def _layer_array(self, value, grid):
@@ -374,7 +374,7 @@ class FieldModel:
             self._pumped_wells,
             self.domain_size,
             self.top,
-            self.bottom,
+            self.layer_bottom,
             self.n_layers,
             self.grid_spacing,
             self.grid_spacing_at_wells,
@@ -571,7 +571,7 @@ def structured_grid(
     wells: list,
     domain_size: tuple,
     top: float | Callable,
-    bottom: float | Callable | list,
+    layer_bottom: float | Callable | list,
     n_layers: int | list,
     grid_spacing: float,
     grid_spacing_at_wells: float,
@@ -584,8 +584,8 @@ def structured_grid(
         wells: Wells used to refine the grid (e.g., pumped wells).
         domain_size: Size of the domain along x and y [m].
         top: Elevation of the top of the aquifer [m], constant or function z(x, y).
-        bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the bottom of
-            each hydrostratigraphic unit.
+        layer_bottom: Elevation of the bottom of the aquifer [m], constant or function z(x, y), or a list with the
+            bottom of each hydrostratigraphic unit.
         n_layers: Number of layers (per unit).
         grid_spacing: Largest cell width Δx [m].
         grid_spacing_at_wells: Cell width Δx around the wells [m].
@@ -607,7 +607,7 @@ def structured_grid(
 
     # Layers: each hydrostratigraphic unit is divided into layers of equal thickness
     x, y = np.meshgrid(xorigin + np.cumsum(delr) - delr / 2, yorigin + domain_size[1] - np.cumsum(delc) + delc / 2)
-    bottoms = _as_list(bottom)
+    bottoms = _as_list(layer_bottom)
     upper = _elevation(top, x, y)
     botm = []
     for unit, (unit_bottom, n) in enumerate(zip(bottoms, _per_unit(n_layers, len(bottoms))), start=1):
