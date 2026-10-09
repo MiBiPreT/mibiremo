@@ -429,11 +429,13 @@ class FieldModel:
             mup3d.set_chem_stress(boundary)
         return mup3d
 
-    def run(self, n_threads: int = 1) -> None:
+    def run(self, n_threads: int = 1, selected_output: bool = True) -> None:
         """Write the files and run MODFLOW 6, or mf6rtm with `phreeqc_coupling`; build first if needed.
 
         Args:
             n_threads: Number of threads for PHREEQC with `phreeqc_coupling`; -1 for all processors.
+            selected_output: With `phreeqc_coupling`, mf6rtm writes the PHREEQC selected output of every cell at every
+                time step (sout.csv); False switches it off (large models).
         """
         if self.simulation is None:
             self.build()
@@ -451,8 +453,12 @@ class FieldModel:
             log.flush()
             # Separate process, because an error of MODFLOW 6 stops the process running its library
             n_threads = os.cpu_count() if n_threads == -1 else n_threads
-            solve = "import sys, mf6rtm; sys.exit(not mf6rtm.solve('.', nthread=int(sys.argv[1]), libname=sys.argv[2]))"
-            command = [sys.executable, "-c", solve, str(n_threads), str(_libmf6())]
+            solve = (
+                "import sys; from mf6rtm.simulation.solver import initialize_interfaces; "
+                "rtm = initialize_interfaces('.', nthread=int(sys.argv[1]), libname=sys.argv[2]); "
+                "rtm.selected_output.get_selected_output_on = sys.argv[3] == 'True'; sys.exit(not rtm.solve())"
+            )
+            command = [sys.executable, "-c", solve, str(n_threads), str(_libmf6()), str(selected_output)]
             result = subprocess.run(command, cwd=workspace, stdout=log, stderr=log)
         if result.returncode != 0:
             raise RuntimeError(f"mf6rtm failed; see {workspace / 'mf6rtm.log'} and {workspace / 'mfsim.lst'}.")
