@@ -20,6 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 import flopy
 import numpy as np
@@ -32,6 +33,7 @@ from mf6rtm.mup3d.base import Solutions
 
 # Global constants
 MAX_GROWTH_FACTOR = 1.5  # largest ratio between the widths of neighbouring cells outside the fine zone
+PROGRESS = "mibiremo progress"  # start of the lines with the fraction of the simulated time, written by _solve
 
 
 @dataclass(kw_only=True)  # Allow keyword-only arguments, with any order of fields
@@ -465,8 +467,20 @@ class FieldModel:
                 "sys.exit(not _solve(int(sys.argv[1]), sys.argv[2], json.loads(sys.argv[3])))"
             )
             command = [sys.executable, "-c", solve, str(n_threads), str(_libmf6()), json.dumps(times)]
-            result = subprocess.run(command, cwd=workspace, stdout=log, stderr=log)
-        if result.returncode != 0:
+            # The output of mf6rtm goes to the log; the progress written by _solve also to the screen
+            start = perf_counter()
+            pipe = {"stdout": subprocess.PIPE, "stderr": subprocess.STDOUT, "text": True, "errors": "replace"}
+            with subprocess.Popen(command, cwd=workspace, **pipe) as process:
+                for line in process.stdout:
+                    log.write(line)
+                    if line.startswith(PROGRESS):
+                        fraction, elapsed = float(line.split()[-1]), perf_counter() - start
+                        message = f"{100 * fraction:3.0f} % of the simulated time, {elapsed / 60:.1f} min elapsed"
+                        if fraction > 0:
+                            message += f", about {elapsed * (1 - fraction) / fraction / 60:.1f} min left"
+                        print(f"\rmf6rtm: {message}  ", end="", flush=True)
+            print()
+        if process.returncode != 0:
             raise RuntimeError(f"mf6rtm failed; see {workspace / 'mf6rtm.log'} and {workspace / 'mfsim.lst'}.")
 
     def head(self, time: float | None = None) -> np.ndarray:
@@ -700,6 +714,14 @@ def _solve(n_threads, libmf6, output_times):
     from mf6rtm.simulation.solver import initialize_interfaces
 
     rtm = initialize_interfaces(".", nthread=n_threads, libname=str(libmf6))
+    set_time = rtm._set_ctime
+
+    def progress():  # mf6rtm updates the current time after every time step: print the fraction simulated
+        current = set_time()
+        print(PROGRESS, current / rtm.mf6api.get_end_time(), flush=True)
+        return current
+
+    rtm._set_ctime = progress
     output = rtm.selected_output
     if output_times == []:
         output.get_selected_output_on = False
