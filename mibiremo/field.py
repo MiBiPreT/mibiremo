@@ -9,6 +9,7 @@ Contents:
 
 import contextlib
 import copy
+import json
 import math
 import os
 import shutil
@@ -429,13 +430,14 @@ class FieldModel:
             mup3d.set_chem_stress(boundary)
         return mup3d
 
-    def run(self, n_threads: int = 1, selected_output: bool = True) -> None:
+    def run(self, n_threads: int = 1, selected_output: bool | list = True) -> None:
         """Write the files and run MODFLOW 6, or mf6rtm with `phreeqc_coupling`; build first if needed.
 
         Args:
             n_threads: Number of threads for PHREEQC with `phreeqc_coupling`; -1 for all processors.
-            selected_output: With `phreeqc_coupling`, mf6rtm writes the PHREEQC selected output of every cell at every
-                time step (sout.csv); False switches it off (large models).
+            selected_output: With `phreeqc_coupling`, mf6rtm writes the PHREEQC selected output of every cell (sout.csv,
+                e.g. kinetic reactants) at every time step (True), at the end of the time steps containing the times
+                t [s] of a list, or never (False). At every time step it is slow and large for large models.
         """
         if self.simulation is None:
             self.build()
@@ -453,12 +455,16 @@ class FieldModel:
             log.flush()
             # Separate process, because an error of MODFLOW 6 stops the process running its library
             n_threads = os.cpu_count() if n_threads == -1 else n_threads
+            if isinstance(selected_output, bool):
+                times = None if selected_output else []  # every time step, or never
+            else:
+                times = sorted(float(t) for t in selected_output)
             solve = (
-                "import sys; from mf6rtm.simulation.solver import initialize_interfaces; "
-                "rtm = initialize_interfaces('.', nthread=int(sys.argv[1]), libname=sys.argv[2]); "
-                "rtm.selected_output.get_selected_output_on = sys.argv[3] == 'True'; sys.exit(not rtm.solve())"
+                f"import sys, json; sys.path.insert(0, {str(Path(__file__).resolve().parents[1])!r}); "
+                "from mibiremo.field import _solve; "
+                "sys.exit(not _solve(int(sys.argv[1]), sys.argv[2], json.loads(sys.argv[3])))"
             )
-            command = [sys.executable, "-c", solve, str(n_threads), str(_libmf6()), str(selected_output)]
+            command = [sys.executable, "-c", solve, str(n_threads), str(_libmf6()), json.dumps(times)]
             result = subprocess.run(command, cwd=workspace, stdout=log, stderr=log)
         if result.returncode != 0:
             raise RuntimeError(f"mf6rtm failed; see {workspace / 'mf6rtm.log'} and {workspace / 'mfsim.lst'}.")
@@ -686,6 +692,31 @@ def _values_at(schedule, times):
     """Values of a schedule at the given times."""
     schedule_times, values = np.array(schedule).T
     return values[np.searchsorted(schedule_times, times, side="right") - 1]
+
+
+def _solve(n_threads, libmf6, output_times):
+    """Run mf6rtm in the working directory, with the selected output at every time step (output_times None) or at the
+    end of the time steps containing output_times [s]; returns True on success."""
+    from mf6rtm.simulation.solver import initialize_interfaces
+
+    rtm = initialize_interfaces(".", nthread=n_threads, libname=str(libmf6))
+    output = rtm.selected_output
+    if output_times == []:
+        output.get_selected_output_on = False
+    elif output_times is not None:
+        # mf6rtm reads the selected output and appends it to sout.csv at the end of every time step, and also keeps
+        # all time steps in memory: here only the current one is kept, and written at the output times
+        write = output._append_to_soutdf_file
+
+        def append():
+            if output_times and rtm.ctime >= output_times[0] - 1e-3:
+                write()
+                while output_times and output_times[0] <= rtm.ctime + 1e-3:
+                    output_times.pop(0)
+
+        output._update_selected_output = output._get_selected_output
+        output._append_to_soutdf_file = append
+    return rtm.solve()
 
 
 def _libmf6():
