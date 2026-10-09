@@ -7,6 +7,7 @@ from importlib.resources import files
 import flopy
 import geopandas
 import numpy as np
+import pandas as pd
 import pytest
 import shapely
 from mibiremo.field import FieldModel
@@ -288,7 +289,9 @@ def test_injected_solution(tmp_path):
         kinetics={1: {"Dk": {"m0": 1.0, "parms": [decay_rate], "formula": "Dk -1"}}},
         initial_kinetics=1,
     )
-    model.run()
+    model.run(selected_output=[pulse])
+    sout = pd.read_csv(tmp_path / "phreeqc" / "sout.csv")  # selected output of every cell, only at the pulse end
+    assert list(sout["time_d"].unique()) == pytest.approx([pulse]) and len(sout) == model.grid.nrow * model.grid.ncol
     expected = 1e-3 * 997.0 * tracer.concentration()  # mol kgw⁻¹ × ρ_w [kg m⁻³]
     assert model.concentration(component="Tr") == pytest.approx(expected, rel=1e-3, abs=1e-9)  # mol m⁻³
     for time in [pulse, DAY]:
