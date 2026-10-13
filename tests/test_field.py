@@ -122,6 +122,43 @@ def test_cell_widths():
         assert widths[near_wells] == pytest.approx(FINE, rel=0.05)
 
 
+def test_domain_edge():
+    """No cell significantly narrower than its neighbours is created at the domain boundary.
+
+    The 0.5 m fine cells span the 5 m refinement margin around the well, leaving a 0.1 m gap at the domain boundary.
+    Instead of filling this gap with a separate 0.1 m cell, the outermost fine cell is widened from 0.5 m to 0.6 m,
+    since the gap is less than half the nominal fine-cell width. This adjustment avoids an excessively narrow boundary
+    cell while preserving the total domain width.
+    """
+    distance = 0.1  # from the outermost fine cell to the domain boundary [m]
+    size = 2 * (FINE / 2 + 5.0 + distance)  # on both sides of the well: half its cell, the margin, and the distance
+    grid = structured_grid([EXTRACTION], **(GRID | {"domain_size": (size, size)}), grid_spacing_at_wells=FINE)
+    # 21 fine cells: the cell of the well and 10 (5 m / 0.5 m) on each side; the 2 outermost are widened, 19 are not
+    for widths in [grid.delr, grid.delc]:
+        assert widths == pytest.approx([FINE + distance, *[FINE] * 19, FINE + distance])
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        ({"layer_bottom": [93.5, 94.0]}, "unit 2: the bottom must lie below the top"),  # above the bottom of unit 1
+        ({"top": lambda x, y: np.where(x < EXTRACTION.x, 95.5, np.nan)}, "returned NaN"),  # no elevation in the east
+        ({"wells": [replace(EXTRACTION, screen_top=96.3, screen_bottom=95.8)]}, "screen does not cross the aquifer"),
+        ({"domain_size": (10.0, 40.0)}, "domain is too small"),  # the fine cells reach 5.25 m from the well
+    ],
+)
+def test_invalid_geometry(tmp_path, changes, message):
+    """A model with an inconsistent geometry is not built.
+
+    Cases: a hydrostratigraphic unit without thickness, an elevation function without values in part of the domain,
+    a pumped well screened above the aquifer, and a domain narrower than the fine cells around the well.
+    """
+    settings = MODEL | {"wells": DESIGN} | changes
+    model = FieldModel(**settings, workspace=tmp_path, flow_rates={"EXT_1": -Q}, simulation_time=DAY, time_step=DAY)
+    with pytest.raises(ValueError, match=message):
+        model.build()
+
+
 def test_stress_periods(tmp_path):
     """Stress periods start at every change time of the schedules and preserve the volume of each well."""
     model = FieldModel(
@@ -167,12 +204,12 @@ def test_well_rates(tmp_path):
 @requires_mf6
 def test_regional_flow(tmp_path):
     """Without pumping, the hydraulic head is planar (also in the monitoring wells) and the specific discharge is K i
-    towards the regional flow azimuth (Darcy's law)."""
+    towards the regional flow azimuth (Darcy's law). A monitoring well outside the domain has no head."""
     gradient, azimuth = 0.008, math.radians(22.0)
     model = FieldModel(
         **(MODEL | {"n_layers": 2}),
         workspace=tmp_path,
-        wells=DESIGN,
+        wells=[*DESIGN, replace(EXTRACTION, name="MON_1", x=EXTRACTION.x + 30.0)],  # MON_1: 10 m east of the domain
         flow_rates={"EXT_1": 0.0},
         regional_hydraulic_gradient=gradient,
         regional_flow_azimuth=22.0,
@@ -184,6 +221,8 @@ def test_regional_flow(tmp_path):
     assert model.head() == pytest.approx(np.broadcast_to(planar, model.grid.shape))
     well = DESIGN[1]  # monitoring well, at a cell centre
     assert model.well_head(well.name)["head"].iloc[-1] == pytest.approx(model.head_from_gradient(well.x, well.y))
+    with pytest.raises(ValueError, match="MON_1 lies outside the domain"):
+        model.well_head("MON_1")
     discharge = model.simulation.get_model("gwf").output.budget().get_data(text="DATA-SPDIS")[0]
     darcy = MODEL["hydraulic_conductivity"] * gradient
     assert discharge["qx"] == pytest.approx(darcy * math.sin(azimuth))
