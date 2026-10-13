@@ -71,6 +71,11 @@ ReadTheDocs = "https://mibiremo.readthedocs.io"
 [tool.setuptools]
 packages = ["mibiremo"]
 
+[tool.uv]
+# pyqt5-qt5 has Windows wheels only up to 5.15.2: without this, uv resolves to a version
+# that cannot be installed
+required-environments = ["sys_platform == 'win32' and platform_machine == 'AMD64'"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 filterwarnings = [
