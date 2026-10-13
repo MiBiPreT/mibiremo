@@ -31,10 +31,10 @@ def test_well_symbols():
     assert dx > 0 and abs(dy) < 1e-9 * dx
 
 
-def test_cross_section(tmp_path):
-    """A south-north section through EXT_1 shows the screens of the wells on it at their northing and elevation."""
+def _model(workspace, **kwargs):
+    """Built single-layer model of the three wells."""
     model = FieldModel(
-        workspace=tmp_path,
+        workspace=workspace,
         wells=WELLS,
         flow_rates=FLOW_RATES,
         domain_size=(40.0, 40.0),
@@ -47,12 +47,39 @@ def test_cross_section(tmp_path):
         grid_spacing_at_wells=1.0,
         simulation_time=86400.0,
         time_step=86400.0,
+        **kwargs,
     )
     model.build()
+    return model
+
+
+def test_grid(tmp_path):
+    """Check that the grid plot marks the cells of the lateral boundary.
+
+    For a model with a general-head boundary (GHB), the coloured cells are all the cells on the perimeter of the grid
+    and none inside it. The setting `boundary=False` disables the legend.
+    """
+    model = _model(tmp_path, boundary_conductance=1e-4)
+    ax = plotting.grid(model)
+    coloured = ~np.ma.getmaskarray(ax.collections[-1].get_array())  # (row, column), True where a cell is coloured
+    interior = coloured[1:-1, 1:-1]
+    assert not interior.any() and coloured.sum() == coloured.size - interior.size
+    assert [text.get_text() for text in ax.get_legend().get_texts()] == ["general-head boundary (GHB)"]
+
+    assert plotting.grid(model, boundary=False).get_legend() is None
+
+
+def test_cross_section(tmp_path):
+    """Check that a cross section shows the screens of the wells located on its line.
+
+    A south-north section through EXT_1 draws the screens of EXT_1 and INJ_1, from the screen bottom
+    to the screen top. MON_1, 4 m east of the line, is not drawn. The map view is only drawn, not checked.
+    """
+    model = _model(tmp_path)
     values = np.zeros(model.grid.shape)
     plotting.map_view(model, values)
 
     ax = plotting.cross_section(model, values, line=[(0.0, -10.0), (0.0, 10.0)])
     screens = {text.get_text(): line.get_xydata().tolist() for text, line in zip(ax.texts, ax.lines)}
-    # MON_1 is off the line
+    # MON_1 should not appear in the cross section.
     assert screens == {"EXT_1": [[0.0, 92.0], [0.0, 95.5]], "INJ_1": [[4.0, 92.0], [4.0, 95.5]]}
