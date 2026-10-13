@@ -12,7 +12,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
@@ -25,7 +24,7 @@ dependencies = [
     "numba>=0.64",
     "phreeqcrm",
     "flopy",
-    "mf6rtm>=0.5.2,<0.6",
+    "mf6rtm @ git+https://github.com/p-ortega/mf6rtm.git@ea9d1a7c018dd9fed196280918937dbd605538ca",  # develop
     "geopandas>=1.0",
     "mibitrans>=1.0,<2",
 ]
@@ -34,7 +33,7 @@ keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical En
 license = "Apache-2.0"
 name = "mibiremo"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 version = "0.3.0"
 
 [project.optional-dependencies]
@@ -87,7 +86,7 @@ omit = ["examples/*"]
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py310,py311,py312
+envlist = py311,py312
 skip_missing_interpreters = true
 [testenv]
 commands = pytest
