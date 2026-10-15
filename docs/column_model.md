@@ -70,6 +70,8 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
 - `effluent(component)`: concentration of the last cell at every time step, with the time and the pore volumes
   flushed V / V_p, where V_p = n A L (`model.pore_volume`).
 - `concentration(component, time)`: concentration profile at the end of the time step containing `time`.
+- `kinetic_reactant(reactant)`: amount of a KINETICS reactant, e.g. an immobile contaminant, in every cell at every
+  time step (DataFrame: index time [s], one column per cell), in moles per litre of water as `m0`.
 
 ## Verification
 
