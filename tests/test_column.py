@@ -47,3 +47,30 @@ def test_mibitrans_column(tmp_path):
         numerical = np.array([model.concentration(component, t * DAY) for t in plume.t]) / influent
         assert plume.x[1:] == pytest.approx(model.x)
         assert rmse(exact, numerical, axis=(0, 1)) < 0.015  # decay: splitting of transport and reaction, ≈ λ Δt / 2
+
+
+def test_kinetic_reactant(tmp_path):
+    """Without flow, the KINETICS reactant of a first-order decay changes by the dissolved amount decayed in each cell
+    (mass balance), at every time step."""
+    decay_rate = math.log(2) / (0.2 * DAY)  # λ [s-1]
+    model = ColumnModel(
+        workspace=tmp_path,
+        length=0.1,
+        diameter=0.05,
+        porosity=0.4,
+        flow_rate=0.0,
+        n_cells=3,
+        simulation_time=0.4 * DAY,
+        time_step=0.05 * DAY,
+        database=decay_database(tmp_path / "decay.dat"),
+        solutions={1: {"Dk": 1e-3}},
+        kinetics={1: {"Dk": {"m0": 1.0, "parms": [decay_rate], "formula": "Dk -1"}}},
+        initial_kinetics=1,
+    )
+    model.run()
+    reactant = model.kinetic_reactant("Dk")  # mol per litre of water
+    dissolved = np.array([model.concentration("Dk", t) for t in reactant.index]) / 1000.0  # mol/L
+    assert reactant.shape == (9, 3) and list(reactant.columns) == pytest.approx(model.x)
+    decayed = (reactant.iloc[0] - reactant).to_numpy()  # from the stored T0 amount, m0 minus 1 s of PHREEQC reaction
+    assert decayed == pytest.approx(dissolved[0] - dissolved, rel=1e-6, abs=1e-12)
+    assert dissolved[-1, 0] < 0.3 * dissolved[0, 0]  # two half-lives

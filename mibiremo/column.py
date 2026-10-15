@@ -113,6 +113,8 @@ class ColumnModel:
             str(self.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
         )
         phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
+        reactants = self._reactants()
+        phreeqc.rm.SetSelectedOutputOn(bool(reactants))  # amounts of the KINETICS reactants
         initial = np.full((self.n_cells, 7), -1)
         initial[:, 0] = np.broadcast_to(self.initial_solution, self.n_cells)
         initial[:, 6] = np.broadcast_to(self.initial_kinetics, self.n_cells)
@@ -120,12 +122,16 @@ class ColumnModel:
         rm = phreeqc.rm
         n_components = len(phreeqc.components)
 
+        def amounts():
+            """Amount of every KINETICS reactant in every cell (cells, reactants) [mol per litre of water]."""
+            return phreeqc.get_selected_output_df()[reactants].to_numpy() if reactants else np.empty((self.n_cells, 0))
+
         periods = self.stress_periods
         influent = {n: np.asarray(rm.InitialPhreeqc2Concentrations([n])) for n in set(periods["influent_solution"])}
         area = math.pi * self.diameter**2 / 4
         concentration = np.reshape(rm.GetConcentrations(), (n_components, self.n_cells)).T
         time, volume = 0.0, 0.0
-        times, volumes, saved = [time], [volume], [concentration]
+        times, volumes, saved, saved_amounts = [time], [volume], [concentration], [amounts()]
         for period in periods.to_dict("records"):
             dt = period["duration"] / period["n_time_steps"]
             velocity = period["flow_rate"] / (area * self.porosity)  # average linear velocity v = Q / (n A)
@@ -142,9 +148,11 @@ class ColumnModel:
                 times.append(time)
                 volumes.append(volume)
                 saved.append(concentration)
+                saved_amounts.append(amounts())
         self.phreeqc, self.components = phreeqc, list(phreeqc.components)
         self._times, self._volumes = np.array(times), np.array(volumes)
         self._concentrations = 1000.0 * np.array(saved)  # mol/L -> mol m⁻³
+        self._amounts = np.array(saved_amounts)  # (time steps, cells, reactants)
 
     def concentration(self, component: str, time: float | None = None) -> np.ndarray:
         """Concentration profile C [mol m⁻³] at the end of the time step containing time t (default: end).
@@ -176,8 +184,25 @@ class ColumnModel:
             }
         )
 
+    def kinetic_reactant(self, reactant: str) -> pd.DataFrame:
+        """Amount of a KINETICS reactant, e.g. an immobile contaminant, in every cell at the end of every time step.
+
+        Args:
+            reactant: KINETICS reactant.
+
+        Returns:
+            DataFrame with the time t [s] as index and one column per cell (at `x`); amounts in moles per litre of
+            water, as `m0`.
+        """
+        values = self._amounts[:, :, self._reactants().index(reactant)]
+        return pd.DataFrame(values, index=pd.Index(self._times, name="time"), columns=self.x)
+
+    def _reactants(self):
+        """Names of the KINETICS reactants of `kinetics`."""
+        return list(dict.fromkeys(name for block in (self.kinetics or {}).values() for name in block))
+
     def _phreeqc_input(self):
-        """PHREEQC SOLUTION and KINETICS blocks of `solutions` and `kinetics`."""
+        """PHREEQC SOLUTION and KINETICS blocks of `solutions` and `kinetics`, and selected output of the reactants."""
         lines = []
         for number, solution in sorted(self.solutions.items()):
             lines += [f"SOLUTION {number}", "    units mol/kgw"]
@@ -189,4 +214,8 @@ class ColumnModel:
                 for key, value in settings.items():
                     value = " ".join(str(v) for v in value) if isinstance(value, (list, tuple)) else value
                     lines.append(f"        -{key} {value}")
+        if reactants := self._reactants():
+            punch = ", ".join(f'KIN("{name}")' for name in reactants)
+            lines += ["SELECTED_OUTPUT 1", "    -reset false", "USER_PUNCH 1", f"    -headings {' '.join(reactants)}"]
+            lines += ["    -start", f"    10 PUNCH {punch}", "    -end"]
         return "\n".join([*lines, "END", ""])
