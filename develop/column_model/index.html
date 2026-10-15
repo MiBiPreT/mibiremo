@@ -1489,6 +1489,8 @@ same PHREEQC solutions and kinetics can be used in both.</p>
 <li><code>effluent(component)</code>: concentration of the last cell at every time step, with the time and the pore volumes
   flushed V / V_p, where V_p = n A L (<code>model.pore_volume</code>).</li>
 <li><code>concentration(component, time)</code>: concentration profile at the end of the time step containing <code>time</code>.</li>
+<li><code>kinetic_reactant(reactant)</code>: amount of a KINETICS reactant, e.g. an immobile contaminant, in every cell at every
+  time step (DataFrame: index time [s], one column per cell), in moles per litre of water as <code>m0</code>.</li>
 </ul>
 <h2 id="verification">Verification</h2>
 <p>The column model is verified against the exact analytical solution of
