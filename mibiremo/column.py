@@ -112,6 +112,7 @@ class ColumnModel:
         phreeqc.initialize_phreeqc(
             str(self.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
         )
+        phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
         initial = np.full((self.n_cells, 7), -1)
         initial[:, 0] = np.broadcast_to(self.initial_solution, self.n_cells)
         initial[:, 6] = np.broadcast_to(self.initial_kinetics, self.n_cells)
