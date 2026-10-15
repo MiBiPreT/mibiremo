@@ -1,4 +1,4 @@
-# MiBiReMo - Microbiome Bioremediation Reaction Module - PhreeqcRM-Python Interface - Database files
+# MiBiReMo - MiBiPreT Remediation Module - Database files
 
 ## Databases
 - `mibirem.dat`. Database developed for the MIBIREM project. It is based on standard phreeeqc.dat, and includes additional species, phases and reaction definitions for selected organic contaminants (e.g., BTEX)

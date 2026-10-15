@@ -123,6 +123,7 @@ class PhreeqcRM:
         porosity=1.0,
         saturation=1.0,
         multicomponent=True,
+        file_prefix="phr",
     ) -> None:
         """Initialize PhreeqcRM with database and default parameters.
 
@@ -133,16 +134,19 @@ class PhreeqcRM:
         Args:
             database_path (str): Path to the PHREEQC database file (.dat format).
                 Common databases include phreeqc.dat, Amm.dat, pitzer.dat.
-            units_solution (int, optional): Units for solution concentrations.
-                1 = mol/L, 2 = mmol/L, 3 = μmol/L. Defaults to 2.
-            units (int, optional): Units for other phases (Exchange, Surface,
-                Gas, Solid solutions, Kinetics). Defaults to 1.
+            units_solution (int, optional): Units of the solution concentrations exchanged with
+                PhreeqcRM: 1 = mg/L, 2 = mol/L, 3 = mass fraction (kg/kgs). Defaults to 2.
+            units (int, optional): Units of the other reactants (equilibrium phases, exchange,
+                surface, gas phase, solid solutions, kinetics): 0 = mol per litre of cell,
+                1 = mol per litre of water, 2 = mol per litre of rock. Defaults to 1.
             porosity (float, optional): Porosity value assigned to all cells.
                 Must be between 0 and 1. Defaults to 1.0.
             saturation (float, optional): Saturation value assigned to all cells.
                 Must be between 0 and 1. Defaults to 1.0.
             multicomponent (bool, optional): Enable multicomponent diffusion
                 by saving species concentrations. Defaults to True.
+            file_prefix (str, optional): Path and name prefix of the PhreeqcRM output files
+                (``.chem.txt``, ``.log.txt``). Defaults to "phr" (in the working directory).
 
         Raises:
             RuntimeError: If the PhreeqcRM instance is not initialized or if
@@ -171,7 +175,7 @@ class PhreeqcRM:
         self.rm.SetUnitsKinetics(units)
         self.rm.SetPorosity(porosity * np.ones(self.nxyz))
         self.rm.SetSaturationUser(saturation * np.ones(self.nxyz))
-        self.rm.SetFilePrefix("phr")
+        self.rm.SetFilePrefix(str(file_prefix))
         self.rm.OpenFiles()
         if multicomponent:
             self.rm.SetSpeciesSaveOn(True)
@@ -208,20 +212,18 @@ class PhreeqcRM:
             >>> ic = np.array([[1, -1, -1, -1, -1, -1, -1]])  # Only solution 1
             >>> rm.run_initial_from_file("initial.pqi", ic)
         """
+        try:
+            ic = np.asarray(ic).astype(np.int32)
+        except Exception as e:
+            raise ValueError("Initial conditions must be convertible to a numpy array of integers") from e
+        if ic.shape != (self.nxyz, 7):
+            raise ValueError(f"Initial conditions array must have shape ({self.nxyz}, 7), got {ic.shape}")
+
         status = self.rm.RunFile(True, True, True, pqi_file)
         if status < 0:
             raise RuntimeError(f"Failed to run Phreeqc input file (error code: {status})")
 
-        if ic.shape != (self.nxyz, 7):
-            raise ValueError(f"Initial conditions array must have shape ({self.nxyz}, 7), got {ic.shape}")
-
-        if not isinstance(ic, np.ndarray):
-            try:
-                ic = np.array(ic).astype(np.int32)
-            except Exception as e:
-                raise ValueError("Initial conditions must be convertible to a numpy array of integers") from e
-
-        ic1 = ic.flatten("F").astype(np.int32)
+        ic1 = ic.flatten("F")
         self.rm.InitialPhreeqc2Module(ic1)
 
         self.rm.FindComponents()

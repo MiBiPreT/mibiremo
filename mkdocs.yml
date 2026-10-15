@@ -1,5 +1,5 @@
 site_name: mibiremo
-site_description: Microbiome Bioremediation Reaction Module, a Python interface to PhreeqcRM library
+site_description: MiBiPreT Remediation Module, a Python package for designing and testing bioremediation installations
 site_author: Matteo Masi, Jaro Camphuijsen, Robin Richardson
 site_url: https://MiBiPreT.github.io/mibiremo
 repo_name: MiBiPreT/mibiremo
@@ -10,12 +10,24 @@ copyright: Copyright &copy; 2026, MIBIREM Project
 nav:
   - Home: index.md
   - Introduction: introduction.md
+  - Field model: field_model.md
+  - Column model: column_model.md
   - Development: development.md
   - Examples: examples.md
   - Tutorial Notebooks:
-    - Titration: notebooks/ex1-titration.ipynb
-    - BTEX dissolution: notebooks/ex2-BTEX_dissolution.ipynb
-    - BTEX dissolution and transport coupling: notebooks/ex3-BTEX_dissolution_transport_coupling.ipynb
+    - PhreeqcRM models:
+      - Titration: notebooks/phreeqcrm_calcite_titration.ipynb
+      - BTEX dissolution: notebooks/phreeqcrm_BTEX_dissolution.ipynb
+      - BTEX dissolution and transport coupling: notebooks/phreeqcrm_BTEX_transport_coupling.ipynb
+    - Field model:
+      - Tracer test: notebooks/field_tracer_test.ipynb
+      - Injection-extraction distance: notebooks/field_injection_extraction_distance.ipynb
+      - Layered aquifer: notebooks/field_layered_model.ipynb
+    - Column model:
+      - Laboratory column test: notebooks/column_reactive_transport_test.ipynb
+    - Numerical validation:
+      - Column model vs mibitrans: notebooks/validation_column_vs_mibitrans.ipynb
+      - Field model vs mibitrans: notebooks/validation_field_vs_mibitrans.ipynb
 
   - API Reference: reference.md
 
@@ -69,10 +81,13 @@ plugins:
             show_docstring_description: true
             docstring_style: google
             docstring_section_style: table
+            docstring_options:
+              returns_multiple_items: false
             filters:
               - "!^RM_"
   - mkdocs-jupyter:
       execute: false
+      ignore: ["*.md"]  # Markdown pages are not notebooks; parsing them with pandoc warns about "::: mibiremo"
       include_source: true
       custom_mathjax_url: "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"
 
