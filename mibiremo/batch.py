@@ -9,12 +9,12 @@ from dataclasses import field
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from .column import _check_numbering
-from .column import _reactant_amounts
-from .column import _reactants
-from .column import _start_phreeqc
-from .field import _stress_periods
 from .phreeqc import PhreeqcRM
+from .phreeqc import _check_numbering
+from .phreeqc import _reactant_amounts
+from .phreeqc import _reactants
+from .phreeqc import _start_phreeqc
+from .stress_periods import _stress_periods
 
 
 @dataclass(kw_only=True)  # Allow keyword-only arguments, with any order of fields

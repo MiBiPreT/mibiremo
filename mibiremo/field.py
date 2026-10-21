@@ -3,7 +3,7 @@
 Contents:
 - `FieldModel`: wells in a homogeneous or layered aquifer with constant gradient groundwater flow, tracer transport,
   and reactive transport (MODFLOW 6 coupled with PHREEQC by mf6rtm)
-- `intermittent_pumping`: on/off schedule (e.g., of a flow rate)
+- `intermittent_pumping`: on/off time-dependent input (e.g., of a flow rate)
 - `structured_grid`: structured (DIS) grid refined around the wells
 """
 
@@ -30,6 +30,7 @@ from mf6rtm.mup3d.base import ChemStress
 from mf6rtm.mup3d.base import KineticPhases
 from mf6rtm.mup3d.base import Mup3d
 from mf6rtm.mup3d.base import Solutions
+from .stress_periods import _stress_periods
 
 # Global constants
 MAX_GROWTH_FACTOR = 1.5  # largest ratio between the widths of neighbouring cells outside the fine zone
@@ -61,7 +62,7 @@ class FieldModel:
     Args:
         workspace: Folder of the MODFLOW 6 files.
         wells: Wells, with unique names.
-        flow_rates: Flow rate Q [m³ s⁻¹] by well name, constant or schedule; positive for injection, negative for
+        flow_rates: Flow rate Q [m³ s⁻¹] by well name, constant or time-dependent; positive for injection, negative for
             extraction. Wells not listed are monitoring wells (Q = 0). The Q of a well is split among its screened
             cells in proportion to K b (screened transmissivity).
         domain_size: Size of the domain along x and y [m].
@@ -79,7 +80,7 @@ class FieldModel:
         regional_flow_azimuth: Direction of the regional flow, clockwise from north [°].
         boundary_conductance: Conductance C [m² s⁻¹] of each lateral boundary cell for a general-head boundary (GHB)
             with the head of the regional flow; when it is set to None (default), constant heads (CHD) are applied.
-        tracer_concentration: Tracer concentration of the injected water, constant or schedule, for all
+        tracer_concentration: Tracer concentration of the injected water, constant or time-dependent, for all
             injection wells. The concentration is 0 in the aquifer at the start and in the inflow across the
             boundary. Default is 1.0.
         advection_scheme: "upstream", "central", or "tvd" (total variation diminishing).
@@ -92,7 +93,7 @@ class FieldModel:
         grid_spacing_at_wells: Cell width Δx around the pumped wells [m].
         refinement_margin: Distance from the outermost pumped wells to the edge of the fine cells [m].
         simulation_time: Simulated time [s].
-        time_step: Largest time step Δt [s], constant or schedule.
+        time_step: Largest time step Δt [s], constant or time-dependent.
         phreeqc_coupling: If True, every component of the PHREEQC solutions is transported instead of the tracer
             (C in mol m⁻³), and PHREEQC computes the reactions in every cell at every time step.
         database: PHREEQC database file, needed with `phreeqc_coupling`; kinetic rates must be in its RATES block.
@@ -100,7 +101,7 @@ class FieldModel:
             numbered 1, 2, ...; needed with `phreeqc_coupling`.
         initial_solution: Solution number in the aquifer at the start and in the inflow across the boundary, for
             all cells or as an array (layer, row, column).
-        injected_solution: Solution number of the injected water, constant or schedule, for all injection wells.
+        injected_solution: Solution number of the injected water, constant or time-dependent, for all injection wells.
         kinetics: PHREEQC KINETICS blocks {number: {reactant: {"m0": moles per litre of water, "parms": [...],
             "formula": "..."}}}, numbered 1, 2, ...
         initial_kinetics: KINETICS block number (-1 for none), for all cells or as an array (layer, row, column),
@@ -194,10 +195,10 @@ class FieldModel:
     def stress_periods(self):
         """Stress periods: start [s], duration [s], number of time steps, Q [m³ s⁻¹] of each pumped well, C_in, and
         the injected solution (with `phreeqc_coupling`)."""
-        schedules = self.flow_rates | {"tracer_concentration": self.tracer_concentration}
+        inputs = self.flow_rates | {"tracer_concentration": self.tracer_concentration}
         if self.phreeqc_coupling:
-            schedules["injected_solution"] = self.injected_solution
-        table = _stress_periods(schedules, self.time_step, self.simulation_time)
+            inputs["injected_solution"] = self.injected_solution
+        table = _stress_periods(inputs, self.time_step, self.simulation_time)
         if self.phreeqc_coupling:
             table["injected_solution"] = table["injected_solution"].astype(int)
         return table
@@ -568,7 +569,7 @@ class FieldModel:
 def intermittent_pumping(
     value: float, on_duration: float, off_duration: float, end_time: float, start_time: float = 0.0
 ) -> list[tuple[float, float]]:
-    """Schedule switching between value (on) and 0 (off), from start_time to end_time; 0 before and after.
+    """Time-dependent input switching between value (on) and 0 (off), from start_time to end_time; 0 before and after.
 
     Args:
         value: Value during the on phases, e.g., Q [m³ s⁻¹].
@@ -578,16 +579,16 @@ def intermittent_pumping(
         start_time: Start of the first on phase [s].
 
     Returns:
-        Schedule ``[(t, value), ...]``, t [s].
+        Time-dependent input ``[(t, value), ...]``, t [s].
     """
     if on_duration <= 0 or off_duration <= 0:
         raise ValueError("on_duration and off_duration must be positive.")
-    schedule = [(0.0, 0.0)] if start_time > 0 else []
+    values = [(0.0, 0.0)] if start_time > 0 else []
     t = start_time
     while t < end_time:
-        schedule += [(t, value), (min(t + on_duration, end_time), 0.0)]
+        values += [(t, value), (min(t + on_duration, end_time), 0.0)]
         t += on_duration + off_duration
-    return schedule
+    return values
 
 
 def structured_grid(
@@ -669,40 +670,6 @@ def _elevation(value, x, y):
     if np.isnan(z).any():
         raise ValueError("An elevation function returned NaN (e.g., outside the points it interpolates).")
     return z
-
-
-def _stress_periods(schedules: dict, time_step: float | list, simulation_time: float) -> pd.DataFrame:
-    """Stress periods starting at every change time of the schedules (constants or [(t, value), ...]).
-
-    Returns:
-        DataFrame with start [s], duration [s], number of time steps (Δt ≤ time_step), and the value of each schedule.
-    """
-    time_step = _schedule(time_step)
-    schedules = {name: _schedule(value) for name, value in schedules.items()}
-    times = {t for schedule in [time_step, *schedules.values()] for t, _ in schedule}
-    start = np.array(sorted(t for t in times if t < simulation_time))
-    duration = np.diff([*start, simulation_time])
-    n_time_steps = np.ceil(duration / _values_at(time_step, start) - 1e-9).astype(int)
-    table = pd.DataFrame({"start": start, "duration": duration, "n_time_steps": n_time_steps})
-    for name, schedule in schedules.items():
-        table[name] = _values_at(schedule, start)
-    return table
-
-
-def _schedule(value):
-    """Schedule ``[(t, value), ...]`` from a schedule or a constant."""
-    if np.isscalar(value):
-        return [(0.0, float(value))]
-    times = [t for t, _ in value]
-    if not times or times[0] != 0 or np.any(np.diff(times) <= 0):
-        raise ValueError(f"Schedule times must start at 0 and increase: {times}.")
-    return [(float(t), float(v)) for t, v in value]
-
-
-def _values_at(schedule, times):
-    """Values of a schedule at the given times."""
-    schedule_times, values = np.array(schedule).T
-    return values[np.searchsorted(schedule_times, times, side="right") - 1]
 
 
 def _solve(n_threads, libmf6, output_times):
