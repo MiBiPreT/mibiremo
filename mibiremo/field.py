@@ -101,8 +101,8 @@ class FieldModel:
         initial_solution: Solution number in the aquifer at the start and in the inflow across the boundary, for
             all cells or as an array (layer, row, column).
         injected_solution: Solution number of the injected water, constant or schedule, for all injection wells.
-        kinetics: PHREEQC KINETICS blocks {number: {reactant: {"m0": moles, "parms": [...], "formula": "..."}}},
-            numbered 1, 2, ...
+        kinetics: PHREEQC KINETICS blocks {number: {reactant: {"m0": moles per litre of water, "parms": [...],
+            "formula": "..."}}}, numbered 1, 2, ...
         initial_kinetics: KINETICS block number (-1 for none), for all cells or as an array (layer, row, column),
             e.g. from `zone`.
     """
