@@ -46,6 +46,9 @@ class ColumnModel:
             numbered 1, 2, ...; pH 7 and pe 4 where not given.
         initial_solution: Solution number of the pore water at the start, for all cells or one per cell.
         influent_solution: Solution number of the influent, constant or schedule.
+        equilibrium_phases: PHREEQC EQUILIBRIUM_PHASES blocks {number: {phase: [saturation index, moles per litre of
+            water]}}, numbered 1, 2, ...
+        initial_equilibrium_phases: EQUILIBRIUM_PHASES block number (-1 for none), for all cells or one per cell.
         kinetics: PHREEQC KINETICS blocks {number: {reactant: {"m0": moles per litre of water, "parms": [...],
             "formula": "..."}}}, numbered 1, 2, ...
         initial_kinetics: KINETICS block number (-1 for none), for all cells or one per cell.
@@ -65,15 +68,15 @@ class ColumnModel:
     solutions: dict
     initial_solution: int | np.ndarray = 1
     influent_solution: int | list = 1
+    equilibrium_phases: dict | None = None
+    initial_equilibrium_phases: int | np.ndarray = -1
     kinetics: dict | None = None
     initial_kinetics: int | np.ndarray = -1
     phreeqc: PhreeqcRM | None = field(default=None, init=False, repr=False)
     components: list | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
-        for name, blocks in {"solutions": self.solutions, "kinetics": self.kinetics or {}}.items():
-            if sorted(blocks) != list(range(1, len(blocks) + 1)):
-                raise ValueError(f"{name} must be numbered 1, 2, ...")
+        _check_numbering(self)
         if any(q < 0 for _, q in _schedule(self.flow_rate)):
             raise ValueError("The flow rate must not be negative.")
 
@@ -101,37 +104,22 @@ class ColumnModel:
         Args:
             n_threads: Number of threads for PHREEQC; -1 for all processors.
         """
-        workspace = Path(self.workspace)
-        workspace.mkdir(parents=True, exist_ok=True)
-        (workspace / "column.pqi").write_text(self._phreeqc_input())
-
-        # Concentrations in mol/L, other reactants in mol per litre of water; PhreeqcRM porosity 1: each cell holds
-        # 1 L of water, and the porosity of the column acts on the transport only (as in mf6rtm)
-        phreeqc = PhreeqcRM()
-        phreeqc.create(nxyz=self.n_cells, n_threads=n_threads)
-        phreeqc.initialize_phreeqc(
-            str(self.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
-        )
-        phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
-        reactants = self._reactants()
-        phreeqc.rm.SetSelectedOutputOn(bool(reactants))  # amounts of the KINETICS reactants
-        initial = np.full((self.n_cells, 7), -1)
-        initial[:, 0] = np.broadcast_to(self.initial_solution, self.n_cells)
-        initial[:, 6] = np.broadcast_to(self.initial_kinetics, self.n_cells)
-        phreeqc.run_initial_from_file(str(workspace / "column.pqi"), initial)
+        # The porosity of the column acts on the transport only: each PhreeqcRM cell contains 1 L of water (as in mf6rtm)
+        phreeqc = _start_phreeqc(self, "column.pqi", self.n_cells, n_threads)
         rm = phreeqc.rm
         n_components = len(phreeqc.components)
-
-        def amounts():
-            """Amount of every KINETICS reactant in every cell (cells, reactants) [mol per litre of water]."""
-            return phreeqc.get_selected_output_df()[reactants].to_numpy() if reactants else np.empty((self.n_cells, 0))
-
+        reactants = _reactants(self.kinetics)
         periods = self.stress_periods
         influent = {n: np.asarray(rm.InitialPhreeqc2Concentrations([n])) for n in set(periods["influent_solution"])}
         area = math.pi * self.diameter**2 / 4
         concentration = np.reshape(rm.GetConcentrations(), (n_components, self.n_cells)).T
         time, volume = 0.0, 0.0
-        times, volumes, saved, saved_amounts = [time], [volume], [concentration], [amounts()]
+        times, volumes, saved, saved_amounts = (
+            [time],
+            [volume],
+            [concentration],
+            [_reactant_amounts(phreeqc, reactants)],
+        )
         for period in periods.to_dict("records"):
             dt = period["duration"] / period["n_time_steps"]
             velocity = period["flow_rate"] / (area * self.porosity)  # average linear velocity v = Q / (n A)
@@ -143,12 +131,12 @@ class ColumnModel:
                 rm.SetTime(time)
                 rm.SetTimeStep(dt)
                 if rm.RunCells() < 0:
-                    raise RuntimeError(f"PHREEQC failed; see {workspace / 'phreeqc.log.txt'}.")
+                    raise RuntimeError(f"PHREEQC failed; see {Path(self.workspace) / 'phreeqc.log.txt'}.")
                 concentration = np.reshape(rm.GetConcentrations(), (n_components, self.n_cells)).T
                 times.append(time)
                 volumes.append(volume)
                 saved.append(concentration)
-                saved_amounts.append(amounts())
+                saved_amounts.append(_reactant_amounts(phreeqc, reactants))
         self.phreeqc, self.components = phreeqc, list(phreeqc.components)
         self._times, self._volumes = np.array(times), np.array(volumes)
         self._concentrations = 1000.0 * np.array(saved)  # mol/L -> mol m⁻³
@@ -194,28 +182,71 @@ class ColumnModel:
             DataFrame with the time t [s] as index and one column per cell (at `x`); amounts in moles per litre of
             water, as `m0`.
         """
-        values = self._amounts[:, :, self._reactants().index(reactant)]
+        values = self._amounts[:, :, _reactants(self.kinetics).index(reactant)]
         return pd.DataFrame(values, index=pd.Index(self._times, name="time"), columns=self.x)
 
-    def _reactants(self):
-        """Names of the KINETICS reactants of `kinetics`."""
-        return list(dict.fromkeys(name for block in (self.kinetics or {}).values() for name in block))
 
-    def _phreeqc_input(self):
-        """PHREEQC SOLUTION and KINETICS blocks of `solutions` and `kinetics`, and selected output of the reactants."""
-        lines = []
-        for number, solution in sorted(self.solutions.items()):
-            lines += [f"SOLUTION {number}", "    units mol/kgw"]
-            lines += [f"    {name} {value}" for name, value in ({"pH": 7.0, "pe": 4.0} | solution).items()]
-        for number, block in sorted((self.kinetics or {}).items()):
-            lines.append(f"KINETICS {number}")
-            for reactant, settings in block.items():
-                lines.append(f"    {reactant}")
-                for key, value in settings.items():
-                    value = " ".join(str(v) for v in value) if isinstance(value, (list, tuple)) else value
-                    lines.append(f"        -{key} {value}")
-        if reactants := self._reactants():
-            punch = ", ".join(f'KIN("{name}")' for name in reactants)
-            lines += ["SELECTED_OUTPUT 1", "    -reset false", "USER_PUNCH 1", f"    -headings {' '.join(reactants)}"]
-            lines += ["    -start", f"    10 PUNCH {punch}", "    -end"]
-        return "\n".join([*lines, "END", ""])
+def _check_numbering(model):
+    """Check that the PHREEQC blocks of a column or batch model are numbered 1, 2, ..."""
+    blocks = {"solutions": model.solutions, "equilibrium_phases": model.equilibrium_phases, "kinetics": model.kinetics}
+    for name, block in blocks.items():
+        if sorted(block or {}) != list(range(1, len(block or {}) + 1)):
+            raise ValueError(f"{name} must be numbered 1, 2, ...")
+
+
+def _start_phreeqc(model, input_file, n_cells, n_threads):
+    """PhreeqcRM with the initial conditions of a column or batch model, from the input file written in its workspace.
+
+    Concentrations in mol/L, other reactants in mol per litre of water; PhreeqcRM porosity 1, so each cell contains 1 L
+    of water.
+    """
+    workspace = Path(model.workspace)
+    workspace.mkdir(parents=True, exist_ok=True)
+    (workspace / input_file).write_text(_phreeqc_input(model))
+    phreeqc = PhreeqcRM()
+    phreeqc.create(nxyz=n_cells, n_threads=n_threads)
+    phreeqc.initialize_phreeqc(
+        str(model.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
+    )
+    phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
+    phreeqc.rm.SetSelectedOutputOn(bool(_reactants(model.kinetics)))  # amounts of the KINETICS reactants
+    initial = np.full((n_cells, 7), -1)
+    initial[:, 0] = np.broadcast_to(model.initial_solution, n_cells)
+    initial[:, 1] = np.broadcast_to(model.initial_equilibrium_phases, n_cells)
+    initial[:, 6] = np.broadcast_to(model.initial_kinetics, n_cells)
+    phreeqc.run_initial_from_file(str(workspace / input_file), initial)
+    return phreeqc
+
+
+def _reactant_amounts(phreeqc, reactants):
+    """Amount of every KINETICS reactant in every cell (cells, reactants) [mol per litre of water]."""
+    return phreeqc.get_selected_output_df()[reactants].to_numpy() if reactants else np.empty((phreeqc.nxyz, 0))
+
+
+def _reactants(kinetics):
+    """Names of the reactants of the KINETICS blocks."""
+    return list(dict.fromkeys(name for block in (kinetics or {}).values() for name in block))
+
+
+def _phreeqc_input(model):
+    """PHREEQC SOLUTION, EQUILIBRIUM_PHASES, and KINETICS blocks of a column or batch model, and selected output of the
+    KINETICS reactants."""
+    lines = []
+    for number, solution in sorted(model.solutions.items()):
+        lines += [f"SOLUTION {number}", "    units mol/kgw"]
+        lines += [f"    {name} {value}" for name, value in ({"pH": 7.0, "pe": 4.0} | solution).items()]
+    for number, block in sorted((model.equilibrium_phases or {}).items()):
+        lines.append(f"EQUILIBRIUM_PHASES {number}")
+        lines += [f"    {phase} {' '.join(str(v) for v in values)}" for phase, values in block.items()]
+    for number, block in sorted((model.kinetics or {}).items()):
+        lines.append(f"KINETICS {number}")
+        for reactant, settings in block.items():
+            lines.append(f"    {reactant}")
+            for key, value in settings.items():
+                value = " ".join(str(v) for v in value) if isinstance(value, (list, tuple)) else value
+                lines.append(f"        -{key} {value}")
+    if reactants := _reactants(model.kinetics):
+        punch = ", ".join(f'KIN("{name}")' for name in reactants)
+        lines += ["SELECTED_OUTPUT 1", "    -reset false", "USER_PUNCH 1", f"    -headings {' '.join(reactants)}"]
+        lines += ["    -start", f"    10 PUNCH {punch}", "    -end"]
+    return "\n".join([*lines, "END", ""])
