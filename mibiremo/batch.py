@@ -27,7 +27,7 @@ class BatchModel:
     Args:
         workspace: Folder of the PHREEQC input file and of the PhreeqcRM output files.
         simulation_time: Simulation duration [s].
-        time_step: Largest time step Δt [s], constant or as a vector of tuples [(t, value), ...].
+        time_step: Largest time step Δt [s], constant or as a list of tuples [(t, value), ...].
         database: PHREEQC database file; kinetic rates must be in its RATES block.
         solutions: PHREEQC solutions {number: {component: concentration [mol kgw⁻¹], "pH": pH, "pe": pe}},
             numbered 1, 2, ...; pH 7 and pe 4 where not given.
