@@ -10,21 +10,25 @@ copyright: Copyright &copy; 2026, MIBIREM Project
 nav:
   - Home: index.md
   - Introduction: introduction.md
-  - Field model: field_model.md
-  - Column model: column_model.md
   - Development: development.md
+  - Batch model: batch_model.md
+  - Column model: column_model.md
+  - Field model: field_model.md
+
   - Examples: examples.md
   - Tutorial Notebooks:
-    - PhreeqcRM models:
+    - PhreeqcRM interface:
       - Titration: notebooks/phreeqcrm_calcite_titration.ipynb
       - BTEX dissolution: notebooks/phreeqcrm_BTEX_dissolution.ipynb
       - BTEX dissolution and transport coupling: notebooks/phreeqcrm_BTEX_transport_coupling.ipynb
+    - Batch model:
+      - Aerobic biodegradation in mesocosms: notebooks/batch_first_order_decay.ipynb
+    - Column model:
+      - Laboratory column test: notebooks/column_reactive_transport_test.ipynb
     - Field model:
       - Tracer test: notebooks/field_tracer_test.ipynb
       - Injection-extraction distance: notebooks/field_injection_extraction_distance.ipynb
       - Layered aquifer: notebooks/field_layered_model.ipynb
-    - Column model:
-      - Laboratory column test: notebooks/column_reactive_transport_test.ipynb
     - Numerical validation:
       - Column model vs mibitrans: notebooks/validation_column_vs_mibitrans.ipynb
       - Field model vs mibitrans: notebooks/validation_field_vs_mibitrans.ipynb
