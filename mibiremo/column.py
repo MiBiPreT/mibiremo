@@ -11,9 +11,13 @@ from dataclasses import field
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from .field import _schedule
-from .field import _stress_periods
 from .phreeqc import PhreeqcRM
+from .phreeqc import _check_numbering
+from .phreeqc import _reactant_amounts
+from .phreeqc import _reactants
+from .phreeqc import _start_phreeqc
+from .stress_periods import _time_dependent
+from .stress_periods import _stress_periods
 from .semilagsolver import SemiLagSolver
 
 
@@ -35,17 +39,17 @@ class ColumnModel:
         length: Length of the column L [m].
         diameter: Inner diameter of the column [m].
         porosity: Effective porosity n [-].
-        flow_rate: Volumetric flow rate Q ≥ 0 [m³ s⁻¹], constant or schedule; 0 stops the flow.
+        flow_rate: Volumetric flow rate Q ≥ 0 [m³ s⁻¹], constant or time-dependent; 0 stops the flow.
         longitudinal_dispersivity: Longitudinal dispersivity alpha_L [m].
         diffusion_coefficient: Effective molecular diffusion coefficient D* [m² s⁻¹].
         n_cells: Number of cells.
         simulation_time: Simulated time [s].
-        time_step: Largest time step Δt [s], constant or schedule.
+        time_step: Largest time step Δt [s], constant or time-dependent.
         database: PHREEQC database file; kinetic rates must be in its RATES block.
         solutions: PHREEQC solutions {number: {component: concentration [mol kgw⁻¹], "pH": pH, "pe": pe}},
             numbered 1, 2, ...; pH 7 and pe 4 where not given.
         initial_solution: Solution number of the pore water at the start, for all cells or one per cell.
-        influent_solution: Solution number of the influent, constant or schedule.
+        influent_solution: Solution number of the influent, constant or time-dependent.
         equilibrium_phases: PHREEQC EQUILIBRIUM_PHASES blocks {number: {phase: [saturation index, moles per litre of
             water]}}, numbered 1, 2, ...
         initial_equilibrium_phases: EQUILIBRIUM_PHASES block number (-1 for none), for all cells or one per cell.
@@ -77,7 +81,7 @@ class ColumnModel:
 
     def __post_init__(self):
         _check_numbering(self)
-        if any(q < 0 for _, q in _schedule(self.flow_rate)):
+        if any(q < 0 for _, q in _time_dependent(self.flow_rate)):
             raise ValueError("The flow rate must not be negative.")
 
     @property
@@ -93,8 +97,8 @@ class ColumnModel:
     @property
     def stress_periods(self) -> pd.DataFrame:
         """Stress periods: start [s], duration [s], number of time steps, Q [m³ s⁻¹], and influent solution."""
-        schedules = {"flow_rate": self.flow_rate, "influent_solution": self.influent_solution}
-        table = _stress_periods(schedules, self.time_step, self.simulation_time)
+        inputs = {"flow_rate": self.flow_rate, "influent_solution": self.influent_solution}
+        table = _stress_periods(inputs, self.time_step, self.simulation_time)
         table["influent_solution"] = table["influent_solution"].astype(int)
         return table
 
@@ -184,69 +188,3 @@ class ColumnModel:
         """
         values = self._amounts[:, :, _reactants(self.kinetics).index(reactant)]
         return pd.DataFrame(values, index=pd.Index(self._times, name="time"), columns=self.x)
-
-
-def _check_numbering(model):
-    """Check that the PHREEQC blocks of a column or batch model are numbered 1, 2, ..."""
-    blocks = {"solutions": model.solutions, "equilibrium_phases": model.equilibrium_phases, "kinetics": model.kinetics}
-    for name, block in blocks.items():
-        if sorted(block or {}) != list(range(1, len(block or {}) + 1)):
-            raise ValueError(f"{name} must be numbered 1, 2, ...")
-
-
-def _start_phreeqc(model, input_file, n_cells, n_threads):
-    """PhreeqcRM with the initial conditions of a column or batch model, from the input file written in its workspace.
-
-    Concentrations in mol/L, other reactants in mol per litre of water; PhreeqcRM porosity 1, so each cell contains 1 L
-    of water.
-    """
-    workspace = Path(model.workspace)
-    workspace.mkdir(parents=True, exist_ok=True)
-    (workspace / input_file).write_text(_phreeqc_input(model))
-    phreeqc = PhreeqcRM()
-    phreeqc.create(nxyz=n_cells, n_threads=n_threads)
-    phreeqc.initialize_phreeqc(
-        str(model.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
-    )
-    phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
-    phreeqc.rm.SetSelectedOutputOn(bool(_reactants(model.kinetics)))  # amounts of the KINETICS reactants
-    initial = np.full((n_cells, 7), -1)
-    initial[:, 0] = np.broadcast_to(model.initial_solution, n_cells)
-    initial[:, 1] = np.broadcast_to(model.initial_equilibrium_phases, n_cells)
-    initial[:, 6] = np.broadcast_to(model.initial_kinetics, n_cells)
-    phreeqc.run_initial_from_file(str(workspace / input_file), initial)
-    return phreeqc
-
-
-def _reactant_amounts(phreeqc, reactants):
-    """Amount of every KINETICS reactant in every cell (cells, reactants) [mol per litre of water]."""
-    return phreeqc.get_selected_output_df()[reactants].to_numpy() if reactants else np.empty((phreeqc.nxyz, 0))
-
-
-def _reactants(kinetics):
-    """Names of the reactants of the KINETICS blocks."""
-    return list(dict.fromkeys(name for block in (kinetics or {}).values() for name in block))
-
-
-def _phreeqc_input(model):
-    """PHREEQC SOLUTION, EQUILIBRIUM_PHASES, and KINETICS blocks of a column or batch model, and selected output of the
-    KINETICS reactants."""
-    lines = []
-    for number, solution in sorted(model.solutions.items()):
-        lines += [f"SOLUTION {number}", "    units mol/kgw"]
-        lines += [f"    {name} {value}" for name, value in ({"pH": 7.0, "pe": 4.0} | solution).items()]
-    for number, block in sorted((model.equilibrium_phases or {}).items()):
-        lines.append(f"EQUILIBRIUM_PHASES {number}")
-        lines += [f"    {phase} {' '.join(str(v) for v in values)}" for phase, values in block.items()]
-    for number, block in sorted((model.kinetics or {}).items()):
-        lines.append(f"KINETICS {number}")
-        for reactant, settings in block.items():
-            lines.append(f"    {reactant}")
-            for key, value in settings.items():
-                value = " ".join(str(v) for v in value) if isinstance(value, (list, tuple)) else value
-                lines.append(f"        -{key} {value}")
-    if reactants := _reactants(model.kinetics):
-        punch = ", ".join(f'KIN("{name}")' for name in reactants)
-        lines += ["SELECTED_OUTPUT 1", "    -reset false", "USER_PUNCH 1", f"    -headings {' '.join(reactants)}"]
-        lines += ["    -start", f"    10 PUNCH {punch}", "    -end"]
-    return "\n".join([*lines, "END", ""])
