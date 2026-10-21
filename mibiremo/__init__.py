@@ -1,8 +1,10 @@
+from .batch import BatchModel as BatchModel
 from .column import ColumnModel as ColumnModel
 from .field import FieldModel as FieldModel
 from .field import intermittent_pumping as intermittent_pumping
 from . import plotting as plotting
 from .phreeqc import PhreeqcRM as PhreeqcRM
+from .phreeqc import write_database as write_database
 from .semilagsolver import SemiLagSolver as SemiLagSolver
 from .wells import Well as Well
 from .wells import read_wells as read_wells
