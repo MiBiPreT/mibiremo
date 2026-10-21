@@ -70,7 +70,8 @@ def test_kinetic_reactant(tmp_path):
     model.run()
     reactant = model.kinetic_reactant("Dk")  # mol per litre of water
     dissolved = np.array([model.concentration("Dk", t) for t in reactant.index]) / 1000.0  # mol/L
-    assert reactant.shape == (9, 3) and list(reactant.columns) == pytest.approx(model.x)
+    assert reactant.shape == (9, 3)
+    assert list(reactant.columns) == pytest.approx(model.x)
     decayed = (reactant.iloc[0] - reactant).to_numpy()  # from the stored T0 amount, m0 minus 1 s of PHREEQC reaction
     assert decayed == pytest.approx(dissolved[0] - dissolved, rel=1e-6, abs=1e-12)
     assert dissolved[-1, 0] < 0.3 * dissolved[0, 0]  # two half-lives
