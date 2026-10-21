@@ -288,5 +288,6 @@ def write_database(
     # PHREEQC reads a database up to its first END
     text = text.replace("\nEND\n", extension + "END\n", 1) if "\nEND\n" in text else text + extension
     path = Path(path)
-    path.write_text(text, encoding="latin-1")
+    with open(path, "w", encoding="latin-1") as database_file:
+        database_file.write(text)
     return path
