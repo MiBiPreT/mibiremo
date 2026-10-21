@@ -28,7 +28,8 @@ def test_well_symbols():
     plotting.flow_arrow(ax, azimuth=90.0)
     arrow = ax.texts[0]
     dx, dy = np.subtract(arrow.xy, arrow.xyann)
-    assert dx > 0 and abs(dy) < 1e-9 * dx
+    assert dx > 0
+    assert abs(dy) < 1e-9 * dx
 
 
 def _model(workspace, **kwargs):
@@ -63,7 +64,8 @@ def test_grid(tmp_path):
     ax = plotting.grid(model)
     coloured = ~np.ma.getmaskarray(ax.collections[-1].get_array())  # (row, column), True where a cell is coloured
     interior = coloured[1:-1, 1:-1]
-    assert not interior.any() and coloured.sum() == coloured.size - interior.size
+    assert not interior.any()
+    assert coloured.sum() == coloured.size - interior.size
     assert [text.get_text() for text in ax.get_legend().get_texts()] == ["general-head boundary (GHB)"]
 
     assert plotting.grid(model, boundary=False).get_legend() is None

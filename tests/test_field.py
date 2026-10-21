@@ -330,7 +330,8 @@ def test_injected_solution(tmp_path):
     )
     model.run(selected_output=[pulse])
     sout = pd.read_csv(tmp_path / "phreeqc" / "sout.csv")  # selected output of every cell, only at the pulse end
-    assert list(sout["time_d"].unique()) == pytest.approx([pulse]) and len(sout) == model.grid.nrow * model.grid.ncol
+    assert list(sout["time_d"].unique()) == pytest.approx([pulse])
+    assert len(sout) == model.grid.nrow * model.grid.ncol
     expected = 1e-3 * 997.0 * tracer.concentration()  # mol kgw⁻¹ × ρ_w [kg m⁻³]
     assert model.concentration(component="Tr") == pytest.approx(expected, rel=1e-3, abs=1e-9)  # mol m⁻³
     for time in [pulse, DAY]:
