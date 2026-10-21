@@ -32,6 +32,8 @@ model = mb.ColumnModel(
     solutions={1: pore_water, 2: influent},        # {component: mol/kgw, "pH": ..., "pe": ...}
     initial_solution=1,
     influent_solution=2,                           # solution number, constant or schedule
+    equilibrium_phases={1: {"Calcite": [0, 0.1]}}, # PHREEQC EQUILIBRIUM_PHASES blocks (optional)
+    initial_equilibrium_phases=1,                  # block number, for all cells or one per cell (-1 for none)
     kinetics={1: reaction},                        # PHREEQC KINETICS blocks
     initial_kinetics=1,                            # KINETICS block number, for all cells or one per cell
 )
@@ -43,7 +45,8 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
 ## Conventions
 
 - **Units**: SI throughout: m, s, m³ s⁻¹. Concentrations in mol m⁻³ (= mmol L⁻¹); the PHREEQC solutions are given in
-  mol kgw⁻¹, and the KINETICS amounts `m0` in moles per litre of water, as in the field model.
+  mol kgw⁻¹, and the KINETICS amounts `m0` in moles per litre of water, as in the field model. The EQUILIBRIUM_PHASES
+  amounts are also in moles per litre of water.
 - **Schedules**: the flow rate, the influent solution, and the time step are constants or lists `[(t, value), ...]`
   starting at t = 0, each value holding until the next t. Stress periods start at every change time
   (`model.stress_periods`). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.
