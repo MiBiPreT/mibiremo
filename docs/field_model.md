@@ -4,7 +4,8 @@
 extraction wells in an aquifer with regional groundwater flow. It simulates groundwater flow, the transport of a
 tracer, and reactive transport with PHREEQC through [mf6rtm](https://github.com/p-ortega/mf6rtm). The model is
 built with [flopy](https://github.com/modflowpy/flopy), and the flopy simulation is always available as
-`model.simulation`.
+`model.simulation`. The inputs follow the conventions of the [column](column_model.md) and [batch](batch_model.md)
+models, so the same PHREEQC solutions and kinetics can be used in all three.
 
 Examples: [tracer test](notebooks/field_tracer_test.ipynb),
 [tracer test with three well layouts](notebooks/field_injection_extraction_distance.ipynb),
