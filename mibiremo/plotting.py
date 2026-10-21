@@ -10,6 +10,8 @@ from flopy.plot import PlotCrossSection
 from flopy.plot import PlotMapView
 from .field import FieldModel
 
+_OFFSET_POINTS = "offset points"  # matplotlib annotation offsets in points
+
 
 def map_view(
     model: FieldModel,
@@ -108,7 +110,7 @@ def cross_section(
         if across <= model.grid_spacing_at_wells / 2 and 0 <= along <= length:
             position = w.x if section.direction == "x" else w.y
             ax.plot([position, position], [w.screen_bottom, w.screen_top], color="k", lw=2)
-            ax.annotate(w.name, (position, w.screen_top), textcoords="offset points", xytext=(3, -10), fontsize=8)
+            ax.annotate(w.name, (position, w.screen_top), textcoords=_OFFSET_POINTS, xytext=(3, -10), fontsize=8)
     ax.set(xlabel=f"{section.direction} [m]", ylabel="elevation [m]")
     ax.ticklabel_format(useOffset=False, style="plain")
     return ax
@@ -133,7 +135,7 @@ def wells(ax: Axes, wells: list, flow_rates: dict | None = None, labels: bool = 
         style = {"marker": marker, "color": color, "mec": "k", "ms": 9}
         ax.plot(w.x, w.y, ls="", **(style | kwargs))
         if labels:
-            ax.annotate(w.name, (w.x, w.y), textcoords="offset points", xytext=(6, 4), fontsize=8)
+            ax.annotate(w.name, (w.x, w.y), textcoords=_OFFSET_POINTS, xytext=(6, 4), fontsize=8)
     ax.set_aspect("equal")
 
 
@@ -149,4 +151,4 @@ def flow_arrow(ax: Axes, azimuth: float) -> None:
     start = (x0 + 0.1 * (x1 - x0), y0 + 0.1 * (y1 - y0))
     end = (start[0] + length * math.sin(math.radians(azimuth)), start[1] + length * math.cos(math.radians(azimuth)))
     ax.annotate("", xy=end, xytext=start, arrowprops={"arrowstyle": "-|>", "color": "0.3", "lw": 1.5})
-    ax.annotate("groundwater flow", start, textcoords="offset points", xytext=(0, -12), fontsize=8, color="0.3")
+    ax.annotate("groundwater flow", start, textcoords=_OFFSET_POINTS, xytext=(0, -12), fontsize=8, color="0.3")
