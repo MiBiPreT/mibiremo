@@ -26,6 +26,8 @@ Last revision: 10/04/2026
 """
 
 import os
+from importlib.resources import files
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import phreeqcrm
@@ -222,6 +224,8 @@ class PhreeqcRM:
         status = self.rm.RunFile(True, True, True, pqi_file)
         if status < 0:
             raise RuntimeError(f"Failed to run Phreeqc input file (error code: {status})")
+        # The workers also ran the file: delete their blocks, otherwise block n stays in cell n where ic gives -1
+        self.rm.RunString(True, False, True, "DELETE; -all")
 
         ic1 = ic.flatten("F")
         self.rm.InitialPhreeqc2Module(ic1)
@@ -256,3 +260,33 @@ class PhreeqcRM:
         ncolsel = len(headings)
         so = np.array(self.rm.GetSelectedOutput())
         return pd.DataFrame(so.reshape(ncolsel, self.nxyz).T, columns=headings)
+
+
+def write_database(
+    path: str | Path, *definitions: str | Path, parameters: dict | None = None, database: str | Path = "phreeqc.dat"
+) -> Path:
+    """Write a PHREEQC database extended with new definitions and rate parameters.
+
+    Args:
+        path: Database file to write.
+        *definitions: PHREEQC data blocks (e.g. SOLUTION_MASTER_SPECIES, PHASES, RATES), as text or as files
+            (`pathlib.Path`).
+        parameters: Rate parameters {name: value}, written as CALCULATE_VALUES and read in the rates with
+            CALC_VALUE("name").
+        database: Database to extend: a file, or the name of a database of mibiremo (e.g. "phreeqc.dat").
+
+    Returns:
+        Path of the database written.
+    """
+    source = Path(database) if Path(database).is_file() else files("mibiremo") / "database" / database
+    text = source.read_text(encoding="latin-1")
+    blocks = [block.read_text(encoding="latin-1") if isinstance(block, Path) else block for block in definitions]
+    if parameters:
+        values = "".join(f"{name}\n-start\n10 SAVE {float(value):.15g}\n-end\n" for name, value in parameters.items())
+        blocks.append("CALCULATE_VALUES\n" + values)
+    extension = "\n" + "\n".join(block.strip("\n") for block in blocks) + "\n"
+    # PHREEQC reads a database up to its first END
+    text = text.replace("\nEND\n", extension + "END\n", 1) if "\nEND\n" in text else text + extension
+    path = Path(path)
+    path.write_text(text, encoding="latin-1")
+    return path
