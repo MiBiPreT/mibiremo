@@ -122,8 +122,8 @@ def wells(ax: Axes, wells: list, flow_rates: dict | None = None, labels: bool = 
     Args:
         ax: matplotlib axes.
         wells: Wells.
-        flow_rates: Flow rate Q [m³ s⁻¹] by well name, constant or schedule; a well that ever injects is an injection
-            well.
+        flow_rates: Flow rate Q [m³ s⁻¹] by well name, constant or time-dependent; a well that ever injects is an
+            injection well.
         labels: If True, write the well names.
         **kwargs: Arguments of matplotlib `plot`, e.g. `ms`.
     """

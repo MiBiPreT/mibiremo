@@ -66,11 +66,11 @@ plume = model.concentration(time=2 * day)          # array (layer, row, column)
   `z(x, y)` of the coordinates, e.g. `scipy.interpolate.NearestNDInterpolator(points, z)` for measured elevations.
 - **Flow rates**: Q by well name, positive for injection and negative for extraction. Wells not listed in
   `flow_rates` are monitoring wells (Q = 0); their concentrations are available as for the pumped wells.
-- **Schedules**: every time-dependent input is a list `[(t, value), ...]` starting at t = 0, each value holding until
-  the next t; a number is a constant. Schedules are used for flow rates, the tracer concentration of the injected
-  water, the time step, and the injected solution of PHREEQC coupling.
-- **Stress periods** start at every change time of any schedule (`model.stress_periods`). Flow is steady within a
-  stress period.
+- **Time-dependent inputs**: lists `[(t, value), ...]` starting at t = 0, each value holding until the next t; a
+  number is a constant. They are used for flow rates, the tracer concentration of the injected water, the time
+  step, and the injected solution of PHREEQC coupling.
+- **Stress periods** start at every change time of any time-dependent input (`model.stress_periods`). Flow is
+  steady within a stress period.
 - **Tracer**: the aquifer and the inflow across the boundary are tracer-free. With the default tracer
   concentration of 1, the concentration is the fraction of injected water.
 

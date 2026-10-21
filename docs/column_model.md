@@ -32,7 +32,7 @@ model = mb.ColumnModel(
     database="my_database.dat",                    # kinetic rates in its RATES block
     solutions={1: pore_water, 2: influent},        # {component: mol/kgw, "pH": ..., "pe": ...}
     initial_solution=1,
-    influent_solution=2,                           # solution number, constant or schedule
+    influent_solution=2,                           # solution number, constant or time-dependent
     equilibrium_phases={1: {"Calcite": [0, 0.1]}}, # PHREEQC EQUILIBRIUM_PHASES blocks (optional)
     initial_equilibrium_phases=1,                  # block number, for all cells or one per cell (-1 for none)
     kinetics={1: reaction},                        # PHREEQC KINETICS blocks
@@ -48,9 +48,9 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
 - **Units**: SI throughout: m, s, m³ s⁻¹. Concentrations in mol m⁻³ (= mmol L⁻¹); the PHREEQC solutions are given in
   mol kgw⁻¹, and the KINETICS amounts `m0` in moles per litre of water, as in the field model. The EQUILIBRIUM_PHASES
   amounts are also in moles per litre of water.
-- **Schedules**: the flow rate, the influent solution, and the time step are constants or lists `[(t, value), ...]`
-  starting at t = 0, each value holding until the next t. Stress periods start at every change time
-  (`model.stress_periods`). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.
+- **Time-dependent inputs**: the flow rate, the influent solution, and the time step are constants or lists
+  `[(t, value), ...]` starting at t = 0, each value holding until the next t. Stress periods start at every change
+  time (`model.stress_periods`). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.
 - **Grid**: the column is divided into `n_cells` cells of length Δx = L / `n_cells`. The concentration of each cell
   is computed at its downstream end, `model.x` = Δx, 2 Δx, ..., L, so the last cell gives the effluent. A cell range,
   e.g. `model.x <= 0.1` for the first 10 cm, sets `initial_solution` or `initial_kinetics` per cell.
