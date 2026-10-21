@@ -131,7 +131,12 @@ def wells(ax: Axes, wells: list, flow_rates: dict | None = None, labels: bool = 
     for w in wells:
         q = flow_rates.get(w.name, 0.0)
         q = [value for _, value in q] if isinstance(q, list) else [q]
-        marker, color = ("^", "tab:blue") if max(q) > 0 else ("o", "tab:red") if min(q) < 0 else ("s", "0.6")
+        if max(q) > 0:  # injection well
+            marker, color = "^", "tab:blue"
+        elif min(q) < 0:  # extraction well
+            marker, color = "o", "tab:red"
+        else:  # no pumping
+            marker, color = "s", "0.6"
         style = {"marker": marker, "color": color, "mec": "k", "ms": 9}
         ax.plot(w.x, w.y, ls="", **(style | kwargs))
         if labels:

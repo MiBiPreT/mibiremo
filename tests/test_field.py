@@ -85,8 +85,10 @@ def test_wells_at_cell_centres(wells, tolerance, centre):
     x_min, x_max, y_min, y_max = grid.extent
     x, y = [w.x for w in wells], [w.y for w in wells]
     centre = centre or ((min(x) + max(x)) / 2, (min(y) + max(y)) / 2)
-    assert (x_max - x_min, y_max - y_min) == pytest.approx(GRID["domain_size"])
-    assert ((x_min + x_max) / 2, (y_min + y_max) / 2) == pytest.approx(centre)
+    domain_size = (x_max - x_min, y_max - y_min)
+    domain_centre = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+    assert domain_size == pytest.approx(GRID["domain_size"])
+    assert domain_centre == pytest.approx(centre)
     assert np.diff(grid.botm[:, 0, 0]) == pytest.approx([-5.0 / 7] * 6)  # layers of equal thickness
 
 
