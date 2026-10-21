@@ -1,6 +1,6 @@
 # MiBiReMo - Examples
 
-Nine examples are available as both Python scripts and Jupyter notebooks.
+Ten examples are available as both Python scripts and Jupyter notebooks.
 To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
@@ -65,6 +65,12 @@ These examples use `ColumnModel`. See [Column model](column_model.md) for the co
 
 ### Laboratory column test
 The example `column_reactive_transport_test.py` simulates a laboratory column with `ColumnModel`: a soil column flushed with a solution containing a conservative tracer and a solute degraded with first-order kinetics, with a flow interruption (stop-flow test). The example shows the breakthrough curves in time and in pore volumes flushed, and the concentration profiles in the column.
+
+## Batch model
+This example uses `BatchModel`. See [Batch model](batch_model.md) for the conventions of the model.
+
+### Aerobic biodegradation in mesocosms
+The example `batch_first_order_decay.py` simulates an aerated soil mesocosm with `BatchModel`: residual petroleum hydrocarbons (TPH) degraded aerobically with a first-order rate limited by the dissolved O₂ (Monod term), with the pore water kept in equilibrium with air. The example shows the TPH content in time, compared with the analytical solution of the first-order model, c0 exp(-k F t).
 
 ## Numerical validation
 These examples compare the models with the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2), for a conservative tracer and for a solute with first-order decay (a PHREEQC KINETICS reactant).
