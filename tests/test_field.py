@@ -162,7 +162,7 @@ def test_invalid_geometry(tmp_path, changes, message):
 
 
 def test_stress_periods(tmp_path):
-    """Stress periods start at every change time of the schedules and preserve the volume of each well."""
+    """Stress periods start at every change time of the time-dependent inputs and preserve the volume of each well."""
     model = FieldModel(
         **MODEL,
         workspace=tmp_path,

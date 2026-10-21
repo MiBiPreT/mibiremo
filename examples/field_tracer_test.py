@@ -47,10 +47,10 @@ plt.show()
 # Model setup and simulation
 # The aquifer is homogeneous and confined. The groundwater flows from west to east (azimuth 90°) with a hydraulic
 # gradient of 0.01 m/m, imposed by fixed heads on the lateral boundary. The grid is refined around the wells (0.5 m
-# cells, growing to 4 m). Flow is steady within each stress period. Time-dependent inputs are defined as schedules
+# cells, growing to 4 m). Flow is steady within each stress period. Time-dependent inputs are defined as
 # [(t, value), ...] with t in seconds. Here, the tracer concentration of the injected water C_in (1 during the first
 # day, then 0) and the time step (1 h during the tracer injection, then 4 h). The stress periods are derived from the
-# change times of all schedules.
+# change times of all time-dependent inputs.
 #
 # With C_in = 1 and tracer-free groundwater, the concentration C equals the fraction of injected water.
 model = mb.FieldModel(
@@ -129,6 +129,6 @@ for ax in axes:
     ax.grid(alpha=0.3)
 plt.show()
 
-# Further options of FieldModel are: time-dependent flow rates (schedules, e.g. mb.intermittent_pumping), multiple
+# Further options of FieldModel are: time-dependent flow rates (e.g. mb.intermittent_pumping), multiple
 # layers (n_layers, vertical_anisotropy) for partially screened wells, dispersion (dispersion=True with dispersivities),
 # the advection scheme, and reactive transport with PHREEQC coupling. See the other examples for more details.
