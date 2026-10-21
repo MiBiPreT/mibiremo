@@ -475,10 +475,7 @@ class FieldModel:
                     log.write(line)
                     if line.startswith(PROGRESS):
                         fraction, elapsed = float(line.split()[-1]), perf_counter() - start
-                        message = f"{100 * fraction:3.0f} % of the simulated time, {elapsed / 60:.1f} min elapsed"
-                        if fraction > 0:
-                            message += f", about {elapsed * (1 - fraction) / fraction / 60:.1f} min left"
-                        print(f"\rmf6rtm: {message}  ", end="", flush=True)
+                        print(f"\rmf6rtm: {_progress_message(fraction, elapsed)}  ", end="", flush=True)
             print()
         if process.returncode != 0:
             raise RuntimeError(f"mf6rtm failed; see {workspace / 'mf6rtm.log'} and {workspace / 'mfsim.lst'}.")
@@ -739,6 +736,14 @@ def _solve(n_threads, libmf6, output_times):
         output._update_selected_output = output._get_selected_output
         output._append_to_soutdf_file = append
     return rtm.solve()
+
+
+def _progress_message(fraction, elapsed):
+    """Progress of an mf6rtm run from the fraction of the simulated time and the elapsed time [s]."""
+    message = f"{100 * fraction:3.0f} % of the simulated time, {elapsed / 60:.1f} min elapsed"
+    if fraction > 0:
+        message += f", about {elapsed * (1 - fraction) / fraction / 60:.1f} min left"
+    return message
 
 
 def _libmf6():
