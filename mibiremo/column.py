@@ -104,7 +104,7 @@ class ColumnModel:
         Args:
             n_threads: Number of threads for PHREEQC; -1 for all processors.
         """
-        # The porosity of the column acts on the transport only: each PhreeqcRM cell contains 1 L of water (as in mf6rtm)
+        # The porosity of the column acts on the transport only: each PhreeqcRM cell contains 1 L of water
         phreeqc = _start_phreeqc(self, "column.pqi", self.n_cells, n_threads)
         rm = phreeqc.rm
         n_components = len(phreeqc.components)
