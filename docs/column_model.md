@@ -3,8 +3,9 @@
 `mibiremo.ColumnModel` simulates a laboratory column: a soil sample in a column flushed with a solution. It computes the
 advection and dispersion of every component of the PHREEQC solutions with the semi-Lagrangian solver
 (`SemiLagSolver`), and the reactions with PHREEQC through PhreeqcRM, sequentially at every time step
-(sequential non-iterative approach). The inputs follow the conventions of the [field model](field_model.md), so the
-same PHREEQC solutions and kinetics can be used in both.
+(sequential non-iterative approach). The inputs follow the conventions of the [field](field_model.md) and
+[batch](batch_model.md) models, so the same PHREEQC solutions and kinetics can be used in all three; the equilibrium
+phases are shared with the batch model.
 
 Examples: [laboratory column test](notebooks/column_reactive_transport_test.ipynb) and
 [column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb).
