@@ -26,6 +26,8 @@ Last revision: 10/04/2026
 """
 
 import os
+from importlib.resources import files
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import phreeqcrm
@@ -123,6 +125,7 @@ class PhreeqcRM:
         porosity=1.0,
         saturation=1.0,
         multicomponent=True,
+        file_prefix="phr",
     ) -> None:
         """Initialize PhreeqcRM with database and default parameters.
 
@@ -133,16 +136,19 @@ class PhreeqcRM:
         Args:
             database_path (str): Path to the PHREEQC database file (.dat format).
                 Common databases include phreeqc.dat, Amm.dat, pitzer.dat.
-            units_solution (int, optional): Units for solution concentrations.
-                1 = mol/L, 2 = mmol/L, 3 = μmol/L. Defaults to 2.
-            units (int, optional): Units for other phases (Exchange, Surface,
-                Gas, Solid solutions, Kinetics). Defaults to 1.
+            units_solution (int, optional): Units of the solution concentrations exchanged with
+                PhreeqcRM: 1 = mg/L, 2 = mol/L, 3 = mass fraction (kg/kgs). Defaults to 2.
+            units (int, optional): Units of the other reactants (equilibrium phases, exchange,
+                surface, gas phase, solid solutions, kinetics): 0 = mol per litre of cell,
+                1 = mol per litre of water, 2 = mol per litre of rock. Defaults to 1.
             porosity (float, optional): Porosity value assigned to all cells.
                 Must be between 0 and 1. Defaults to 1.0.
             saturation (float, optional): Saturation value assigned to all cells.
                 Must be between 0 and 1. Defaults to 1.0.
             multicomponent (bool, optional): Enable multicomponent diffusion
                 by saving species concentrations. Defaults to True.
+            file_prefix (str, optional): Path and name prefix of the PhreeqcRM output files
+                (``.chem.txt``, ``.log.txt``). Defaults to "phr" (in the working directory).
 
         Raises:
             RuntimeError: If the PhreeqcRM instance is not initialized or if
@@ -171,7 +177,7 @@ class PhreeqcRM:
         self.rm.SetUnitsKinetics(units)
         self.rm.SetPorosity(porosity * np.ones(self.nxyz))
         self.rm.SetSaturationUser(saturation * np.ones(self.nxyz))
-        self.rm.SetFilePrefix("phr")
+        self.rm.SetFilePrefix(str(file_prefix))
         self.rm.OpenFiles()
         if multicomponent:
             self.rm.SetSpeciesSaveOn(True)
@@ -208,20 +214,20 @@ class PhreeqcRM:
             >>> ic = np.array([[1, -1, -1, -1, -1, -1, -1]])  # Only solution 1
             >>> rm.run_initial_from_file("initial.pqi", ic)
         """
-        status = self.rm.RunFile(True, True, True, pqi_file)
-        if status < 0:
-            raise RuntimeError(f"Failed to run Phreeqc input file (error code: {status})")
-
+        try:
+            ic = np.asarray(ic).astype(np.int32)
+        except Exception as e:
+            raise ValueError("Initial conditions must be convertible to a numpy array of integers") from e
         if ic.shape != (self.nxyz, 7):
             raise ValueError(f"Initial conditions array must have shape ({self.nxyz}, 7), got {ic.shape}")
 
-        if not isinstance(ic, np.ndarray):
-            try:
-                ic = np.array(ic).astype(np.int32)
-            except Exception as e:
-                raise ValueError("Initial conditions must be convertible to a numpy array of integers") from e
+        status = self.rm.RunFile(True, True, True, pqi_file)
+        if status < 0:
+            raise RuntimeError(f"Failed to run Phreeqc input file (error code: {status})")
+        # The workers also ran the file: delete their blocks, otherwise block n stays in cell n where ic gives -1
+        self.rm.RunString(True, False, True, "DELETE; -all")
 
-        ic1 = ic.flatten("F").astype(np.int32)
+        ic1 = ic.flatten("F")
         self.rm.InitialPhreeqc2Module(ic1)
 
         self.rm.FindComponents()
@@ -254,3 +260,100 @@ class PhreeqcRM:
         ncolsel = len(headings)
         so = np.array(self.rm.GetSelectedOutput())
         return pd.DataFrame(so.reshape(ncolsel, self.nxyz).T, columns=headings)
+
+
+def write_database(
+    path: str | Path, *definitions: str | Path, parameters: dict | None = None, database: str | Path = "phreeqc.dat"
+) -> Path:
+    """Write a PHREEQC database extended with new definitions and rate parameters.
+
+    Args:
+        path: Database file to write.
+        *definitions: PHREEQC data blocks (e.g. SOLUTION_MASTER_SPECIES, PHASES, RATES), as text or as files
+            (`pathlib.Path`).
+        parameters: Rate parameters {name: value}, written as CALCULATE_VALUES and read in the rates with
+            CALC_VALUE("name").
+        database: Database to extend: a file, or the name of a database of mibiremo (e.g. "phreeqc.dat").
+
+    Returns:
+        Path of the database written.
+    """
+    source = Path(database) if Path(database).is_file() else files("mibiremo") / "database" / database
+    text = source.read_text(encoding="latin-1")
+    blocks = [block.read_text(encoding="latin-1") if isinstance(block, Path) else block for block in definitions]
+    if parameters:
+        values = "".join(f"{name}\n-start\n10 SAVE {float(value):.15g}\n-end\n" for name, value in parameters.items())
+        blocks.append("CALCULATE_VALUES\n" + values)
+    extension = "\n" + "\n".join(block.strip("\n") for block in blocks) + "\n"
+    # PHREEQC reads a database up to its first END
+    text = text.replace("\nEND\n", extension + "END\n", 1) if "\nEND\n" in text else text + extension
+    path = Path(path)
+    with open(path, "w", encoding="latin-1") as database_file:
+        database_file.write(text)
+    return path
+
+
+def _check_numbering(model):
+    """Check that the PHREEQC blocks of a column or batch model are numbered 1, 2, ..."""
+    blocks = {"solutions": model.solutions, "equilibrium_phases": model.equilibrium_phases, "kinetics": model.kinetics}
+    for name, block in blocks.items():
+        if sorted(block or {}) != list(range(1, len(block or {}) + 1)):
+            raise ValueError(f"{name} must be numbered 1, 2, ...")
+
+
+def _start_phreeqc(model, input_file, n_cells, n_threads):
+    """PhreeqcRM with the initial conditions of a column or batch model, from the input file written in its workspace.
+
+    Concentrations in mol/L, other reactants in mol per litre of water; PhreeqcRM porosity 1, so each cell contains 1 L
+    of water.
+    """
+    workspace = Path(model.workspace)
+    workspace.mkdir(parents=True, exist_ok=True)
+    (workspace / input_file).write_text(_phreeqc_input(model))
+    phreeqc = PhreeqcRM()
+    phreeqc.create(nxyz=n_cells, n_threads=n_threads)
+    phreeqc.initialize_phreeqc(
+        str(model.database), units_solution=2, units=1, multicomponent=False, file_prefix=str(workspace / "phreeqc")
+    )
+    phreeqc.rm.SetScreenOn(False)  # PhreeqcRM messages (e.g. load rebalancing of the threads) in the log file only
+    phreeqc.rm.SetSelectedOutputOn(bool(_reactants(model.kinetics)))  # amounts of the KINETICS reactants
+    initial = np.full((n_cells, 7), -1)
+    initial[:, 0] = np.broadcast_to(model.initial_solution, n_cells)
+    initial[:, 1] = np.broadcast_to(model.initial_equilibrium_phases, n_cells)
+    initial[:, 6] = np.broadcast_to(model.initial_kinetics, n_cells)
+    phreeqc.run_initial_from_file(str(workspace / input_file), initial)
+    return phreeqc
+
+
+def _reactant_amounts(phreeqc, reactants):
+    """Amount of every KINETICS reactant in every cell (cells, reactants) [mol per litre of water]."""
+    return phreeqc.get_selected_output_df()[reactants].to_numpy() if reactants else np.empty((phreeqc.nxyz, 0))
+
+
+def _reactants(kinetics):
+    """Names of the reactants of the KINETICS blocks."""
+    return list(dict.fromkeys(name for block in (kinetics or {}).values() for name in block))
+
+
+def _phreeqc_input(model):
+    """PHREEQC SOLUTION, EQUILIBRIUM_PHASES, and KINETICS blocks of a column or batch model, and selected output of the
+    KINETICS reactants."""
+    lines = []
+    for number, solution in sorted(model.solutions.items()):
+        lines += [f"SOLUTION {number}", "    units mol/kgw"]
+        lines += [f"    {name} {value}" for name, value in ({"pH": 7.0, "pe": 4.0} | solution).items()]
+    for number, block in sorted((model.equilibrium_phases or {}).items()):
+        lines.append(f"EQUILIBRIUM_PHASES {number}")
+        lines += [f"    {phase} {' '.join(str(v) for v in values)}" for phase, values in block.items()]
+    for number, block in sorted((model.kinetics or {}).items()):
+        lines.append(f"KINETICS {number}")
+        for reactant, settings in block.items():
+            lines.append(f"    {reactant}")
+            for key, value in settings.items():
+                value = " ".join(str(v) for v in value) if isinstance(value, (list, tuple)) else value
+                lines.append(f"        -{key} {value}")
+    if reactants := _reactants(model.kinetics):
+        punch = ", ".join(f'KIN("{name}")' for name in reactants)
+        lines += ["SELECTED_OUTPUT 1", "    -reset false", "USER_PUNCH 1", f"    -headings {' '.join(reactants)}"]
+        lines += ["    -start", f"    10 PUNCH {punch}", "    -end"]
+    return "\n".join([*lines, "END", ""])
