@@ -2475,10 +2475,10 @@ plt.show()</div>
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="model-setup-and-simulation">Model setup and simulation<a class="anchor-link" href="#model-setup-and-simulation">¶</a></h2><p>The aquifer is homogeneous and confined. The groundwater flows from west to east (azimuth 90°) with a hydraulic
 gradient of 0.01 m/m, imposed by fixed heads on the lateral boundary. The grid is refined around the wells (0.5 m
-cells, growing to 4 m). Flow is steady within each stress period. Time-dependent inputs are defined as schedules
+cells, growing to 4 m). Flow is steady within each stress period. Time-dependent inputs are defined as
 <code>[(t, value), ...]</code> with t in seconds. Here, the tracer concentration of the injected water C_in (1 during the first
 day, then 0) and the time step (1 h during the tracer injection, then 4 h). The stress periods are derived from the
-change times of all schedules.</p>
+change times of all time-dependent inputs.</p>
 <p>With C_in = 1 and tracer-free groundwater, the concentration C equals the fraction of injected water.</p>
 </div>
 </div>
@@ -2936,7 +2936,7 @@ plt.show()</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Further options of <code>FieldModel</code> are: time-dependent flow rates (schedules, e.g. <code>mb.intermittent_pumping</code>), multiple layers
+<p>Further options of <code>FieldModel</code> are: time-dependent flow rates (e.g. <code>mb.intermittent_pumping</code>), multiple layers
 (<code>n_layers</code>, <code>vertical_anisotropy</code>) for partially screened wells, dispersion (<code>dispersion=True</code> with
 dispersivities), the advection scheme, and reactive transport with PHREEQC coupling. See the other examples for more details.</p>
 </div>

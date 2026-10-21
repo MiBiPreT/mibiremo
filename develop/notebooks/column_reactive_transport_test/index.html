@@ -2459,7 +2459,7 @@ database.write_text(text.replace("\nEND\n", definitions + "END\n", 1), encoding=
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="model-setup">Model setup<a class="anchor-link" href="#model-setup">¶</a></h2><p>The flow rate Q is a schedule [(t, value), ...] with t in seconds, as all the time-dependent inputs: 1 mL/min, 0
+<h2 id="model-setup">Model setup<a class="anchor-link" href="#model-setup">¶</a></h2><p>The flow rate Q is a time-dependent input [(t, value), ...] with t in seconds, as all the others: 1 mL/min, 0
 between 10 h and 16 h. Solution 1 is the initial pore water, solution 2 the influent. The KINETICS block 1 (decay of
 Dk with a half-life of 2 h) acts in all cells. Concentrations are in mol/m³ (= mmol/L).</p>
 </div>

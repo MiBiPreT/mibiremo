@@ -1592,7 +1592,7 @@ phases are shared with the batch model.</p>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">database</span><span class="o">=</span><span class="s2">"my_database.dat"</span><span class="p">,</span>                    <span class="c1"># kinetic rates in its RATES block</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="n">solutions</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">pore_water</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="n">influent</span><span class="p">},</span>        <span class="c1"># {component: mol/kgw, "pH": ..., "pe": ...}</span>
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">initial_solution</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">influent_solution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>                           <span class="c1"># solution number, constant or schedule</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">influent_solution</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>                           <span class="c1"># solution number, constant or time-dependent</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">equilibrium_phases</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="s2">"Calcite"</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]}},</span> <span class="c1"># PHREEQC EQUILIBRIUM_PHASES blocks (optional)</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="n">initial_equilibrium_phases</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>                  <span class="c1"># block number, for all cells or one per cell (-1 for none)</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="n">kinetics</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">reaction</span><span class="p">},</span>                        <span class="c1"># PHREEQC KINETICS blocks</span>
@@ -1607,9 +1607,9 @@ phases are shared with the batch model.</p>
 <li><strong>Units</strong>: SI throughout: m, s, m³ s⁻¹. Concentrations in mol m⁻³ (= mmol L⁻¹); the PHREEQC solutions are given in
   mol kgw⁻¹, and the KINETICS amounts <code>m0</code> in moles per litre of water, as in the field model. The EQUILIBRIUM_PHASES
   amounts are also in moles per litre of water.</li>
-<li><strong>Schedules</strong>: the flow rate, the influent solution, and the time step are constants or lists <code>[(t, value), ...]</code>
-  starting at t = 0, each value holding until the next t. Stress periods start at every change time
-  (<code>model.stress_periods</code>). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.</li>
+<li><strong>Time-dependent inputs</strong>: the flow rate, the influent solution, and the time step are constants or lists
+  <code>[(t, value), ...]</code> starting at t = 0, each value holding until the next t. Stress periods start at every change
+  time (<code>model.stress_periods</code>). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.</li>
 <li><strong>Grid</strong>: the column is divided into <code>n_cells</code> cells of length Δx = L / <code>n_cells</code>. The concentration of each cell
   is computed at its downstream end, <code>model.x</code> = Δx, 2 Δx, &hellip;, L, so the last cell gives the effluent. A cell range,
   e.g. <code>model.x &lt;= 0.1</code> for the first 10 cm, sets <code>initial_solution</code> or <code>initial_kinetics</code> per cell.</li>

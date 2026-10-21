@@ -1665,11 +1665,11 @@ models, so the same PHREEQC solutions and kinetics can be used in all three.</p>
   <code>z(x, y)</code> of the coordinates, e.g. <code>scipy.interpolate.NearestNDInterpolator(points, z)</code> for measured elevations.</li>
 <li><strong>Flow rates</strong>: Q by well name, positive for injection and negative for extraction. Wells not listed in
   <code>flow_rates</code> are monitoring wells (Q = 0); their concentrations are available as for the pumped wells.</li>
-<li><strong>Schedules</strong>: every time-dependent input is a list <code>[(t, value), ...]</code> starting at t = 0, each value holding until
-  the next t; a number is a constant. Schedules are used for flow rates, the tracer concentration of the injected
-  water, the time step, and the injected solution of PHREEQC coupling.</li>
-<li><strong>Stress periods</strong> start at every change time of any schedule (<code>model.stress_periods</code>). Flow is steady within a
-  stress period.</li>
+<li><strong>Time-dependent inputs</strong>: lists <code>[(t, value), ...]</code> starting at t = 0, each value holding until the next t; a
+  number is a constant. They are used for flow rates, the tracer concentration of the injected water, the time
+  step, and the injected solution of PHREEQC coupling.</li>
+<li><strong>Stress periods</strong> start at every change time of any time-dependent input (<code>model.stress_periods</code>). Flow is
+  steady within a stress period.</li>
 <li><strong>Tracer</strong>: the aquifer and the inflow across the boundary are tracer-free. With the default tracer
   concentration of 1, the concentration is the fraction of injected water.</li>
 </ul>
