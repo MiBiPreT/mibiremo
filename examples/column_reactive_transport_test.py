@@ -44,7 +44,7 @@ database = OUTPUT / "column.dat"
 database.write_text(text.replace("\nEND\n", definitions + "END\n", 1), encoding="latin-1")
 
 # Model setup
-# The flow rate Q is a schedule [(t, value), ...] with t in seconds, as all the time-dependent inputs: 1 mL/min, 0
+# The flow rate Q is a time-dependent input [(t, value), ...] with t in seconds, as all the others: 1 mL/min, 0
 # between 10 h and 16 h. Solution 1 is the initial pore water, solution 2 the influent. The KINETICS block 1 (decay of
 # Dk with a half-life of 2 h) acts in all cells. Concentrations are in mol/m³ (= mmol/L).
 flow_rate = 1e-6 / MINUTE  # 1 mL/min in m3/s
