@@ -24,7 +24,7 @@ dependencies = [
     "numba>=0.64",
     "phreeqcrm",
     "flopy",
-    "mf6rtm @ git+https://github.com/p-ortega/mf6rtm.git@ea9d1a7c018dd9fed196280918937dbd605538ca",  # develop
+    "mf6rtm>=0.6.0",
     "geopandas>=1.0",
     "mibitrans>=1.0,<2",
 ]
