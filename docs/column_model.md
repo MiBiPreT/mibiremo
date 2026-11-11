@@ -1,13 +1,12 @@
 # Column model
 
-`mibiremo.ColumnModel` simulates a laboratory column: a soil sample in a column flushed with a solution. It computes the
-advection and dispersion of every component of the PHREEQC solutions with the semi-Lagrangian solver
-(`SemiLagSolver`), and the reactions with PHREEQC through PhreeqcRM, sequentially at every time step
-(sequential non-iterative approach). The inputs follow the conventions of the [field](field_model.md) and
-[batch](batch_model.md) models, so the same PHREEQC solutions and kinetics can be used in all three; the equilibrium
-phases are shared with the batch model.
+`mibiremo.ColumnModel` simulates a laboratory column experiment, in which a soil sample is flushed with an aqueous solution. It can also be used to represent one-dimensional reactive-transport processes in an aquifer.
+Advection and dispersion of all aqueous components are simulated using the semi-Lagrangian solver (`SemiLagSolver`), while geochemical reactions are computed with PHREEQC through PhreeqcRM. Transport and reactions are coupled sequentially at each time step using a sequential non-iterative approach (SNIA).
 
-Examples: [laboratory column test](notebooks/column_reactive_transport_test.ipynb) and
+The inputs are consistent with the conventions adopted in the [field](field_model.md) and [batch](batch_model.md) models, allowing the same PHREEQC solutions and kinetic definitions to be used across all three models. Equilibrium phases are also defined in the same way as in the batch model.
+
+Examples: [laboratory column test](notebooks/column_reactive_transport_test.ipynb),
+[BTEX dissolution and transport](notebooks/column_BTEX_dissolution.ipynb), and
 [column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb).
 
 ## Workflow

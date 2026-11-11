@@ -1,52 +1,15 @@
 # MiBiReMo - Examples
 
-Ten examples are available as both Python scripts and Jupyter notebooks.
+Eight examples are available as both Python scripts and Jupyter notebooks.
 To run the examples as scripts, navigate to the `examples` directory and run the desired example:
 ```sh
 cd examples
-python phreeqcrm_calcite_titration.py
+python column_reactive_transport_test.py
 ```
 
-Interactive Jupyter notebooks are also available in the `examples` folder, and can be viewed in the [Tutorial Notebooks](notebooks/phreeqcrm_calcite_titration.ipynb) section.
+Interactive Jupyter notebooks are also available in the `examples` folder, and can be viewed in the [Tutorial Notebooks](notebooks/column_reactive_transport_test.ipynb) section.
 
 The field model examples and `validation_field_vs_mibitrans.py` need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
-
-## PhreeqcRM models
-These examples use the classes `PhreeqcRM` and `SemiLagSolver` directly.
-
-### Titration
-The example `phreeqcrm_calcite_titration.py` demonstrates the use of the package to simulate a simple titration in a batch, where a solution is equilibrated with a mineral phase (calcite) and the pH is adjusted by adding HCl.
-
-### Benzene and Ethylbenzene kinetic dissolution
-The example `phreeqcrm_BTEX_dissolution.py` demonstrates the use of the package to simulate the kinetic dissolution of benzene and ethylbenzene in a batch reactor.
-
-### Reactive transport - BTEX dissolution and transport
-The example `phreeqcrm_BTEX_transport_coupling.py` demonstrates the use of the package to simulate the reactive transport of benzene and ethylbenzene in a 1D domain.
-The problem is described in the following scheme:
-
-![Model diagram](img/BTEX_dissolution_transport.png)
-
-The model consists of a 1D domain with a length of 100 m. The domain is initially filled with clean groundwater with a spot of benzene and ethylbenzene pure phases present at the left side of the domain extending for 0.5 m. We assumed that the contaminant pure phase in the source zone is immobile (it only dissolves).
-The groundwater flows from left to right with a velocity of 1 m/d, and dissolved benzene and ethylbenzene are transported towards the right end of the domain. The dissolution process is modelled both kinetically and equilibrium-based. 
-The model is run for 100 days, and the concentration of benzene and ethylbenzene is monitored at 50 m from the inlet.
-
-Three simulation runs are performed:
-1. Equilibrium dissolution of benzene and ethylbenzene simulated with PHREEQC (standalone).
-2. Equilibrium dissolution of benzene and ethylbenzene simulated by MiBiReMo (1D transport solver coupled with PhreeqcRM).
-3. Kinetic dissolution of benzene and ethylbenzene simulated by MiBiReMo.
-
-The transport equition (advection and dispersion) in MiBiReMo is solved using a Semi-Lagrangian scheme with operator splitting, where the advection is solved using the method of characteristics with cubic spline interpolation, and the dispersion is solved using the Saul'yev finite differences technique. 
-
-Simulation results are shown in the following figure:
-
-![Model results](img/BTEX_dissolution_and_transport_results.png)
-
-The results obtaines show a pattern similar to the experimental results obtained by Geller and Hunt (1993) [[1]](#1).
-In their experiment they injected an equimolar mixture of benzene and toluene in the center of a column which was subsequently eluted with water. The results show that benzene is eluted first, followed by toluene because of the different solubilities.
-The following figure shows the experimental results obtained by Geller and Hunt (1993):
-
-![Geller and Hunt (1993) results](img/Geller_Hunt_1993.png)
-
 
 ## Field model
 These examples use `FieldModel`. See [Field model](field_model.md) for the conventions of the model.
@@ -65,6 +28,26 @@ These examples use `ColumnModel`. See [Column model](column_model.md) for the co
 
 ### Laboratory column test
 The example `column_reactive_transport_test.py` simulates a laboratory column with `ColumnModel`: a soil column flushed with a solution containing a conservative tracer and a solute degraded with first-order kinetics, with a flow interruption (stop-flow test). The example shows the breakthrough curves in time and in pore volumes flushed, and the concentration profiles in the column.
+
+### BTEX dissolution and transport
+The `column_BTEX_dissolution.py` example uses `ColumnModel` to simulate the dissolution of a benzene–ethylbenzene non-aqueous phase liquid (NAPL) in a porous medium. The 50 m-long column represents a one-dimensional groundwater flow path in the aquifer:
+
+![Model diagram](img/BTEX_dissolution_transport.png)
+
+Initially, the column contains non-contaminated groundwater, with an immobile NAPL source located in the first 0.5 m. The source contains 0.03 mol of each constituent per litre of water. Groundwater flows through the column at an average velocity of 1 m/d, and benzene and ethylbenzene concentrations are monitored at the outlet, 50 m downstream of the source, over a 100-day period.
+
+Three simulations are compared:
+1. **Equilibrium dissolution with standalone PHREEQC**: simulated using the `TRANSPORT` keyword (input file: `pqi/column_BTEX_dissolution.pqi`).
+2. **Equilibrium dissolution with `ColumnModel`**: each NAPL constituent is represented as a pure phase using PHREEQC's `EQUILIBRIUM_PHASES` keyword.
+3. **Kinetic dissolution with `ColumnModel`**: the dissolution rate is proportional to the difference between the effective solubility, calculated using Raoult's law, and the aqueous concentration, as implemented through PHREEQC's `KINETICS` keyword.
+
+
+![Model results](img/BTEX_dissolution_and_transport_results.png)
+
+
+Benzene, being more soluble, is depleted from the NAPL first and reaches the column outlet earlier than ethylbenzene. This behaviour is consistent with the experimental results of Geller and Hunt (1993) [[1]](#1), who injected an equimolar mixture of benzene and toluene into the centre of a column and subsequently flushed it with water. Benzene was eluted first, followed by toluene, reflecting their different solubilities.
+
+![Geller and Hunt (1993) results](img/Geller_Hunt_1993.png)
 
 ## Batch model
 This example uses `BatchModel`. See [Batch model](batch_model.md) for the conventions of the model.
