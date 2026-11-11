@@ -1,6 +1,6 @@
-TITLE BTEX dissolution and transport - equilibrium dissolution
+TITLE BTEX dissolution and transport - equilibrium dissolution, reference for column_BTEX_dissolution.py
 
-##################################
+###################################
 # 1) REDEFINE PURE PHASE AS PHASES
 ##################################
 PHASES
@@ -68,17 +68,11 @@ TRANSPORT
         -punch_frequency 1
 PRINT; -reset false; -status false  		# Avoid printing results (speed-up the simulation)
 
-USER_GRAPH 1
-  -chart_title "BTEX transport"
-  -headings Ethylbenzene Benzene
-  -axis_titles "Time (days)" "Concentration mg/L"
-  -initial_solutions true
-  -plot_concentration_vs time
-  #10 x = (STEP_NO + 0.5) / cell_no # PV
-  11 x = total_time/3600/24
-  20 PLOT_XY x, MOL("Ethyl")*1e3*106.17, symbol = Plus, symbol_size = 2
-  30 PLOT_XY x, MOL("Benz")*1e3*78.114, symbol = Plus, symbol_size = 2
-  #40 PLOT_XY x, TOT("K")*1000, symbol = Plus, symbol_size = 2
-
+SELECTED_OUTPUT 1
+		-file column_BTEX_dissolution.sel
+        -time
+		-distance
+        -totals          Benz Ethyl
+        -high_precision  true
 END
 
