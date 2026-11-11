@@ -17,14 +17,11 @@ nav:
 
   - Examples: examples.md
   - Tutorial Notebooks:
-    - PhreeqcRM interface:
-      - Titration: notebooks/phreeqcrm_calcite_titration.ipynb
-      - BTEX dissolution: notebooks/phreeqcrm_BTEX_dissolution.ipynb
-      - BTEX dissolution and transport coupling: notebooks/phreeqcrm_BTEX_transport_coupling.ipynb
     - Batch model:
       - Aerobic biodegradation in mesocosms: notebooks/batch_first_order_decay.ipynb
     - Column model:
       - Laboratory column test: notebooks/column_reactive_transport_test.ipynb
+      - BTEX dissolution and transport: notebooks/column_BTEX_dissolution.ipynb
     - Field model:
       - Tracer test: notebooks/field_tracer_test.ipynb
       - Injection-extraction distance: notebooks/field_injection_extraction_distance.ipynb
