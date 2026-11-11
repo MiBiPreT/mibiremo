@@ -83,4 +83,4 @@ examples/pqi/*.sel
 examples/output/
 docs/notebooks/output/
 phreeqc.log
-!phreeqcrm_BTEX_transport_coupling.sel
+!column_BTEX_dissolution.sel
