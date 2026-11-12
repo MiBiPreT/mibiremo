@@ -28,7 +28,7 @@ dependencies = [
     "geopandas>=1.0",
     "mibitrans>=1.0,<2",
 ]
-description = "MiBiPreT Remediation Module: a Python interface for designing and testing bioremediation installations"
+description = "Microbiome Bioremediation Reactive-transport Module: a Python package for the simulation and design of soil and groundwater bioremediation systems"
 keywords = ["Microbiome"," Bioremediation"," Chemical Reaction"," Geochemical Engineering"]
 license = "Apache-2.0"
 name = "mibiremo"

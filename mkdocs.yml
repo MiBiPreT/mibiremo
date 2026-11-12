@@ -1,5 +1,5 @@
 site_name: mibiremo
-site_description: MiBiPreT Remediation Module, a Python package for designing and testing bioremediation installations
+site_description: Microbiome Bioremediation Reactive-transport Module, a Python package for the simulation and design of soil and groundwater bioremediation systems
 site_author: Matteo Masi, Jaro Camphuijsen, Robin Richardson
 site_url: https://MiBiPreT.github.io/mibiremo
 repo_name: MiBiPreT/mibiremo
