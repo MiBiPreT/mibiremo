@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="MiBiPreT Remediation Module, a Python package for designing and testing bioremediation installations">
+        <meta name="description" content="Microbiome Bioremediation Reactive-transport Module, a Python package for the simulation and design of soil and groundwater bioremediation systems">
       
       
         <meta name="author" content="Matteo Masi, Jaro Camphuijsen, Robin Richardson">
@@ -532,6 +532,78 @@
     <span class="md-ellipsis">
       
         Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-of-stable-release-from-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation of stable release from PyPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation-of-most-recent-development-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation of most recent development version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modflow-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MODFLOW 6
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Credits
       
     </span>
   </a>
@@ -1327,6 +1399,78 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-of-stable-release-from-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation of stable release from PyPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installation-of-most-recent-development-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation of most recent development version
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modflow-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MODFLOW 6
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Credits
+      
+    </span>
+  </a>
+  
 </li>
       
     </ul>
@@ -1350,16 +1494,34 @@
 
 
 <h1 id="documentation-for-mibiremo-python-package">Documentation for <code>mibiremo</code> python package</h1>
-<p>MiBiPreT Remediation Module, a Python package for designing and testing bioremediation installations. Part of the MiBiPreT (Micro-Bioremediation Prediction Tool) tools, developed within the MIBIREM toolbox for bioremediation.</p>
+<p>MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the <a href="https://www.mibirem.eu/">MIBIREM</a> bioremediation toolbox. See the <a href="introduction/">introduction</a> for an overview.</p>
 <h2 id="installation">Installation</h2>
-<p>To install mibiremo from GitHub repository, do:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">git clone git@github.com:MiBiPreT/mibiremo.git</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">cd mibiremo</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">python -m pip install .</span>
+<h3 id="installation-of-stable-release-from-pypi">Installation of stable release from PyPI</h3>
+<p>Use <code>pip</code> to install the most recent stable release of <code>mibiremo</code> from PyPI as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">pip install mibiremo</span>
 </code></pre></div>
-<p>Field-scale simulations require the MODFLOW 6 executable and shared library. Install them into the active Python environment with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">get-modflow :python --subset mf6,libmf6</span>
+<h3 id="installation-of-most-recent-development-version">Installation of most recent development version</h3>
+<p>To install mibiremo from the GitHub repository directly, do:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">git clone git@github.com:MiBiPreT/mibiremo.git</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">cd mibiremo</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="go">python -m pip install .</span>
 </code></pre></div>
+<p>Note that this is the (possibly unstable) development version from the <code>main</code> branch. If you want a stable release, use the PyPI installation method instead.</p>
+<h3 id="modflow-6">MODFLOW 6</h3>
+<p>Field-scale simulations require the MODFLOW 6 executable and shared library. After installing mibiremo, install them into the active Python environment with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">get-modflow :python --subset mf6,libmf6</span>
+</code></pre></div>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li><a href="introduction/">Introduction</a>: overview of the package and of the MIBIREM project.</li>
+<li><a href="batch_model/">Batch model</a>, <a href="column_model/">Column model</a>, and <a href="field_model/">Field model</a>: model description, workflow, and conventions.</li>
+<li><a href="examples/">Examples</a>: description of the examples, which are also available as tutorial notebooks.</li>
+<li><a href="reference/">API reference</a>: classes and functions of the package.</li>
+</ul>
+<h2 id="contributing">Contributing</h2>
+<p>If you want to contribute to the development of mibiremo, have a look at the <a href="development/">development</a> page.</p>
+<h2 id="credits">Credits</h2>
+<p>This package was created with <a href="https://github.com/copier-org/copier">Copier</a> and the <a href="https://github.com/NLeSC/python-template">NLeSC/python-template</a>.</p>
 
 
 

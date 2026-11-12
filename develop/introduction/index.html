@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="MiBiPreT Remediation Module, a Python package for designing and testing bioremediation installations">
+        <meta name="description" content="Microbiome Bioremediation Reactive-transport Module, a Python package for the simulation and design of soil and groundwater bioremediation systems">
       
       
         <meta name="author" content="Matteo Masi, Jaro Camphuijsen, Robin Richardson">
@@ -1375,9 +1375,15 @@
 
 <h1 id="introduction">Introduction</h1>
 <h2 id="general">General</h2>
-<p>MiBiReMo (MiBiPreT Remediation Module) is an open-source Python package for the simulation and design of groundwater bioremediation systems. It allows to set up field-scale models, focusing on biological flushing technique, to simulate groundwater flow, solute transport, and reactive transport. Flow and transport are simulated using MODFLOW 6, while geochemical and biodegradation reactions are computed using PHREEQC, and coupled to MODFLOW through <a href="https://github.com/p-ortega/mf6rtm">mf6rtm</a>). The package also includes a one-dimensional advection–dispersion solver for the simulation of laboratory-scale column experiments. MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) tools, developed within the <a href="https://www.mibirem.eu/">MIBIREM</a> toolbox for bioremediation.</p>
+<p>MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It provides a framework for implementing reactive-transport models at both laboratory and field scales. The package comprises three modelling components that use PHREEQC to simulate biological and biogeochemical reactions:</p>
+<ul>
+<li><strong><a href="../batch_model/">Batch model</a></strong>: simulates biogeochemical reactions in well-mixed systems under static conditions, without flow.</li>
+<li><strong><a href="../column_model/">Column model</a></strong>: simulates one-dimensional advective–dispersive transport coupled with biogeochemical reactions.</li>
+<li><strong><a href="../field_model/">Field model</a></strong>: simulates three-dimensional groundwater flow and solute transport using MODFLOW 6, coupled with PHREEQC through <a href="https://github.com/p-ortega/mf6rtm">mf6rtm</a>. It is primarily intended for modelling in situ biological flushing systems based on injection and extraction wells.</li>
+</ul>
+<p>MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the <a href="https://www.mibirem.eu/">MIBIREM</a> bioremediation toolbox.</p>
 <h2 id="mibirem">MIBIREM</h2>
-<p><a href="https://www.mibirem.eu/">MIBIREM - Innovative technological toolbox for bioremediation</a> is a EU funded consortium project by 12 international partners all over Europe working together to develop an <em>Innovative technological toolbox for bioremediation</em>. The project will develop molecular methods for the monitoring, isolation, cultivation and subsequent deposition of whole microbiomes. The toolbox will also include the methodology for the improvement of specific microbiome functions, including evolution and enrichment. The performance of selected microbiomes will be tested under real field conditions. The <code>mibiremo</code> package is part of this toolbox.</p>
+<p><a href="https://www.mibirem.eu/">MIBIREM – Innovative Technological Toolbox for Bioremediation</a> is an EU-funded research project involving a consortium of 12 partners from across Europe, with the aim of developing an integrated technological toolbox for bioremediation. The project focuses on the development of molecular methods for the monitoring, isolation, cultivation, and subsequent application of microbiomes. It also investigates approaches to enhance specific microbiome functions through processes such as microbial evolution and enrichment. The performance of selected microbiomes is subsequently evaluated under field conditions. The <code>mibiremo</code> Python package is one of the technological components developed within this toolbox.</p>
 
 
 
