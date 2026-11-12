@@ -15,7 +15,13 @@
 
 # `mibiremo`
 
-MiBiReMo (MiBiPreT Remediation Module) is an open-source Python package for the simulation and design of groundwater bioremediation systems. It allows to set up field-scale models, focusing on biological flushing technique, to simulate groundwater flow, solute transport, and reactive transport. Flow and transport are simulated using MODFLOW 6, while geochemical and biodegradation reactions are computed using PHREEQC, and coupled to MODFLOW through [mf6rtm](https://github.com/p-ortega/mf6rtm)). The package also includes a one-dimensional advection–dispersion solver for the simulation of laboratory-scale column experiments. MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) tools, developed within the [MIBIREM](https://www.mibirem.eu/) toolbox for bioremediation.
+MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It provides a framework for implementing reactive-transport models at both laboratory and field scales. The package comprises three modelling components that use PHREEQC to simulate biological and biogeochemical reactions:
+
+- **Batch model**: simulates biogeochemical reactions in well-mixed systems under static conditions, without flow.
+- **Column model**: simulates one-dimensional advective–dispersive transport coupled with biogeochemical reactions.
+- **Field model**: simulates three-dimensional groundwater flow and solute transport using MODFLOW 6, coupled with PHREEQC through [mf6rtm](https://github.com/p-ortega/mf6rtm). It is primarily intended for modelling in situ biological flushing systems based on injection and extraction wells.
+
+MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the [MIBIREM](https://www.mibirem.eu/) bioremediation toolbox.
 
 ## Installation
 
