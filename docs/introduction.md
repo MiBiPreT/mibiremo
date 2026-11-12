@@ -2,8 +2,15 @@
 
 ## General
 
-MiBiReMo (Microbiome Bioremediation Reaction Module) is a Python interface to the PhreeqcRM library. The package is designed to be coupled with transport models to simulate reactive transport in porous media, with applications in environmental and geochemical engineering.
+MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It provides a framework for implementing reactive-transport models at both laboratory and field scales. The package comprises three modelling components that use PHREEQC to simulate biological and biogeochemical reactions:
+
+- **[Batch model](batch_model.md)**: simulates biogeochemical reactions in well-mixed systems under static conditions, without flow.
+- **[Column model](column_model.md)**: simulates one-dimensional advective–dispersive transport coupled with biogeochemical reactions.
+- **[Field model](field_model.md)**: simulates three-dimensional groundwater flow and solute transport using MODFLOW 6, coupled with PHREEQC through [mf6rtm](https://github.com/p-ortega/mf6rtm). It is primarily intended for modelling in situ biological flushing systems based on injection and extraction wells.
+
+MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the [MIBIREM](https://www.mibirem.eu/) bioremediation toolbox.
+
 
 ## MIBIREM
 
-[MIBIREM - Innovative technological toolbox for bioremediation](https://www.mibirem.eu/) is a EU funded consortium project by 12 international partners all over Europe working together to develop an *Innovative technological toolbox for bioremediation*. The project will develop molecular methods for the monitoring, isolation, cultivation and subsequent deposition of whole microbiomes. The toolbox will also include the methodology for the improvement of specific microbiome functions, including evolution and enrichment. The performance of selected microbiomes will be tested under real field conditions. The `mibiremo` package is part of this toolbox.
+[MIBIREM – Innovative Technological Toolbox for Bioremediation](https://www.mibirem.eu/) is an EU-funded research project involving a consortium of 12 partners from across Europe, with the aim of developing an integrated technological toolbox for bioremediation. The project focuses on the development of molecular methods for the monitoring, isolation, cultivation, and subsequent application of microbiomes. It also investigates approaches to enhance specific microbiome functions through processes such as microbial evolution and enrichment. The performance of selected microbiomes is subsequently evaluated under field conditions. The `mibiremo` Python package is one of the technological components developed within this toolbox.

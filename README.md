@@ -5,19 +5,23 @@
 [![workflow pypi badge](https://img.shields.io/pypi/v/mibiremo.svg?colorB=blue)](https://pypi.python.org/project/mibiremo/) 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15180602.svg)](https://doi.org/10.5281/zenodo.15180602)
 [![workflow cii badge](https://bestpractices.coreinfrastructure.org/projects/10401/badge)](https://bestpractices.coreinfrastructure.org/projects/10401) 
-[![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8B-yellow)](https://fair-software.eu) 
+[![fair-software badge](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu) 
 [![workflow scq badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_mibiremo&metric=alert_status)](https://sonarcloud.io/dashboard?id=MiBiPreT_mibiremo) 
 [![workflow scc badge](https://sonarcloud.io/api/project_badges/measure?project=MiBiPreT_mibiremo&metric=coverage)](https://sonarcloud.io/dashboard?id=MiBiPreT_mibiremo)
-<!-- [![Documentation Status](https://readthedocs.org/projects/mibiremobadge/?version=latest)](https://mibiremo.readthedocs.io/en/latest/?badge=latest) -->
 [![build](https://github.com/MiBiPreT/mibiremo/actions/workflows/build.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/build.yml)
 [![cffconvert](https://github.com/MiBiPreT/mibiremo/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/cffconvert.yml)
 [![sonarcloud](https://github.com/MiBiPreT/mibiremo/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/sonarcloud.yml)
-[![link-check](https://github.com/MiBiPreT/mibiremo/actions/workflows/link-check.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/link-check.yml)
-
+[![link-check](https://github.com/MiBiPreT/mibiremo/actions/workflows/markdown-link-check.yml/badge.svg)](https://github.com/MiBiPreT/mibiremo/actions/workflows/markdown-link-check.yml)
 
 # `mibiremo`
 
-MiBiReMo (Microbiome Bioremediation Reaction Module) is a Python interface to the PhreeqcRM library. The package is designed to be coupled with transport models to simulate reactive transport in porous media, with applications in environmental and geochemical engineering. Developed as part of the [MIBIREM](https://www.mibirem.eu/) toolbox for Bioremediation.
+MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It provides a framework for implementing reactive-transport models at both laboratory and field scales. The package comprises three modelling components that use PHREEQC to simulate biological and biogeochemical reactions:
+
+- **Batch model**: simulates biogeochemical reactions in well-mixed systems under static conditions, without flow.
+- **Column model**: simulates one-dimensional advective–dispersive transport coupled with biogeochemical reactions.
+- **Field model**: simulates three-dimensional groundwater flow and solute transport using MODFLOW 6, coupled with PHREEQC through [mf6rtm](https://github.com/p-ortega/mf6rtm). It is primarily intended for modelling in situ biological flushing systems based on injection and extraction wells.
+
+MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the [MIBIREM](https://www.mibirem.eu/) bioremediation toolbox.
 
 ## Installation
 
@@ -40,6 +44,14 @@ python -m pip install .
 ```
 
 Note that this is the (possibly unstable) development version from the `main` branch. If you want a stable release, use the PyPI installation method instead.
+
+### MODFLOW 6
+
+Field-scale simulations require the MODFLOW 6 executable and shared library. After installing mibiremo, install them into the active Python environment with:
+
+```console
+get-modflow :python --subset mf6,libmf6
+```
 
 ## Examples
 Examples are available in the [`examples`](examples/) directory. 
