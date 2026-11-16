@@ -11,17 +11,11 @@ Interactive Jupyter notebooks are also available in the `examples` folder, and c
 
 The field model examples and `validation_field_vs_mibitrans.py` need MODFLOW 6 and its shared library (`get-modflow :python --subset mf6,libmf6`).
 
-## Field model
-These examples use `FieldModel`. See [Field model](field_model.md) for the conventions of the model.
+## Batch model
+This example uses `BatchModel`. See [Batch model](batch_model.md) for the conventions of the model.
 
-### Tracer test
-The example `field_tracer_test.py` builds a MODFLOW 6 model of an in situ biological flushing installation with `FieldModel`: one extraction well and four injection wells around it in a confined aquifer with groundwater flow. A tracer is injected during the first day. The example shows the hydraulic head and drawdown, the tracer plume, and the breakthrough and recovery at the extraction well.
-
-### Injection-extraction distance
-The example `field_injection_extraction_distance.py` repeats the tracer test of `field_tracer_test.py` with the injection wells at 4 m, 6 m, and 10 m from the extraction well, and compares the breakthrough curves and the tracer mass recovery at the extraction well.
-
-### Layered aquifer
-The example `field_layered_model.py` repeats the tracer test of `field_tracer_test.py` in a layered aquifer made of three hydrostratigraphic units, with a sloping top and a general-head boundary, and compares it with a homogeneous single-layer aquifer of the same transmissivity. The example shows the hydrostratigraphic units and the tracer in cross sections, and the breakthrough at the extraction well and at a monitoring well with two sampling levels.
+### Aerobic biodegradation in mesocosms
+The example `batch_first_order_decay.py` simulates an aerated soil mesocosm with `BatchModel`: residual petroleum hydrocarbons (TPH) degraded aerobically with a first-order rate limited by the dissolved O₂ (Monod term), with the pore water kept in equilibrium with air. The example shows the TPH content in time, compared with the analytical solution of the first-order model, c0 exp(-k F t).
 
 ## Column model
 These examples use `ColumnModel`. See [Column model](column_model.md) for the conventions of the model.
@@ -49,11 +43,17 @@ Benzene, being more soluble, is depleted from the NAPL first and reaches the col
 
 ![Geller and Hunt (1993) results](img/Geller_Hunt_1993.png)
 
-## Batch model
-This example uses `BatchModel`. See [Batch model](batch_model.md) for the conventions of the model.
+## Field model
+These examples use `FieldModel`. See [Field model](field_model.md) for the conventions of the model.
 
-### Aerobic biodegradation in mesocosms
-The example `batch_first_order_decay.py` simulates an aerated soil mesocosm with `BatchModel`: residual petroleum hydrocarbons (TPH) degraded aerobically with a first-order rate limited by the dissolved O₂ (Monod term), with the pore water kept in equilibrium with air. The example shows the TPH content in time, compared with the analytical solution of the first-order model, c0 exp(-k F t).
+### Tracer test
+The example `field_tracer_test.py` builds a MODFLOW 6 model of an in situ biological flushing installation with `FieldModel`: one extraction well and four injection wells around it in a confined aquifer with groundwater flow. A tracer is injected during the first day. The example shows the hydraulic head and drawdown, the tracer plume, and the breakthrough and recovery at the extraction well.
+
+### Injection-extraction distance
+The example `field_injection_extraction_distance.py` repeats the tracer test of `field_tracer_test.py` with the injection wells at 4 m, 6 m, and 10 m from the extraction well, and compares the breakthrough curves and the tracer mass recovery at the extraction well.
+
+### Layered aquifer
+The example `field_layered_model.py` repeats the tracer test of `field_tracer_test.py` in a layered aquifer made of three hydrostratigraphic units, with a sloping top and a general-head boundary, and compares it with a homogeneous single-layer aquifer of the same transmissivity. The example shows the hydrostratigraphic units and the tracer in cross sections, and the breakthrough at the extraction well and at a monitoring well with two sampling levels.
 
 ## Numerical validation
 These examples compare the models with the exact analytical solution of [mibitrans](https://github.com/MiBiPreT/mibitrans) (Wexler, 1992) [[2]](#2), for a conservative tracer and for a solute with first-order decay (a PHREEQC KINETICS reactant).
