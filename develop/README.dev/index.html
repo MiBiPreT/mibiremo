@@ -12,13 +12,13 @@
         <meta name="author" content="Matteo Masi, Jaro Camphuijsen, Robin Richardson">
       
       
-        <link rel="canonical" href="https://MiBiPreT.github.io/mibiremo/develop/code_of_conduct/">
+        <link rel="canonical" href="https://MiBiPreT.github.io/mibiremo/develop/README.dev/">
       
       
-        <link rel="prev" href="../development/">
+        <link rel="prev" href="../CONTRIBUTING/">
       
       
-        <link rel="next" href="../reference/">
+        <link rel="next" href="../CODE_OF_CONDUCT/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Code of Conduct - mibiremo</title>
+        <title>Development - mibiremo</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#contributor-covenant-code-of-conduct" class="md-skip">
+        <a href="#mibiremo-developer-documentation" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Code of Conduct
+              Development
             
           </span>
         </div>
@@ -309,7 +309,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../contributing/" class="md-tabs__link">
+        <a href="../CONTRIBUTING/" class="md-tabs__link">
           
   
   
@@ -1364,7 +1364,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../contributing/" class="md-nav__link">
+      <a href="../CONTRIBUTING/" class="md-nav__link">
         
   
   
@@ -1372,34 +1372,6 @@
     
   
     Contributing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../development/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Development
   
 
     
@@ -1436,7 +1408,7 @@
   <span class="md-ellipsis">
     
   
-    Code of Conduct
+    Development
   
 
     
@@ -1454,7 +1426,7 @@
   <span class="md-ellipsis">
     
   
-    Code of Conduct
+    Development
   
 
     
@@ -1480,10 +1452,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#our-pledge" class="md-nav__link">
+  <a href="#development-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Pledge
+        Development install
       
     </span>
   </a>
@@ -1491,10 +1463,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-standards" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Standards
+        Quick Start
       
     </span>
   </a>
@@ -1502,10 +1474,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-responsibilities" class="md-nav__link">
+  <a href="#running-the-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Responsibilities
+        Running the tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-linters-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running linters locally
       
     </span>
   </a>
@@ -1513,10 +1513,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scope" class="md-nav__link">
+  <a href="#testing-docs-locally" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Scope
+        Testing docs locally
       
     </span>
   </a>
@@ -1524,10 +1524,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enforcement" class="md-nav__link">
+  <a href="#versioning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enforcement
+        Versioning
       
     </span>
   </a>
@@ -1535,10 +1535,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#attribution" class="md-nav__link">
+  <a href="#making-a-release" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Attribution
+        Making a release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-a-new-sonar_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting a new SONAR_TOKEN
       
     </span>
   </a>
@@ -1549,6 +1560,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CODE_OF_CONDUCT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of Conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1615,10 +1654,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#our-pledge" class="md-nav__link">
+  <a href="#development-install" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Pledge
+        Development install
       
     </span>
   </a>
@@ -1626,10 +1665,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-standards" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Standards
+        Quick Start
       
     </span>
   </a>
@@ -1637,10 +1676,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#our-responsibilities" class="md-nav__link">
+  <a href="#running-the-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Our Responsibilities
+        Running the tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-linters-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running linters locally
       
     </span>
   </a>
@@ -1648,10 +1715,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#scope" class="md-nav__link">
+  <a href="#testing-docs-locally" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Scope
+        Testing docs locally
       
     </span>
   </a>
@@ -1659,10 +1726,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enforcement" class="md-nav__link">
+  <a href="#versioning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enforcement
+        Versioning
       
     </span>
   </a>
@@ -1670,10 +1737,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#attribution" class="md-nav__link">
+  <a href="#making-a-release" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Attribution
+        Making a release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-a-new-sonar_token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting a new SONAR_TOKEN
       
     </span>
   </a>
@@ -1706,64 +1784,100 @@
   
 
 
-<h1 id="contributor-covenant-code-of-conduct">Contributor Covenant Code of Conduct</h1>
-<h2 id="our-pledge">Our Pledge</h2>
-<p>In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to making participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, gender identity and expression, level of experience,
-education, socio-economic status, nationality, personal appearance, race,
-religion, or sexual identity and orientation.</p>
-<h2 id="our-standards">Our Standards</h2>
-<p>Examples of behavior that contributes to creating a positive environment
-include:</p>
-<ul>
-<li>Using welcoming and inclusive language</li>
-<li>Being respectful of differing viewpoints and experiences</li>
-<li>Gracefully accepting constructive criticism</li>
-<li>Focusing on what is best for the community</li>
-<li>Showing empathy towards other community members</li>
-</ul>
-<p>Examples of unacceptable behavior by participants include:</p>
-<ul>
-<li>The use of sexualized language or imagery and unwelcome sexual attention or
-  advances</li>
-<li>Trolling, insulting/derogatory comments, and personal or political attacks</li>
-<li>Public or private harassment</li>
-<li>Publishing others&rsquo; private information, such as a physical or electronic
-  address, without explicit permission</li>
-<li>Other conduct which could reasonably be considered inappropriate in a
-  professional setting</li>
-</ul>
-<h2 id="our-responsibilities">Our Responsibilities</h2>
-<p>Project maintainers are responsible for clarifying the standards of acceptable
-behavior and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.</p>
-<p>Project maintainers have the right and responsibility to remove, edit, or
-reject comments, commits, code, wiki edits, issues, and other contributions
-that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviors that they deem inappropriate,
-threatening, offensive, or harmful.</p>
-<h2 id="scope">Scope</h2>
-<p>This Code of Conduct applies both within project spaces and in public spaces
-when an individual is representing the project or its community. Examples of
-representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an appointed
-representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers.</p>
-<h2 id="enforcement">Enforcement</h2>
-<p>Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at a.zech@uu.nl. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.</p>
-<p>Project maintainers who do not follow or enforce the Code of Conduct in good
-faith may face temporary or permanent repercussions as determined by other
-members of the project&rsquo;s leadership.</p>
-<h2 id="attribution">Attribution</h2>
-<p>This Code of Conduct is adapted from the <a href="https://www.contributor-covenant.org">Contributor Covenant</a>, version 1.4,
-available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html</p>
+<h1 id="mibiremo-developer-documentation"><code>mibiremo</code> developer documentation</h1>
+<h2 id="development-install">Development install</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Create a virtual environment, e.g. with</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>env
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># activate virtual environment</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nb">source</span><span class="w"> </span>env/bin/activate
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># make sure to have a recent version of pip and setuptools</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip<span class="w"> </span>setuptools
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># (from the project root directory)</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># install mibiremo as an editable package</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>--editable<span class="w"> </span>.
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># install development dependencies</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>--editable<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># install documentation dependencies only</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>--editable<span class="w"> </span>.<span class="o">[</span>doc<span class="o">]</span>
+</code></pre></div>
+<p>Afterwards check that the install directory is present in the <code>PATH</code> environment variable.</p>
+<h2 id="quick-start">Quick Start</h2>
+<p>For a quick overview of available development commands, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>make<span class="w"> </span><span class="nb">help</span>
+</code></pre></div>
+<p>This will show shortcuts to common development tasks like testing, linting, and building documentation.</p>
+<h2 id="running-the-tests">Running the tests</h2>
+<p>There are two ways to run tests.</p>
+<p>The first way requires an activated virtual environment with the development tools installed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pytest<span class="w"> </span>-v
+</code></pre></div>
+<p>The second is to use <code>tox</code>, which can be installed separately (e.g. with <code>pip install tox</code>), i.e. not necessarily inside the virtual environment you use for installing <code>mibiremo</code>, but then builds the necessary virtual environments itself by simply running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>tox
+</code></pre></div>
+<p>Testing with <code>tox</code> allows for keeping the testing environment separate from your development environment.
+The development environment will typically accumulate (old) packages during development that interfere with testing; this problem is avoided by testing with <code>tox</code>.</p>
+<h3 id="test-coverage">Test coverage</h3>
+<p>In addition to just running the tests to see if they pass, they can be used for coverage statistics, i.e. to determine how much of the package&rsquo;s code is actually executed during tests.
+In an activated virtual environment with the development tools installed, inside the package directory, run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>coverage<span class="w"> </span>run
+</code></pre></div>
+<p>This runs tests and stores the result in a <code>.coverage</code> file.
+To see the results on the command line, run</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>coverage<span class="w"> </span>report
+</code></pre></div>
+<p><code>coverage</code> can also generate output in HTML and other formats; see <code>coverage help</code> for more information.</p>
+<h2 id="running-linters-locally">Running linters locally</h2>
+<p>For linting and sorting imports we will use <a href="https://beta.ruff.rs/docs/">ruff</a>. Running the linters requires an
+activated virtual environment with the development tools installed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># linter</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ruff<span class="w"> </span>check<span class="w"> </span>.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># linter with automatic fixing</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span>--fix
+</code></pre></div>
+<p>To fix readability of your code style you can use <a href="https://github.com/google/yapf">yapf</a>.</p>
+<h2 id="testing-docs-locally">Testing docs locally</h2>
+<p>To build the documentation locally, first make sure <code>mkdocs</code> and its dependencies are installed:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>doc<span class="o">]</span>
+</code></pre></div></p>
+<p>Then you can build the documentation and serve it locally with
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mkdocs<span class="w"> </span>serve
+</code></pre></div></p>
+<p>This will return a URL (e.g. <code>http://127.0.0.1:8000/mibiremo/</code>) where the docs site can be viewed.</p>
+<p>Note that this will only create the &ldquo;non-versioned&rdquo; documentation, which should be fine for testing changes to the docs.
+The versioned documentation is created using the python utility called <a href="https://github.com/jimporter/mike?tab=readme-ov-file#mike">mike</a> and its corresponding <a href="https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/">mkdocs integration</a>.
+In general it should not be necessary to test this, but if necessary, use <a href="https://github.com/jimporter/mike?tab=readme-ov-file#viewing-your-docs">the mike documentation</a> to inspect locally.</p>
+<h2 id="versioning">Versioning</h2>
+<p>Bumping the version across all files is done with <a href="https://github.com/callowayproject/bump-my-version">bump-my-version</a>, e.g.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>bump-my-version<span class="w"> </span>bump<span class="w"> </span>major<span class="w">  </span><span class="c1"># bumps from e.g. 0.3.2 to 1.0.0</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>bump-my-version<span class="w"> </span>bump<span class="w"> </span>minor<span class="w">  </span><span class="c1"># bumps from e.g. 0.3.2 to 0.4.0</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>bump-my-version<span class="w"> </span>bump<span class="w"> </span>patch<span class="w">  </span><span class="c1"># bumps from e.g. 0.3.2 to 0.3.3</span>
+</code></pre></div>
+<h2 id="making-a-release">Making a release</h2>
+<p>Before you make a new release:</p>
+<ol>
+<li>Verify that the information in <code>CITATION.cff</code> is correct.</li>
+<li>Make sure the <a href="#versioning">version has been updated</a>.</li>
+<li>Run the unit tests with <code>pytest -v</code></li>
+</ol>
+<p>Now, make a <a href="https://github.com/MiBiPret/mibiremo/releases/new">release on GitHub</a>. The <code>publish.yml</code> workflow will publish the software on PyPI. GitHub-Zenodo integration will also trigger Zenodo into making a snapshot of your repository and sticking a DOI on it.</p>
+<h2 id="getting-a-new-sonar_token">Getting a new <code>SONAR_TOKEN</code></h2>
+<p>If the Sonar pipeline does not run for 60 days, the <code>SONAR_TOKEN</code> expires.
+You can see the original announcement <a href="https://community.sonarsource.com/t/removing-inactive-tokens-after-60-days/142451/6">in this thread</a>.</p>
+<p>The expiry happens silently, so any github action workflows using Sonar will appear to suddenly fail with cryptic errors such as <code>"ERROR Failed to query JRE metadata: . Please check the property sonar.token or the environment variable SONAR_TOKEN. "</code>. If you see this, it means you need to recreate the <code>SONAR_TOKEN</code> for this repository. You will need some admin privileges to carry out the following steps:</p>
+<ol>
+<li>Go to &lsquo;My Account&rsquo; on the sonarcloud.io site after logging in (or try following this URL: <a href="https://sonarcloud.io/account">https://sonarcloud.io/account</a>)</li>
+<li>Click on the &lsquo;Security&rsquo; tab (<a href="https://sonarcloud.io/account/security">https://sonarcloud.io/account/security</a>)</li>
+<li>Enter a token name in the field under &ldquo;Generate Tokens&rdquo; and click &ldquo;Generate Token&rdquo;</li>
+<li>Copy the text for the generated token (you will not be able to see this text again)</li>
+<li>Go to the &ldquo;Actions secrets and variables&rdquo; section of the <code>mibiremo</code> repository on GitHub (<a href="https://github.com/MiBiPreT/mibiremo/settings/secrets/actions">https://github.com/MiBiPreT/mibiremo/settings/secrets/actions</a>)</li>
+<li>Edit the existing <code>SONAR_TOKEN</code> (or create it, if it does not exist). Paste in the token text you copied from sonarcloud earlier</li>
+<li>Click &ldquo;Update Secret&rdquo;</li>
+</ol>
+<p>This should result in the newly created <code>SONAR_TOKEN</code> being used in any new github workflow runs. You may also choose to rerun some previously failed workflows (these should now succeed).</p>
 
 
 
