@@ -34,7 +34,7 @@ get-modflow :python --subset mf6,libmf6
 
 ## Contributing
 
-If you want to contribute to the development of mibiremo, have a look at the [development](development.md) page.
+If you want to contribute to the development of mibiremo, have a look at the [development](README.dev.md) page.
 
 ## Credits
 
