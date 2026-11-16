@@ -31,9 +31,9 @@ nav:
         - Column model vs mibitrans: notebooks/validation_column_vs_mibitrans.ipynb
         - Field model vs mibitrans: notebooks/validation_field_vs_mibitrans.ipynb
   - Contributing: 
-    - Contributing: contributing.md
-    - Development: development.md
-    - Code of Conduct: code_of_conduct.md
+    - Contributing: CONTRIBUTING.md
+    - Development: README.dev.md
+    - Code of Conduct: CODE_OF_CONDUCT.md
   - API Reference: reference.md
 
 theme:
