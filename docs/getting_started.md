@@ -1,6 +1,6 @@
-# Documentation for `mibiremo` python package
+# Getting started
 
-MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the [MIBIREM](https://www.mibirem.eu/) bioremediation toolbox. See the [introduction](introduction.md) for an overview.
+MiBiReMo (Microbiome Bioremediation Reactive-transport Module) is an open-source Python package for the simulation and design of soil and groundwater bioremediation systems. It is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, developed within the [MIBIREM](https://www.mibirem.eu/) bioremediation toolbox. See the [introduction](index.md) for an overview.
 
 ## Installation
 
@@ -31,13 +31,6 @@ Field-scale simulations require the MODFLOW 6 executable and shared library. Aft
 ```console
 get-modflow :python --subset mf6,libmf6
 ```
-
-## Documentation
-
-- [Introduction](introduction.md): overview of the package and of the MIBIREM project.
-- [Batch model](batch_model.md), [Column model](column_model.md), and [Field model](field_model.md): model description, workflow, and conventions.
-- [Examples](examples.md): description of the examples, which are also available as tutorial notebooks.
-- [API reference](reference.md): classes and functions of the package.
 
 ## Contributing
 
