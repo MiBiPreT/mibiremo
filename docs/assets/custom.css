@@ -2,3 +2,17 @@
 code.highlight {
     font-size: 18px;
 }
+
+figure > p {
+    margin-bottom: 0em !important;
+}
+
+figcaption > p {
+    margin-top: 0em !important;
+}
+
+figure > figcaption {
+    font-size: 12px !important;
+    margin: 0em !important;
+    max-width: none !important;
+}

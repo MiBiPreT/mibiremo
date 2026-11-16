@@ -8,9 +8,9 @@ edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2026, MIBIREM Project
 
 nav:
-  - Getting started:
-    - Getting started: index.md
-    - Introduction: introduction.md
+  - Introduction:
+    - Introduction: index.md
+    - Getting started: getting_started.md
   - Models:
     - Batch model: batch_model.md
     - Column model: column_model.md
@@ -30,7 +30,10 @@ nav:
       - Numerical validation:
         - Column model vs mibitrans: notebooks/validation_column_vs_mibitrans.ipynb
         - Field model vs mibitrans: notebooks/validation_field_vs_mibitrans.ipynb
-  - Development: development.md
+  - Contributing: 
+    - Contributing: contributing.md
+    - Development: development.md
+    - Code of Conduct: code_of_conduct.md
   - API Reference: reference.md
 
 theme:
@@ -97,6 +100,7 @@ plugins:
 # Styled blocks: https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
 markdown_extensions:
   - admonition
+  - pymdownx.blocks.caption
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
