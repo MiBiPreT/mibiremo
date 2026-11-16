@@ -25,7 +25,7 @@ Dissolved concentrations of benzene and ethylbenzene in a column model over a si
 - [Introduction](index.md): overview of the package and of the MIBIREM project and getting started.
 - [Models](batch_model.md): model description, workflow, and conventions.
 - [How to](examples.md): description of the examples, which are also available as tutorial notebooks.
-- [Contributing](contributing.md): description of the examples, which are also available as tutorial notebooks.
+- [Contributing](CONTRIBUTING.md): description of the examples, which are also available as tutorial notebooks.
 - [API reference](reference.md): classes and functions of the package.
 
 ## MIBIREM
