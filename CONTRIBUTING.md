@@ -45,7 +45,7 @@ In case you feel like you've made a valuable contribution, but you don't know ho
 
 To create a release you need write permission on the repository.
 
-1. Check the author list in [`CITATION.cff`](CITATION.cff)
+1. Check the author list in [`CITATION.cff`](https://github.com/MiBiPreT/mibiremo/blob/main/CITATION.cff)
 1. Bump the version using `bump-my-version bump <major|minor|patch>`. For example, `bump-my-version bump major` will increase major version numbers everywhere it's needed (code, meta, etc.) in the repo. Alternatively the version can be manually changed in mibiremo/__init__.py, pyproject.toml, CITATION.cffand docs/conf.py (and other places it was possibly added).
 
 1. Go to the [GitHub release page](https://github.com/MiBiPret/mibiremo/releases)
