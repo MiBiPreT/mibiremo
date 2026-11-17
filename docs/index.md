@@ -37,7 +37,7 @@ Tracer concentration at three different time points in a field model of a biolog
 - [Models](batch_model.md): model description, workflow, and conventions.
 - [How to](examples.md): description of the examples, which are also available as tutorial notebooks.
 - [Contributing](CONTRIBUTING.md): description of the examples, which are also available as tutorial notebooks.
-- [API reference](reference.md): classes and functions of the package.
+- [API reference](reference/models.md): classes and functions of the package.
 
 ## MIBIREM project
 

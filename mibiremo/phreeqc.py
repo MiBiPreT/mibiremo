@@ -70,7 +70,7 @@ class PhreeqcRM:
         species (numpy.ndarray): Array of aqueous species names in the system.
 
     Examples:
-        See page [Examples](examples.md) for usage examples.
+        See page [Examples](../examples.md) for usage examples.
     """
 
     def __init__(self):

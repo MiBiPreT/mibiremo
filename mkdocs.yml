@@ -34,7 +34,12 @@ nav:
     - Contributing: CONTRIBUTING.md
     - Development: README.dev.md
     - Code of Conduct: CODE_OF_CONDUCT.md
-  - API Reference: reference.md
+  - API Reference:
+    - Models: reference/models.md
+    - Wells: reference/wells.md
+    - PHREEQC: reference/phreeqc.md
+    - Plotting: reference/plotting.md
+    - Transport solver: reference/transport_solver.md
 
 theme:
   name: "material"
@@ -82,15 +87,19 @@ plugins:
       handlers:
         python:
           options:
-            show_submodules: true
-            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            members_order: source
+            merge_init_into_class: true
+            separate_signature: true
+            show_source: false
             show_docstring_description: true
             docstring_style: google
             docstring_section_style: table
             docstring_options:
               returns_multiple_items: false
             filters:
-              - "!^RM_"
+              - "!^_"
   - mkdocs-jupyter:
       execute: false
       ignore: ["*.md"]  # Markdown pages are not notebooks; parsing them with pandoc warns about "::: mibiremo"

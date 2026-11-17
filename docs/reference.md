@@ -1,3 +1,0 @@
-# `mibiremo` API reference
-
-::: mibiremo
