@@ -328,17 +328,20 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../reference/" class="md-tabs__link">
-        
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/models/" class="md-tabs__link">
+          
   
   
     
   
   API Reference
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -1556,9 +1559,37 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../reference/" class="md-nav__link">
+    
+    
+      
         
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1572,7 +1603,163 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Models
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/wells/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wells
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/phreeqc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PHREEQC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/plotting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plotting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/transport_solver/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transport solver
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1727,21 +1914,32 @@ Advection and dispersion of all aqueous components are simulated using the semi-
   mol kgw⁻¹, and the KINETICS amounts <code>m0</code> in moles per litre of water, as in the field model. The EQUILIBRIUM_PHASES
   amounts are also in moles per litre of water.</li>
 <li><strong>Time-dependent inputs</strong>: the flow rate, the influent solution, and the time step are constants or lists
-  <code>[(t, value), ...]</code> starting at t = 0, each value holding until the next t. Stress periods start at every change
+  <code>[(t, value), ...]</code> starting at <span class="arithmatex">\(t = 0\)</span>, each value holding until the next <span class="arithmatex">\(t\)</span>. Stress periods start at every change
   time (<code>model.stress_periods</code>). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.</li>
-<li><strong>Grid</strong>: the column is divided into <code>n_cells</code> cells of length Δx = L / <code>n_cells</code>. The concentration of each cell
-  is computed at its downstream end, <code>model.x</code> = Δx, 2 Δx, &hellip;, L, so the last cell gives the effluent. A cell range,
-  e.g. <code>model.x &lt;= 0.1</code> for the first 10 cm, sets <code>initial_solution</code> or <code>initial_kinetics</code> per cell.</li>
+<li><strong>Grid</strong>: the column is divided into <code>n_cells</code> cells of length <span class="arithmatex">\(\Delta x = L / n_\text{cells}\)</span>. The concentration of
+  each cell is computed at its downstream end, <span class="arithmatex">\(x_i = i \Delta x\)</span> with <span class="arithmatex">\(i = 1, \dots, n_\text{cells}\)</span> (<code>model.x</code>), so
+  the last cell, <span class="arithmatex">\(x = L\)</span>, gives the effluent. A cell range, e.g. <code>model.x &lt;= 0.1</code> for the first 10 cm, sets <code>initial_solution</code> or <code>initial_kinetics</code> per
+  cell.</li>
 </ul>
 <h2 id="model">Model</h2>
+<p>Flow is one-dimensional, with the average linear velocity <span class="arithmatex">\(v\)</span> [m s⁻¹] and the longitudinal dispersion coefficient
+<span class="arithmatex">\(D_L\)</span> [m² s⁻¹]:</p>
+<div class="arithmatex">\[
+v = \frac{Q}{n A}, \qquad A = \frac{\pi d^2}{4}, \qquad D_L = \alpha_L v + D^*
+\]</div>
+<p>where <span class="arithmatex">\(Q\)</span> is the flow rate, <span class="arithmatex">\(n\)</span> the porosity, <span class="arithmatex">\(d\)</span> the column diameter, <span class="arithmatex">\(\alpha_L\)</span> the longitudinal dispersivity, and
+<span class="arithmatex">\(D^*\)</span> the effective molecular diffusion coefficient. Each aqueous component <span class="arithmatex">\(C\)</span> is transported according to the
+advection–dispersion equation</p>
+<div class="arithmatex">\[
+\frac{\partial C}{\partial t} + v \frac{\partial C}{\partial x} = D_L \frac{\partial^2 C}{\partial x^2},
+\qquad C(0, t) = C_\text{in}(t), \qquad \left. \frac{\partial C}{\partial x} \right|_{x = L} = 0
+\]</div>
 <ul>
-<li>One-dimensional flow with the average linear velocity v = Q / (n A), A = π d² / 4, and the longitudinal dispersion
-  coefficient D = α_L v + D*.</li>
-<li>The influent enters at x = 0 with a fixed concentration (first-type boundary); the outlet has a zero concentration
-  gradient.</li>
+<li>The influent enters at <span class="arithmatex">\(x = 0\)</span> with a fixed concentration <span class="arithmatex">\(C_\text{in}\)</span> (first-type boundary); the outlet has a zero
+  concentration gradient.</li>
 <li>Transport: advection along the characteristics with monotone cubic interpolation, then dispersion with the Saul&rsquo;yev
-  alternating-direction scheme; both are stable for any time step, the accuracy needs Courant numbers v Δt / Δx of
-  about 1 or less.</li>
+  alternating-direction scheme; both are stable for any time step, the accuracy needs Courant numbers
+  <span class="arithmatex">\(v \Delta t / \Delta x\)</span> of about 1 or less.</li>
 <li>Every component of the solutions is transported, including H, O, and the charge balance; immobile reactants must be
   KINETICS reactants.</li>
 <li><code>model.phreeqc</code> is the <code>mibiremo.PhreeqcRM</code> object after <code>run</code>, and <code>model.components</code> the transported components.
@@ -1750,7 +1948,7 @@ Advection and dispersion of all aqueous components are simulated using the semi-
 <h2 id="results">Results</h2>
 <ul>
 <li><code>effluent(component)</code>: concentration of the last cell at every time step, with the time and the pore volumes
-  flushed V / V_p, where V_p = n A L (<code>model.pore_volume</code>).</li>
+  flushed <span class="arithmatex">\(V / V_p\)</span>, where <span class="arithmatex">\(V_p = n A L\)</span> (<code>model.pore_volume</code>).</li>
 <li><code>concentration(component, time)</code>: concentration profile at the end of the time step containing <code>time</code>.</li>
 <li><code>kinetic_reactant(reactant)</code>: amount of a KINETICS reactant, e.g. an immobile contaminant, in every cell at every
   time step (DataFrame: index time [s], one column per cell), in moles per litre of water as <code>m0</code>.</li>

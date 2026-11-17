@@ -37,10 +37,6 @@
          <lastmod>2026-11-17</lastmod>
     </url>
     <url>
-         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/</loc>
-         <lastmod>2026-11-17</lastmod>
-    </url>
-    <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/notebooks/batch_first_order_decay/</loc>
          <lastmod>2026-11-17</lastmod>
     </url>
@@ -70,6 +66,26 @@
     </url>
     <url>
          <loc>https://MiBiPreT.github.io/mibiremo/develop/notebooks/validation_field_vs_mibitrans/</loc>
+         <lastmod>2026-11-17</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/models/</loc>
+         <lastmod>2026-11-17</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/phreeqc/</loc>
+         <lastmod>2026-11-17</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/plotting/</loc>
+         <lastmod>2026-11-17</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/transport_solver/</loc>
+         <lastmod>2026-11-17</lastmod>
+    </url>
+    <url>
+         <loc>https://MiBiPreT.github.io/mibiremo/develop/reference/wells/</loc>
          <lastmod>2026-11-17</lastmod>
     </url>
 </urlset>
