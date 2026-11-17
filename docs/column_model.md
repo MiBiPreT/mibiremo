@@ -48,21 +48,36 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
   mol kgw⁻¹, and the KINETICS amounts `m0` in moles per litre of water, as in the field model. The EQUILIBRIUM_PHASES
   amounts are also in moles per litre of water.
 - **Time-dependent inputs**: the flow rate, the influent solution, and the time step are constants or lists
-  `[(t, value), ...]` starting at t = 0, each value holding until the next t. Stress periods start at every change
+  `[(t, value), ...]` starting at $t = 0$, each value holding until the next $t$. Stress periods start at every change
   time (`model.stress_periods`). A flow rate of 0 stops the flow (stop-flow tests); diffusion continues.
-- **Grid**: the column is divided into `n_cells` cells of length Δx = L / `n_cells`. The concentration of each cell
-  is computed at its downstream end, `model.x` = Δx, 2 Δx, ..., L, so the last cell gives the effluent. A cell range,
-  e.g. `model.x <= 0.1` for the first 10 cm, sets `initial_solution` or `initial_kinetics` per cell.
+- **Grid**: the column is divided into `n_cells` cells of length $\Delta x = L / n_\text{cells}$. The concentration of
+  each cell is computed at its downstream end, $x_i = i \Delta x$ with $i = 1, \dots, n_\text{cells}$ (`model.x`), so
+  the last cell, $x = L$, gives the effluent. A cell range, e.g. `model.x <= 0.1` for the first 10 cm, sets `initial_solution` or `initial_kinetics` per
+  cell.
 
 ## Model
 
-- One-dimensional flow with the average linear velocity v = Q / (n A), A = π d² / 4, and the longitudinal dispersion
-  coefficient D = α_L v + D*.
-- The influent enters at x = 0 with a fixed concentration (first-type boundary); the outlet has a zero concentration
-  gradient.
+Flow is one-dimensional, with the average linear velocity $v$ [m s⁻¹] and the longitudinal dispersion coefficient
+$D_L$ [m² s⁻¹]:
+
+$$
+v = \frac{Q}{n A}, \qquad A = \frac{\pi d^2}{4}, \qquad D_L = \alpha_L v + D^*
+$$
+
+where $Q$ is the flow rate, $n$ the porosity, $d$ the column diameter, $\alpha_L$ the longitudinal dispersivity, and
+$D^*$ the effective molecular diffusion coefficient. Each aqueous component $C$ is transported according to the
+advection–dispersion equation
+
+$$
+\frac{\partial C}{\partial t} + v \frac{\partial C}{\partial x} = D_L \frac{\partial^2 C}{\partial x^2},
+\qquad C(0, t) = C_\text{in}(t), \qquad \left. \frac{\partial C}{\partial x} \right|_{x = L} = 0
+$$
+
+- The influent enters at $x = 0$ with a fixed concentration $C_\text{in}$ (first-type boundary); the outlet has a zero
+  concentration gradient.
 - Transport: advection along the characteristics with monotone cubic interpolation, then dispersion with the Saul'yev
-  alternating-direction scheme; both are stable for any time step, the accuracy needs Courant numbers v Δt / Δx of
-  about 1 or less.
+  alternating-direction scheme; both are stable for any time step, the accuracy needs Courant numbers
+  $v \Delta t / \Delta x$ of about 1 or less.
 - Every component of the solutions is transported, including H, O, and the charge balance; immobile reactants must be
   KINETICS reactants.
 - `model.phreeqc` is the `mibiremo.PhreeqcRM` object after `run`, and `model.components` the transported components.
@@ -71,7 +86,7 @@ profile = model.concentration("Tr", 2 * hour)      # array, one value per cell a
 ## Results
 
 - `effluent(component)`: concentration of the last cell at every time step, with the time and the pore volumes
-  flushed V / V_p, where V_p = n A L (`model.pore_volume`).
+  flushed $V / V_p$, where $V_p = n A L$ (`model.pore_volume`).
 - `concentration(component, time)`: concentration profile at the end of the time step containing `time`.
 - `kinetic_reactant(reactant)`: amount of a KINETICS reactant, e.g. an immobile contaminant, in every cell at every
   time step (DataFrame: index time [s], one column per cell), in moles per litre of water as `m0`.
