@@ -15,7 +15,7 @@ The field model examples and `validation_field_vs_mibitrans.py` need MODFLOW 6 a
 This example uses `BatchModel`. See [Batch model](batch_model.md) for the conventions of the model.
 
 ### Aerobic biodegradation in mesocosms
-The example `batch_first_order_decay.py` simulates an aerated soil mesocosm with `BatchModel`: residual petroleum hydrocarbons (TPH) degraded aerobically with a first-order rate limited by the dissolved O₂ (Monod term), with the pore water kept in equilibrium with air. The example shows the TPH content in time, compared with the analytical solution of the first-order model, c0 exp(-k F t).
+The example `batch_first_order_decay.py` simulates an aerated soil mesocosm with `BatchModel`: residual petroleum hydrocarbons (TPH) degraded aerobically with a first-order rate limited by the dissolved O₂ (Monod term), with the pore water kept in equilibrium with air. The example shows the TPH content in time, compared with the analytical solution of the first-order model, $c(t) = c_0 \cdot \exp(-k F t)$.
 
 ## Column model
 These examples use `ColumnModel`. See [Column model](column_model.md) for the conventions of the model.
