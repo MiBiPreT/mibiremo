@@ -681,6 +681,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1813,6 +1824,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1922,10 +1944,19 @@ tracer, and reactive transport with PHREEQC through <a href="https://github.com/
 built with <a href="https://github.com/modflowpy/flopy">flopy</a>, and the flopy simulation is always available as
 <code>model.simulation</code>. The inputs follow the conventions of the <a href="../column_model/">column</a> and <a href="../batch_model/">batch</a>
 models, so the same PHREEQC solutions and kinetics can be used in all three.</p>
-<p>Examples: <a href="../notebooks/field_tracer_test/">tracer test</a>,
-<a href="../notebooks/field_injection_extraction_distance/">tracer test with three well layouts</a>,
-<a href="../notebooks/field_layered_model/">tracer test in a layered aquifer</a>, and
-<a href="../notebooks/validation_field_vs_mibitrans/">validation against mibitrans</a>.</p>
+<h2 id="examples">Examples</h2>
+<ul>
+<li><a href="../notebooks/field_tracer_test/">tracer test</a></li>
+<li><a href="../notebooks/field_injection_extraction_distance/">tracer test with three well layouts</a></li>
+<li><a href="../notebooks/field_layered_model/">tracer test in a layered aquifer</a></li>
+<li><a href="../notebooks/validation_field_vs_mibitrans/">validation against mibitrans</a></li>
+</ul>
+<figure id="__figure-caption_1">
+<p><img alt="Field model tracer test" src="../img/field_model_tracer_test.png" /></p>
+<figcaption>
+<p><span class="caption-prefix">Figure 1.</span> Tracer concentration at three different time points in a field model of a biological flushing installation with one extraction well and four injection wells.</p>
+</figcaption>
+</figure>
 <h2 id="requirements">Requirements</h2>
 <p>The MODFLOW 6 program and its shared library (used by mf6rtm), installed into the active Python environment:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">get-modflow :python --subset mf6,libmf6</span>
