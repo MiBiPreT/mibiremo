@@ -26,6 +26,3 @@ MiBiReMo is part of the MiBiPreT (Micro-Bioremediation Prediction Tool) suite, d
 - [How to](examples.md): description of the examples, which are also available as tutorial notebooks.
 - [Contributing](CONTRIBUTING.md): description of the examples, which are also available as tutorial notebooks.
 - [API reference](reference/models.md): classes and functions of the package.
-
-
-**Next: [Getting Started](getting_started.md)**
