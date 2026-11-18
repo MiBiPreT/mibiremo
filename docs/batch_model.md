@@ -5,7 +5,13 @@
 [field](field_model.md) and [column](column_model.md) models, so the same PHREEQC solutions and kinetics can be used
 in all three; the equilibrium phases are shared with the column model.
 
-Example: [Aerobic biodegradation in mesocosms](notebooks/batch_first_order_decay.ipynb).
+## Examples
+- [Aerobic biodegradation in mesocosms](notebooks/batch_first_order_decay.ipynb).
+
+![Batch model aerobic biodegradation](img/batch_first_order_decay.png)
+/// figure-caption
+Total petroleum hydrocarbon (TPH) concentration in an aerated soil mesocosm simulated with the batch model, compared with the analytical first-order solution.
+///
 
 ## Workflow
 

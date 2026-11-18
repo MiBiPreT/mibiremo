@@ -5,9 +5,15 @@ Advection and dispersion of all aqueous components are simulated using the semi-
 
 The inputs are consistent with the conventions adopted in the [field](field_model.md) and [batch](batch_model.md) models, allowing the same PHREEQC solutions and kinetic definitions to be used across all three models. Equilibrium phases are also defined in the same way as in the batch model.
 
-Examples: [laboratory column test](notebooks/column_reactive_transport_test.ipynb),
-[BTEX dissolution and transport](notebooks/column_BTEX_dissolution.ipynb), and
-[column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb).
+## Examples
+- [laboratory column test](notebooks/column_reactive_transport_test.ipynb),
+- [BTEX dissolution and transport](notebooks/column_BTEX_dissolution.ipynb), and
+- [column validation against mibitrans](notebooks/validation_column_vs_mibitrans.ipynb).
+
+![Column model BTEX dissolution and transport results](img/BTEX_dissolution_and_transport_results.png)
+/// figure-caption
+Dissolved concentrations of benzene and ethylbenzene in a column model over a simulation period of 100 days.
+///
 
 ## Workflow
 

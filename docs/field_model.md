@@ -7,10 +7,16 @@ built with [flopy](https://github.com/modflowpy/flopy), and the flopy simulation
 `model.simulation`. The inputs follow the conventions of the [column](column_model.md) and [batch](batch_model.md)
 models, so the same PHREEQC solutions and kinetics can be used in all three.
 
-Examples: [tracer test](notebooks/field_tracer_test.ipynb),
-[tracer test with three well layouts](notebooks/field_injection_extraction_distance.ipynb),
-[tracer test in a layered aquifer](notebooks/field_layered_model.ipynb), and
-[validation against mibitrans](notebooks/validation_field_vs_mibitrans.ipynb).
+## Examples
+- [tracer test](notebooks/field_tracer_test.ipynb)
+- [tracer test with three well layouts](notebooks/field_injection_extraction_distance.ipynb)
+- [tracer test in a layered aquifer](notebooks/field_layered_model.ipynb)
+- [validation against mibitrans](notebooks/validation_field_vs_mibitrans.ipynb)
+
+![Field model tracer test](img/field_model_tracer_test.png)
+/// figure-caption
+Tracer concentration at three different time points in a field model of a biological flushing installation with one extraction well and four injection wells.
+///
 
 ## Requirements
 
